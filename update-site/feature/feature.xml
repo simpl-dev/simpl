@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="simplicitas_feature"
+      label="Simplicitas"
+      version="1.0.0">
+
+   <description url="http://www.example.com/description">
+      [Enter Feature Description here.]
+   </description>
+
+   <copyright url="http://www.example.com/copyright">
+      [Enter Copyright Description here.]
+   </copyright>
+
+   <license url="http://www.example.com/license">
+      [Enter License Description here.]
+   </license>
+
+   <url>
+      <discovery label="IMP" url="http://download.eclipse.org/technology/imp/updates/"/>
+      <discovery label="Scala" url="http://www.scala-ide.org/"/>
+   </url>
+
+   <requires>
+      <import plugin="org.eclipse.ui"/>
+      <import plugin="org.eclipse.core.runtime"/>
+      <import plugin="org.eclipse.ui.ide"/>
+      <import plugin="org.eclipse.core.resources"/>
+      <import plugin="org.eclipse.jdt.core"/>
+      <import plugin="org.eclipse.imp.runtime"/>
+      <import plugin="org.eclipse.imp.preferences"/>
+      <import plugin="org.eclipse.jface.text"/>
+      <import plugin="org.apache.ant"/>
+      <import plugin="org.eclipse.ui.editors"/>
+      <import plugin="org.scala-ide.scala.library" version="2.8.0" match="greaterOrEqual"/>
+   </requires>
+
+   <plugin
+         id="simplicitas-tool"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="simplicitas-plugin"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="simpl_ide"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+</feature>

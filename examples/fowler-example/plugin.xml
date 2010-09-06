@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension point="org.eclipse.imp.runtime.languageDescription">
+      <language extensions="state" description="Fowler state machine example"
+                natureID="ee.cyber.simplicitas.fowlerdsl" language="fowler_statemachine"/>
+   </extension>
+   <extension id="fowler_statemachine.parserWrapper"
+              name="Fowler state machine example Parser Wrapper"
+              point="org.eclipse.imp.runtime.parser">
+      <parserWrapper
+            class="ee.cyber.simplicitas.fowlerdsl.FowlerParseController"
+            language="fowler_statemachine"/>
+   </extension>
+   <extension point="org.eclipse.imp.runtime.tokenColorer">
+      <tokenColorer class="ee.cyber.simplicitas.fowlerdsl.FowlerTokenColorer"
+                    language="fowler_statemachine"/>
+   </extension>
+   <extension point="org.eclipse.imp.runtime.modelTreeBuilder">
+      <treeBuilder
+            class="ee.cyber.simplicitas.fowlerdsl.FowlerTreeModelBuilder"
+            language="fowler_statemachine">
+      </treeBuilder>
+   </extension>
+   <extension point="org.eclipse.imp.runtime.labelProvider">
+   <labelProvider class="ee.cyber.simplicitas.fowlerdsl.FowlerLabelProvider"
+   language="fowler_statemachine"/>
+   </extension>
+   <extension point="org.eclipse.imp.runtime.referenceResolvers">
+   <referenceResolver class="ee.cyber.simplicitas.fowlerdsl.FowlerReferenceResolver"
+   language="fowler_statemachine"/>
+   </extension>
+   <extension point="org.eclipse.imp.runtime.foldingUpdater">
+   <foldingUpdater class="ee.cyber.simplicitas.fowlerdsl.FowlerFoldingUpdater"
+   language="fowler_statemachine"/>
+   </extension>
+   <extension point="org.eclipse.imp.runtime.documentationProvider">
+   <docProvider class="ee.cyber.simplicitas.fowlerdsl.FowlerDocumentationProvider"
+   language="fowler_statemachine"/>
+   </extension>
+   <extension id="fowler_statemachine.hoverHelper"
+              name="Fowler state machine example Hover Helper"
+              point="org.eclipse.imp.runtime.hoverHelper">
+      <hoverHelper class="ee.cyber.simplicitas.imp.HoverHelper"
+                 language="fowler_statemachine"/>
+   </extension>
+   <extension point="org.eclipse.imp.runtime.contentProposer">
+      <proposer class="ee.cyber.simplicitas.fowlerdsl.FowlerContentProposer"
+                language="fowler_statemachine"/>
+   </extension>
+   <extension point="org.eclipse.imp.runtime.markOccurrences">
+      <occurrenceMarker class="ee.cyber.simplicitas.fowlerdsl.FowlerOccurrenceMarker"
+                        language="fowler_statemachine"/>
+   </extension>
+   <extension point="org.eclipse.ui.preferencePages">
+      <page class="ee.cyber.simplicitas.fowlerdsl.FowlerPreferencePage"
+            id="ee.cyber.simplicitas.fowlerdsl.FowlerPreferencePage"
+            name="Fowler state machine example preferences">
+      </page>
+   </extension>
+   <extension
+          point="org.eclipse.ui.popupMenus">
+       <objectContribution
+             id="fowler_statemachine.generatorPopUp"
+             nameFilter="*.state"
+             objectClass="org.eclipse.core.resources.IFile">
+          <action
+                class="ee.cyber.simplicitas.fowlerdsl.FowlerGenerateAction"
+                enablesFor="1"
+                id="ee.cyber.simplicitas.fowlerdsl.FowlerGenerateAction"
+                label="Generate"
+                menubarPath="additions"
+                tooltip="Generate">
+          </action>
+       </objectContribution>
+    </extension>
+</plugin>

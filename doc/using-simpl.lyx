@@ -1,0 +1,3365 @@
+#LyX 1.6.5 created this file. For more info see http://www.lyx.org/
+\lyxformat 345
+\begin_document
+\begin_header
+\textclass article
+\begin_preamble
+\usepackage{breakurl}
+\end_preamble
+\use_default_options true
+\language british
+\inputencoding auto
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\float_placement !h
+\paperfontsize 12
+\spacing single
+\use_hyperref true
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks true
+\pdf_pdfborder false
+\pdf_colorlinks false
+\pdf_backref false
+\pdf_pdfusetitle true
+\papersize default
+\use_geometry false
+\use_amsmath 1
+\use_esint 1
+\cite_engine basic
+\use_bibtopic false
+\paperorientation portrait
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation skip
+\defskip medskip
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\author "" 
+\author "" 
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Creating Domain-Specific Languages with 
+\emph on
+Simpl
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset toc
+LatexCommand tableofcontents
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Introduction
+\end_layout
+
+\begin_layout Standard
+This document describes 
+\emph on
+Simpl
+\emph default
+ -- a toolkit for creating textual doman-specific languages (DSLs).
+ The goal of Simpl is to make it easy to use language-oriented programming
+ paradigm when developing enterprise information systems.
+ The main design criteria of the Simpl toolset are the following.
+\end_layout
+
+\begin_layout Itemize
+Visual (editor, IDE) and non-visual (parser, code generator) parts of a
+ DSL implementation must be separate.
+ The non-visual part does not depend on the visual part.
+\end_layout
+
+\begin_layout Itemize
+Non-visual part of the DSL implementation is easily integrable into larger
+ systems and does not make assumptions on how the larger system is implemented.
+\end_layout
+
+\begin_layout Itemize
+Using Simpl, the language developer must be able to create a working DSL
+ implementation with little effort.
+ For a relatively simple language, the time to create a working code generator
+ and an IDE should be less than a day.
+\end_layout
+
+\begin_layout Standard
+Based on these design criteria, the Simpl builds on existing tools by combining
+ them and creating a user-friendly frontend.
+ In particular, Simpl is based on the following tools:
+\end_layout
+
+\begin_layout Itemize
+ANTLR parser generator,
+\end_layout
+
+\begin_layout Itemize
+Eclipse IDE,
+\end_layout
+
+\begin_layout Itemize
+IDE Meta-Toling Platform (IMP),
+\end_layout
+
+\begin_layout Itemize
+Scala programming language,
+\end_layout
+
+\begin_layout Itemize
+ant build system.
+\end_layout
+
+\begin_layout Standard
+The following sections describe the use of Simpl in more detail.
+ The text assumes some familiarity with concepts related to grammars and
+ other tools for implementing formal languages.
+\end_layout
+
+\begin_layout Subsection
+Basic Concepts
+\end_layout
+
+\begin_layout Standard
+A DSL implementation created with Simpl consists of two parts.
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+tool
+\emph default
+ -- the non-visual part of the DSL implementation.
+ The tool part contains the DSL parser and code generator.
+ It is meant to be integrated into a bigger system or a build process.
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+plugin
+\emph default
+ -- the IDE part of the DSL implementation, packaged as an Eclipse plugin.
+ The .jar file also includes the classes that make up the code generator
+ for the DSL.
+\end_layout
+
+\begin_layout Standard
+Most of the DSL implementation revolves around abstract representation of
+ the DSL program (in the following text, it is referred to as Abstract Syntax
+ Tree or AST).
+ In Simpl, the AST is represented as Scala case classes that are derived
+ from DSL grammar.
+ For example, the AST node corresponding to if statement in a typical programmin
+g language could be represented using the following Scala class.
+\end_layout
+
+\begin_layout LyX-Code
+case class IfStatement(
+\end_layout
+
+\begin_layout LyX-Code
+    var condition: Expression,
+\end_layout
+
+\begin_layout LyX-Code
+    var thenStatement: Statement,
+\end_layout
+
+\begin_layout LyX-Code
+    var elseStatement: Statement)
+\end_layout
+
+\begin_layout LyX-Code
+  extends Statement {}
+\end_layout
+
+\begin_layout Standard
+Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Workflow-for-processing"
+
+\end_inset
+
+ illustrates workflow how Simpl processes DSL programs.
+ The parser converts the textual DSL program to AST.
+ The AST is then processed by other tools.
+ On the one (non-visual) side, the AST is fed to the code generator that
+ produces code in the target language.
+ On the other (visual) side, the AST is used by DSL IDE to provide editing
+ features, such as outline view, hyperlinking, automatic completion etc.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename simpl-workflow.dia
+	width 6cm
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Workflow-for-processing"
+
+\end_inset
+
+Workflow for processing DSL programs
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Installing Simpl
+\end_layout
+
+\begin_layout Subsection
+Linux
+\end_layout
+
+\begin_layout Enumerate
+Install Java 6 (on Debian and Ubuntu systems, 
+\emph on
+openjdk-6-jdk
+\emph default
+ package is sufficient).
+\end_layout
+
+\begin_layout Enumerate
+Install ant 1.8 (on Ubuntu, 
+\emph on
+ant1.8
+\emph default
+ package is required, the default 
+\emph on
+ant
+\emph default
+ package installs 1.7).
+\end_layout
+
+\begin_layout Enumerate
+Download and install Eclipse 3.5 (Galileo) SR2 for RCP/Plugin developers,
+ available from 
+\begin_inset Flex URL
+status collapsed
+
+\begin_layout Plain Layout
+
+http://www.eclipse.org/downloads/packages/eclipse-rcpplug-developers/galileosr2
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Enumerate
+Install Simpl Eclipse plugin from update site 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+http://keeks.cyber.ee/~margus/simpl-distrib/
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Enumerate
+Install Scala Eclipse plugin from update site 
+\begin_inset Flex URL
+status collapsed
+
+\begin_layout Plain Layout
+
+http://www.scala-ide.org/
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection
+Windows
+\end_layout
+
+\begin_layout Enumerate
+Download and install JDK 6 (available from 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+http://www.oracle.com/technetwork/java/index.html
+\end_layout
+
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Enumerate
+Download and install Apache Ant 1.8 (available from 
+\begin_inset Flex URL
+status collapsed
+
+\begin_layout Plain Layout
+
+http://ant.apache.org/
+\end_layout
+
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Enumerate
+Download and install Eclipse 3.5 (Galileo) SR2 for RCP/Plugin developers,
+ available from 
+\begin_inset Flex URL
+status collapsed
+
+\begin_layout Plain Layout
+
+http://www.eclipse.org/downloads/packages/eclipse-rcpplug-developers/galileosr2
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Enumerate
+Install Simpl Eclipse plugin from update site 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+http://keeks.cyber.ee/~margus/simpl-distrib/
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Enumerate
+Install Scala Eclipse plugin from update site 
+\begin_inset Flex URL
+status collapsed
+
+\begin_layout Plain Layout
+
+http://www.scala-ide.org/
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Section
+Using Simpl
+\end_layout
+
+\begin_layout Standard
+Using Simpl, creation of a new DSL generally consists of the following steps.
+\end_layout
+
+\begin_layout Enumerate
+Create a new project.
+\end_layout
+
+\begin_layout Enumerate
+Specify the DSL grammar.
+\end_layout
+
+\begin_layout Enumerate
+Create the language runtime (code checker, code generator).
+\end_layout
+
+\begin_layout Enumerate
+Create IDE for the language.
+\end_layout
+
+\begin_layout Standard
+The next sections present these steps based on often-used state machine
+ language from Martin Fowler (see 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+http://martinfowler.com/dslwip/Intro.html
+\end_layout
+
+\end_inset
+
+).
+ The example program in this language is shown in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:State-machine-example"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement !h
+wide false
+sideways false
+status collapsed
+
+\begin_layout LyX-Code
+
+\size footnotesize
+events
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+  doorClosed  D1CL
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+  drawOpened  D2OP
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+  lightOn     L1ON
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+  doorOpened  D1OP
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+  panelClosed PNCL
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+end
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+ 
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+resetEvents
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+  doorOpened
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+end
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+ 
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+commands
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+  unlockPanel PNUL
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+  lockPanel   PNLK
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+  lockDoor    D1LK
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+  unlockDoor  D1UL
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+end
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+ 
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+state idle
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+  actions {unlockDoor lockPanel}
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+  doorClosed => active
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+end
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+ 
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+state active
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+  drawOpened => waitingForLight
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+  lightOn    => waitingForDraw
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+end
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+\SpecialChar \ldots{}
+
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+state unlockedPanel
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+  actions {unlockPanel lockDoor}
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+  panelClosed => idle
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+end
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:State-machine-example"
+
+\end_inset
+
+State machine example program
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Creating a New Project
+\end_layout
+
+\begin_layout Subsection
+Using the New Project Wizard
+\end_layout
+
+\begin_layout Standard
+Simpl comes with new project wizard that can be called from the Eclipse
+ IDE or from the command line.
+\end_layout
+
+\begin_layout Standard
+To invoke the wizard from Eclipse, just select 
+\emph on
+File
+\emph default
+‣
+\emph on
+New
+\emph default
+‣
+\emph on
+Project
+\emph default
+‣
+\emph on
+Simplicitas Wizards
+\emph default
+‣
+\emph on
+Simplicitas Project
+\emph default
+.
+ In the dialog, fill in the fields and press 
+\emph on
+Finish
+\emph default
+.
+ To invoke the wizard from command line, issue the following command:
+\end_layout
+
+\begin_layout LyX-Code
+java -jar simplicitas-wizard.jar -d 
+\emph on
+<directory>
+\emph default
+ 
+\emph on
+[parameters]
+\end_layout
+
+\begin_layout Standard
+You may need to prefix the .jar file with directory where it is stored.
+ The 
+\emph on
+-d
+\emph default
+ parameter is used to specify a directory where the new project will be
+ created.
+\end_layout
+
+\begin_layout Standard
+Both wizards take the same parameters that are described in table 
+\begin_inset CommandInset ref
+LatexCommand vref
+reference "tab:Wizard-parameters"
+
+\end_inset
+
+ (command-line option only applies to the command-line version of the wizard).
+ After running wizard you should have compiling and working DSL implementation,
+ based on the example grammar selected in the wizard.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float table
+placement !h
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Tabular
+<lyxtabular version="3" rows="7" columns="3">
+<features>
+<column alignment="left" valignment="top" width="30col%">
+<column alignment="left" valignment="top" width="20col%">
+<column alignment="left" valignment="top" width="47col%">
+<row>
+<cell alignment="left" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Parameter
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Command-line option
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Description
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Package name
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+-package
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Package that will contain classes that implement the new DSL.
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Class name prefix
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+-class
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Prefix that will be used in generating DSL implementation classes.
+ For example, using prefix 
+\emph on
+Foo
+\emph default
+ will result in classes 
+\emph on
+FooGrammar
+\emph default
+, 
+\emph on
+FooGenerator
+\emph default
+, 
+\emph on
+FooConfig
+\emph default
+.
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+DSL file extension
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+-ext
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+This extension will be associated with newly generated language in Eclipse.
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Identifier of the DSL
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+-id
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+This is an unique identifier that will be used to identify the new language
+ in Eclipse.
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Textual DSL description
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+-description
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+This description will be used as name of the generated Eclipse plugin.
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Base language to use
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+-base
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+The generated project contains a working sample language.
+ Use this option to select, which sample you want to use.
+ Select 
+\emph on
+bean
+\emph default
+ if you want fully functional language that implements code generator and
+ more common IDE services.
+ Select 
+\emph on
+empty
+\emph default
+ if you want empty project that does not include any services that depend
+ on the sample language and must be changed (the empty project does not
+ contain references to any AST classes and should successfully compile and
+ run if you replace the sample grammar with your own).
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "tab:Wizard-parameters"
+
+\end_inset
+
+New project wizard parameters
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Building Language Implementation
+\end_layout
+
+\begin_layout Standard
+Due to several limitations of the Eclipse build system, the language implementat
+ion must be built from the command line (however, it is also possible to
+ invoke the build script from the Eclipse).
+\end_layout
+
+\begin_layout Standard
+The build process of the language implementation can be configured using
+ the file 
+\emph on
+ant.properties
+\emph default
+.
+ The wizard automatically generates two files: 
+\emph on
+ant.properties
+\emph default
+ and 
+\emph on
+ant.properties.sample
+\emph default
+.
+ The idea is that the file with .sample extension is included in the source
+ control and serves as example that the users can use to develop 
+\emph on
+ant.properties
+\emph default
+ file with their own personal settings.
+ The 
+\emph on
+ant.properties
+\emph default
+ file is specific to particular working environment and thus should not
+ be committed to the VCS (it is recommended to add 
+\emph on
+ant.properties
+\emph default
+ to the ignore list of your VCS software).
+\end_layout
+
+\begin_layout Standard
+The default build system for wizard-generated DSL implementation takes the
+ required libraries from two separate places.
+ First, non-eclipse-related libraries are pulled from Maven2 repository
+ (see 
+\emph on
+maven.repo.local
+\emph default
+ parameter in 
+\emph on
+ant.properties
+\emph default
+ file).
+ Second, all the Eclipse-related dependencies are pulled from the user's
+ Eclipse installation.
+ Therefore, currently building the DSL implementation requires installation
+ of Eclipse RCP.
+ Hopefully, in future versions this restriction will be lifted.
+ You can set up the location of Eclipse installation using the 
+\emph on
+eclipse
+\emph default
+ parameter in 
+\emph on
+ant.properties
+\emph default
+ file.
+\end_layout
+
+\begin_layout Subsection
+Using Language Implementation
+\end_layout
+
+\begin_layout Standard
+To use the DSL plugin in Eclipse, just copy the 
+\emph on
+dslname-plugin.jar
+\emph default
+ to 
+\emph on
+plugins
+\emph default
+ directory of your Eclipse installation.
+ This will associate DSL files (determined by the extension given to new
+ project wizard) with the DSL implementation
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Note: if you modify files 
+\emph on
+MANIFEST.MF
+\emph default
+ or 
+\emph on
+plugin.xml
+\emph default
+ (which is normally not necessary), you must start Eclipse with command-line
+ option -clean to force it to reload the plugin information.
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The new project wizard automatically creates a code generator for the DSL.
+ This code generator is located in the 
+\emph on
+dslname-tool.jar
+\emph default
+ file.
+ The .jar file only contains the generator classes and not the necessary
+ libraries.
+ It is assumed that the tool part of the DSL implementation is not invoked
+ directly from command line but instead from a build script.
+ See the 
+\emph on
+tool-run
+\emph default
+ task in the build.xml file for an example on how to run the code generator.
+\end_layout
+
+\begin_layout Standard
+The code generator can also be called from the Eclipse by right-clicking
+ on a DSL file and selecting 
+\emph on
+Generate
+\emph default
+.
+ To enable this, you need to override the 
+\emph on
+runGenerator
+\emph default
+ method in 
+\emph on
+YourLangConfig
+\emph default
+ class (see section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Creating-Language-IDE"
+
+\end_inset
+
+ for more information about customizing the Eclipse-based IDE).
+\end_layout
+
+\begin_layout Section
+Specifying DSL Grammar
+\end_layout
+
+\begin_layout Standard
+Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:State-machine-grammar"
+
+\end_inset
+
+ shows the full content of the state machine grammar.
+ The next sections explain the details of this.
+\end_layout
+
+\begin_layout Standard
+The Simpl grammar is essentially an ANTLR grammar that is annotated with
+ information about the shape of the AST.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement !h
+wide false
+sideways false
+status collapsed
+
+\begin_layout LyX-Code
+
+\size footnotesize
+grammar ee.cyber.simplicitas.fowlerdsl.Fowler;
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+Program: (imports=Import | machines=Machine | externals=ExternalMachine)+;
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+Import: 'import' importURI=Str;
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+ExternalMachine: 'external' Id;
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+Machine: 'machine'
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+    name=Id
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+    events=EventList
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+    resetEvents=ResetEvents?
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+    commands=CommandList
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+    states=State+
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+    'init' initState=StateRef;
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+ResetEvents: 'resetEvents' events=EventRef+ 'end';
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+EventList: 'events' events=Event+ 'end';
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+Event: name=Id code=Id;
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+CommandList: 'commands' commands=Command+ 'end';
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+Command: name=Id code=Id;
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+State: 'state'
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+    name=Id
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+     ('actions' '{' actions=CommandRef+ '}')?
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+     transitions=Transition*
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+     'end';
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+Transition: event=EventRef '=>' state=StateRef;
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+EventRef: Id;
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+CommandRef: Id;
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+StateRef: Id;
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+option Reference {var ref: NamedItem = null; def id: Id}:
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+    EventRef | CommandRef | StateRef;
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+option NamedItem {def name: Id;}: Event | Command | State;
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+terminal Id: ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')*;
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+fragment StrBody: ~('
+\backslash
+
+\backslash
+'|'"') | '
+\backslash
+
+\backslash
+' .;
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+terminal Str(value: String = {$_.substring(1, $_.length() - 1)}):
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+	'"' StrBody* '"' | '
+\backslash
+'' StrBody* '
+\backslash
+'';
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+fragment MlComment: '/*' (~'*' | '*' ~'/')* '*/';
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+fragment SlComment: '//' ~('
+\backslash
+n'|'
+\backslash
+r')*;
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+hidden terminal Ws: (' '|'
+\backslash
+t'|'
+\backslash
+r'|'
+\backslash
+n'|SlComment|MlComment)+;
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:State-machine-grammar"
+
+\end_inset
+
+State machine grammar
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+All the rules have name that will be used for an AST node corresponding
+ to the result of applying this rule.
+ The rule name must always begin with an uppercase letter.
+\end_layout
+
+\begin_layout Standard
+The first rule of the grammar becomes the start symbol (i.e., the topmost
+ rule in the grammar and the root of the AST).
+\end_layout
+
+\begin_layout Subsection
+Terminals
+\end_layout
+
+\begin_layout Subsubsection
+Simple rules
+\end_layout
+
+\begin_layout Standard
+Simple terminal rules have the form:
+\end_layout
+
+\begin_layout LyX-Code
+terminal RuleName: Pattern;
+\end_layout
+
+\begin_layout Standard
+The pattern can consist of the constructs shown in table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:Terminal-patterns"
+
+\end_inset
+
+ (here the 
+\emph on
+P
+\emph default
+ and 
+\emph on
+Pn
+\emph default
+ are patterns).
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float table
+placement H
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="12" columns="2">
+<features>
+<column alignment="center" valignment="top" width="15text%">
+<column alignment="left" valignment="top" width="83text%">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Pattern
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Explanation
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+'x' ..
+ 'y'
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+match any single character between range 
+\emph on
+x
+\emph default
+ and 
+\emph on
+y
+\emph default
+, inclusively.
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+'Str'
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+match the literal string.
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+.
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+match any character
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+P1 P2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+match pattern 
+\emph on
+P1
+\emph default
+ followed by 
+\emph on
+P2
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+P1 | P2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Match either pattern 
+\emph on
+P1
+\emph default
+ or 
+\emph on
+P2
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+~P
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+negation -- match characters not belonging to pattern 
+\emph on
+P
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+P?
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+match the optional pattern 
+\emph on
+P
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+P*
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Match any number of occurrences of pattern 
+\emph on
+P
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+P+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Match one or more occurrences of 
+\emph on
+P
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+(P)
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Match 
+\emph on
+P
+\emph default
+.
+ Parentheses can be used to group patterns.
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Ref
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Reference to another terminal rule or fragment (see section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Fragments"
+
+\end_inset
+
+).
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "tab:Terminal-patterns"
+
+\end_inset
+
+Terminal patterns
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Fragments"
+
+\end_inset
+
+Fragments
+\end_layout
+
+\begin_layout Standard
+Fragments can be used to structure the terminal rules (by splitting a big
+ terminal rule into several parts).
+ The syntax of the fragment is almost the same as terminal rule:
+\end_layout
+
+\begin_layout LyX-Code
+fragment RuleName: Pattern;
+\end_layout
+
+\begin_layout Standard
+The main difference is that fragment rules do not create tokens when parsing
+ (and therefore cannot be called by the context-free rules).
+ Also, AST classes are not generated for fragment rules.
+ Fragment rules can only be called by terminal rule.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Subsubsection
+Terminal Parameters
+\end_layout
+
+\begin_layout Plain Layout
+By default, each terminal rule results with class that has one attribute:
+ 
+\emph on
+text
+\emph default
+.
+ For example, the terminal rule SlComment in the example generates the following
+ AST class.
+\end_layout
+
+\begin_layout LyX-Code
+case class SlComment(text: String) extends TerminalNode {
+\end_layout
+
+\begin_layout LyX-Code
+  def childrenNames = Array("text");
+\end_layout
+
+\begin_layout LyX-Code
+}
+\end_layout
+
+\begin_layout Plain Layout
+It is possible to add additional attributes to the terminal node by using
+ the following syntax:
+\end_layout
+
+\begin_layout LyX-Code
+terminal Foo(param: Type = expression,
+\end_layout
+
+\begin_layout LyX-Code
+    param2: Type2: expression2): \SpecialChar \ldots{}
+
+\end_layout
+
+\begin_layout Plain Layout
+This allows converting the terminal node to a more useful format.
+ The following example defines the terminal 
+\emph on
+IntTerm
+\emph default
+ that has additional field 
+\emph on
+value
+\emph default
+ that converts the terminal's textual value to integer.
+\end_layout
+
+\begin_layout LyX-Code
+terminal IntTerm(value: Int = {$_.toInt}): ('0'..'9')+;
+\end_layout
+
+\begin_layout Plain Layout
+The text of the token (expressed as 
+\emph on
+String
+\emph default
+ object) can be referred to as 
+\emph on
+$_
+\emph default
+.
+\end_layout
+
+\begin_layout LyX-Code
+case class IntTerm(text: String) extends TerminalNode {
+\end_layout
+
+\begin_layout LyX-Code
+    def childrenNames = Array("text"); } 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Context-free Syntax
+\end_layout
+
+\begin_layout Standard
+In Simpl, the rules for describing context-free syntax are also used for
+ describing the AST classes.
+ 
+\end_layout
+
+\begin_layout Subsubsection
+Context-Free Rules
+\end_layout
+
+\begin_layout Standard
+Simple rules have the form:
+\end_layout
+
+\begin_layout LyX-Code
+Name: Pattern;
+\end_layout
+
+\begin_layout Standard
+The pattern can contain constructs listed in table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:Context-free-patterns"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float table
+placement H
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Tabular
+<lyxtabular version="3" rows="9" columns="2">
+<features>
+<column alignment="center" valignment="top" width="25text%">
+<column alignment="left" valignment="top" width="72text%">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Pattern
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Description
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+'Str'
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Matches literal string 
+\emph on
+'str'
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+[name=]Ref
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Calls another rule (non-terminal rule, terminal rule or option rule).
+ The part of the AST matched by the rule will be assigned to attribute 
+\emph on
+name
+\emph default
+.
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+P1 P2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Match pattern 
+\emph on
+P1
+\emph default
+ followed by 
+\emph on
+P2
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+P1 | P2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Match either pattern 
+\emph on
+P1
+\emph default
+ or 
+\emph on
+P2
+\emph default
+.
+ In this case, the AST class for the rule will include fields from all the
+ options in the pattern (only the fields from the matching pattern are filled
+ in).
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+(P)
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Match 
+\emph on
+P
+\emph default
+.
+ Parentheses can be used to group patterns.
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+P?
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Match the optional pattern 
+\emph on
+P
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+P*
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Match any number of occurrences of pattern 
+\emph on
+P
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+P+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Match one or more occurrences of 
+\emph on
+P
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "tab:Context-free-patterns"
+
+\end_inset
+
+Context-free patterns
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Generating AST Classes
+\end_layout
+
+\begin_layout Standard
+The grammar generator will generate an AST class for every rule in the grammar
+ (except for fragment rules).
+ The name of the class will be the name of the rule.
+ Each AST class has attributes corresponding to rule references from this
+ rule.
+ If the references are not named, the name of the attribute will be derived
+ from the type.
+ For example,
+\end_layout
+
+\begin_layout LyX-Code
+Foo: Id Str;
+\end_layout
+
+\begin_layout Standard
+\SpecialChar \ldots{}
+ will generate class 
+\emph on
+Foo
+\emph default
+ with fields 
+\emph on
+id
+\emph default
+ and 
+\emph on
+str
+\emph default
+.
+ Attribute names must be unique, thus the following rule is illegal:
+\end_layout
+
+\begin_layout LyX-Code
+Foo: Id Id;  // two attributes named 'id'
+\end_layout
+
+\begin_layout Standard
+You can also explicitly name the attributes:
+\end_layout
+
+\begin_layout LyX-Code
+Foo: myId=Id myStr=Str;
+\end_layout
+
+\begin_layout Standard
+The attributes of AST classes are mutable (using keyword 
+\emph on
+var
+\emph default
+).
+ This is done to allow the DSL implementation to post-process the AST after
+ parsing.
+\end_layout
+
+\begin_layout Subsubsection
+Option rules
+\end_layout
+
+\begin_layout Standard
+Option rules have the form:
+\end_layout
+
+\begin_layout LyX-Code
+option Name: Rule1 | Rule2;
+\end_layout
+
+\begin_layout Standard
+The main difference between simple rule and option rule is that all the
+ simple rules will generate classes that inherit from 
+\emph on
+CommonNode
+\emph default
+.
+ For example:
+\end_layout
+
+\begin_layout LyX-Code
+case class Rule1 extends CommonNode {\SpecialChar \ldots{}
+}
+\end_layout
+
+\begin_layout LyX-Code
+case class Rule2 extends CommonNode {\SpecialChar \ldots{}
+}
+\end_layout
+
+\begin_layout Standard
+However, using the option rule example from above will make 
+\emph on
+Name
+\emph default
+ to be a base class for all the options in the rule, resulting in
+\end_layout
+
+\begin_layout LyX-Code
+case class Rule1 extends Name {\SpecialChar \ldots{}
+}
+\end_layout
+
+\begin_layout LyX-Code
+case class Rule2 extends Name {\SpecialChar \ldots{}
+}
+\end_layout
+
+\begin_layout Standard
+Option rules can also be used to shape the class hierarchy of the AST classes.
+ For this purpose, one can create artificial option rules that are not called
+ by any other rules and are therefore strictly not part of the grammar.
+ For example, this can be used to create base classes for all the different
+ types of references in the grammar.
+ You can also use decorations (see section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Decorating-AST-Classes"
+
+\end_inset
+
+) to add methods and attributes to the base class.
+\end_layout
+
+\begin_layout Subsection
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Decorating-AST-Classes"
+
+\end_inset
+
+Decorating Generated Classes
+\end_layout
+
+\begin_layout Standard
+Both terminal and context-free rules can include code blocks that will be
+ placed inside generated classes.
+\end_layout
+
+\begin_layout LyX-Code
+Foo {code}: \SpecialChar \ldots{}
+
+\end_layout
+
+\begin_layout Standard
+This will place the code inside the class definition:
+\end_layout
+
+\begin_layout LyX-Code
+case class Foo(var field: Type, \SpecialChar \ldots{}
+) {code}
+\end_layout
+
+\begin_layout Standard
+This can be used to add additional fields or methods to the AST classes.
+ For example:
+\end_layout
+
+\begin_layout LyX-Code
+terminal IntTerm {
+\end_layout
+
+\begin_layout LyX-Code
+    val value: Int = text.toInt
+\end_layout
+
+\begin_layout LyX-Code
+}: ('0'..'9')+;
+\end_layout
+
+\begin_layout Standard
+This generates the following classes:
+\end_layout
+
+\begin_layout LyX-Code
+case class IntTerm(text: String) extends TerminalNode {
+\end_layout
+
+\begin_layout LyX-Code
+    val value: Int = text.toInt
+\end_layout
+
+\begin_layout LyX-Code
+    \SpecialChar \ldots{}
+
+\end_layout
+
+\begin_layout LyX-Code
+} 
+\end_layout
+
+\begin_layout Subsection
+Abstract Representation of Program
+\end_layout
+
+\begin_layout Standard
+The parser converts the DSL program into abstract representation that uses
+ Scala case classes to express the DSL program.
+ In addition to the abstract representation, the programmer also has access
+ to concrete representation of the DSL program in the form of token list.
+ This token list contains al the information about source file, including
+ white space and comments.
+\end_layout
+
+\begin_layout Standard
+All the fields in the AST classes are created mutable (using 
+\emph on
+var
+\emph default
+ keyword).
+ This allows implementing post-processing step after the parsing.
+\end_layout
+
+\begin_layout Standard
+See ScalaDoc comments for 
+\emph on
+CommonNode
+\emph default
+ and 
+\emph on
+CommonToken
+\emph default
+ for more information.
+ Also, see the generated AST classes.
+\end_layout
+
+\begin_layout Section
+Creating Language Runtime
+\end_layout
+
+\begin_layout Subsection
+The Main Program
+\end_layout
+
+\begin_layout Standard
+The wizard automatically generates a main program for the tool part of the
+ DSL implementation.
+ It takes as command line arguments a list of source files and name of the
+ target directory.
+ By default it runs StringTemplate to generate the code.
+ Using StringTemplate is no obligation though -- you can use any other templatin
+g engine for code generation.
+\end_layout
+
+\begin_layout Subsection
+Resolving Links
+\end_layout
+
+\begin_layout Standard
+One typical task in processing DSL programs is resolving links between program
+ elements.
+ This information is used both for checking correctness of the DSL program
+ (right after parsing) and in the IDE for implementing hyperlinking service.
+ This section details one possible implementation of this task, using the
+ state machine DSL as an example.
+\end_layout
+
+\begin_layout Subsubsection
+Add References to Grammar
+\end_layout
+
+\begin_layout Standard
+In the state machine language, the referenceable objects are events, commands
+ and states.
+ The first step is to add grammar rules for designating references:
+\end_layout
+
+\begin_layout LyX-Code
+EventRef: Id;
+\end_layout
+
+\begin_layout LyX-Code
+CommandRef: Id;
+\end_layout
+
+\begin_layout LyX-Code
+StateRef: Id;
+\end_layout
+
+\begin_layout Standard
+Next, take the new non-terminals into use:
+\end_layout
+
+\begin_layout LyX-Code
+ResetEvents: 'resetEvents' events=EventRef+ 'end';
+\end_layout
+
+\begin_layout LyX-Code
+Transition: event=EventRef '=>' state=StateRef;
+\end_layout
+
+\begin_layout LyX-Code
+\SpecialChar \ldots{}
+
+\end_layout
+
+\begin_layout Standard
+In principle, it is possible to do without the 
+\emph on
+*Ref
+\emph default
+ rules and just use the 
+\emph on
+Id
+\emph default
+ rule directly:
+\end_layout
+
+\begin_layout LyX-Code
+Transition: event=Id '=>' state=Id;
+\end_layout
+
+\begin_layout Standard
+However, the intermediate rules are useful because this makes later AST
+ processing simpler: it is possible to determine whether a node is a reference
+ just by looking at its type.
+\end_layout
+
+\begin_layout Standard
+Typically, the reference node contains link to the referenced object.
+ This link can be filled in postprocessing stage and used later in code
+ generation or to implement hyperlinking service in the DSL IDE.
+ In the example, the link is stored in a base class that is generated using
+ synthetic 
+\emph on
+option
+\emph default
+ rule:
+\end_layout
+
+\begin_layout LyX-Code
+option Reference {
+\end_layout
+
+\begin_layout LyX-Code
+    var ref: NamedItem = null
+\end_layout
+
+\begin_layout LyX-Code
+    def id: Id
+\end_layout
+
+\begin_layout LyX-Code
+}: EventRef | CommandRef | StateRef; 
+\end_layout
+
+\begin_layout Standard
+In this code, the 
+\emph on
+ref
+\emph default
+ is a mutable variable that will be filled after parsing.
+ The 
+\emph on
+id
+\emph default
+ method pulls the read-only 
+\emph on
+id
+\emph default
+ property to the base class.
+\end_layout
+
+\begin_layout Subsubsection
+Resolve Links During Postprocessing
+\end_layout
+
+\begin_layout Standard
+The links are normally resolved during postprocessing stage.
+ In this stage, the parsed AST is processed to find semantical errors (such
+ as broken links or other consistency issues).
+ Also, the AST can be modified to make the work of code generation and IDE
+ services easier.
+ After postprocessing the AST is used for code generation and for providing
+ the language IDE.
+\end_layout
+
+\begin_layout Standard
+Figure 
+\begin_inset CommandInset ref
+LatexCommand vref
+reference "fig:Resolving-links-in"
+
+\end_inset
+
+ shows code for 
+\emph on
+FowlerPostProcess
+\emph default
+ class that is responsible for resolving links and reporting broken links.
+ The main entry point is method 
+\emph on
+validate
+\emph default
+ that walks through the AST and invokes the method 
+\emph on
+resolve 
+\emph default
+on every node.
+ 
+\emph on
+resolve
+\emph default
+ looks at type of the node and if the node is a reference, tries to resolve
+ it.
+ The 
+\emph on
+resolveLink
+\emph default
+ method tries to find the referenced item from the symbol table (
+\emph on
+ctx.events
+\emph default
+, 
+\emph on
+ctx.commands 
+\emph default
+or 
+\emph on
+ctx.states
+\emph default
+).
+ If the referenced item is found, it fills the node's 
+\emph on
+ref 
+\emph default
+field.
+ Otherwise, it logs source error.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement !h
+wide false
+sideways false
+status collapsed
+
+\begin_layout LyX-Code
+/**
+\end_layout
+
+\begin_layout LyX-Code
+ * Validates the program and does additional post-processing,
+\end_layout
+
+\begin_layout LyX-Code
+ * e.g.
+ resolving links.
+ The processing step updates errors
+\end_layout
+
+\begin_layout LyX-Code
+ * in the ctx variable.
+\end_layout
+
+\begin_layout LyX-Code
+ */
+\end_layout
+
+\begin_layout LyX-Code
+class FowlerPostProcess(val ctx: FowlerCtx) {
+\end_layout
+
+\begin_layout LyX-Code
+  import collection.mutable.Map
+\end_layout
+
+\begin_layout LyX-Code
+  def validate() {
+\end_layout
+
+\begin_layout LyX-Code
+    // Resolve links.
+\end_layout
+
+\begin_layout LyX-Code
+    ctx.tree.walkTree(resolve)
+\end_layout
+
+\begin_layout LyX-Code
+  }
+\end_layout
+
+\begin_layout LyX-Code
+  
+\end_layout
+
+\begin_layout LyX-Code
+  def resolve(node: CommonNode) {
+\end_layout
+
+\begin_layout LyX-Code
+    node match {
+\end_layout
+
+\begin_layout LyX-Code
+      case ref: EventRef =>
+\end_layout
+
+\begin_layout LyX-Code
+        resolveLink(ctx.events, "event", ref)
+\end_layout
+
+\begin_layout LyX-Code
+      case ref: CommandRef =>
+\end_layout
+
+\begin_layout LyX-Code
+        resolveLink(ctx.commands, "command", ref)
+\end_layout
+
+\begin_layout LyX-Code
+      case ref: StateRef =>
+\end_layout
+
+\begin_layout LyX-Code
+        resolveLink(ctx.states, "state", ref)
+\end_layout
+
+\begin_layout LyX-Code
+      case _ => ()
+\end_layout
+
+\begin_layout LyX-Code
+    }
+\end_layout
+
+\begin_layout LyX-Code
+  }
+\end_layout
+
+\begin_layout LyX-Code
+  def resolveLink[T <: NamedItem](map: Map[String, T],
+\end_layout
+
+\begin_layout LyX-Code
+      kind: String, node: Reference) {
+\end_layout
+
+\begin_layout LyX-Code
+    if (map.contains(node.id.text)) {
+\end_layout
+
+\begin_layout LyX-Code
+      node.ref = map(node.id.text)
+\end_layout
+
+\begin_layout LyX-Code
+    } else {
+\end_layout
+
+\begin_layout LyX-Code
+      ctx.errors += new SourceMessage(
+\end_layout
+
+\begin_layout LyX-Code
+          "Undefined " + kind + ": 
+\backslash
+"" + node.id.text + "
+\backslash
+"",
+\end_layout
+
+\begin_layout LyX-Code
+          SourceMessage.Error, node.id)
+\end_layout
+
+\begin_layout LyX-Code
+    }
+\end_layout
+
+\begin_layout LyX-Code
+  }
+\end_layout
+
+\begin_layout LyX-Code
+}
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Resolving-links-in"
+
+\end_inset
+
+Resolving links in Fowler DSL
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Creating-Language-IDE"
+
+\end_inset
+
+Creating Language IDE
+\end_layout
+
+\begin_layout Subsection
+Overview
+\end_layout
+
+\begin_layout Standard
+When generating a new language project, the plugin part of the project will
+ contain two files: 
+\emph on
+YourLangConfig.scala
+\emph default
+ and 
+\emph on
+YourLangServices.scala
+\emph default
+.
+ The latter contains technical glue code that is responsible for instatiating
+ various language services, referenced from the 
+\emph on
+plugin.xml
+\emph default
+ configuration file.
+ In general, the DSL developer should not edit this file and instead use
+ the 
+\emph on
+YourLangConfig.scala
+\emph default
+ file for specifying behaviour of the DSL IDE.
+\end_layout
+
+\begin_layout Standard
+Language-specific functionality of the IDE resides in the 
+\emph on
+YourLangConfig
+\emph default
+ class that overrides methods in 
+\emph on
+APluginConfig
+\emph default
+ class with language-specific implementations.
+ See the 
+\emph on
+APluginConfig 
+\emph default
+class for list of all the methods that can be overriden.
+ The following sections explain how to implement various IDE services.
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Note: only one instance of the 
+\emph default
+YourLangConfig
+\emph on
+ class will be constructed during the work of the Eclipse plugin.
+ It is therefore inadvisable to store mutable working data in the 
+\emph default
+YourLangConfig
+\emph on
+ class.
+\end_layout
+
+\begin_layout Subsection
+Editor Assistance
+\end_layout
+
+\begin_layout Standard
+This category provides hints to the code editor about the general syntax
+ of the DSL.
+\end_layout
+
+\begin_layout Subsubsection
+Fences
+\end_layout
+
+\begin_layout LyX-Code
+def fences: Array[Tuple2[String, String]]
+\end_layout
+
+\begin_layout Standard
+This method is used by the bracket matching feature of the code editor.
+ This method should return list of brackets whose conterpart will be highlighted
+ in the editor.
+ For example, if the DSL uses 
+\begin_inset Quotes eld
+\end_inset
+
+()
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+[]
+\begin_inset Quotes erd
+\end_inset
+
+ as brackets, then the method could be implemented as
+\end_layout
+
+\begin_layout LyX-Code
+override def fences = Array(("(", ")"), ("[", "]"))
+\end_layout
+
+\begin_layout Subsubsection
+Prefix for Single-Line Comments
+\end_layout
+
+\begin_layout LyX-Code
+def singleLineCommentPrefix: String
+\end_layout
+
+\begin_layout Standard
+This method should return prefix that is added or removed by the 
+\begin_inset Quotes eld
+\end_inset
+
+toggle comments
+\begin_inset Quotes erd
+\end_inset
+
+ feature of the DSL editor.
+ Implement it to return string that is used for comments that start with
+ a comment marker and last until the end of current line (such as 
+\family typewriter
+//
+\family default
+ in Java).
+\end_layout
+
+\begin_layout Subsection
+Syntax Highlighting
+\end_layout
+
+\begin_layout Standard
+Simpl uses two-level scheme for defining syntax colouring for the DSL.
+ First, you have to create list of all the different syntax elements that
+ you wish to highlight.
+ Typically this would include keywords, comments, strings and various other
+ language elements.
+ In Simpl, syntax highlighting is configurable, the DSL developer has to
+ provide default values for colors and fonts.
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Note: Simpl automatically highlights keywords and comments, based on grammar
+ description.
+ Therefore you do not need to do anything about them unless you want to
+ change the default behaviour (such as colouring some keywords differently
+ than others).
+\end_layout
+
+\begin_layout Standard
+First step in implementing syntax colouring is to enumerate all the syntax
+ elements with different colours.
+ This is done by changing variable 
+\emph on
+colors
+\emph default
+ in the automatically-generated 
+\emph on
+YourLangConfig
+\emph default
+ object.
+ The variable contains map, indexed by a symbol, whose values are descriptions
+ of syntax element.
+ The description consists of three parts: human-readable name, default color
+ (encoded as 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+R,G,B
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+) and default font style (using constants from the 
+\emph on
+SWT
+\emph default
+ class).
+ This data is mainly used to build preferences page.
+\end_layout
+
+\begin_layout LyX-Code
+val colors = Map(
+\end_layout
+
+\begin_layout LyX-Code
+    'strings -> ("Strings", "0, 128, 0",
+\end_layout
+
+\begin_layout LyX-Code
+        SWT.BOLD | SWT.ITALIC),
+\end_layout
+
+\begin_layout LyX-Code
+    'code -> ("Embedded code", "128, 0, 0",
+\end_layout
+
+\begin_layout LyX-Code
+        SWT.NORMAL))
+\end_layout
+
+\begin_layout Standard
+The second step involves overriding the 
+\emph on
+getTokenColor
+\emph default
+ method:
+\end_layout
+
+\begin_layout LyX-Code
+def getTokenColor(token: GenericToken): Symbol
+\end_layout
+
+\begin_layout Standard
+This method takes as input a token from the DSL program source and returns
+ a symbol corresponding to a particular syntax element.
+ 
+\emph on
+getTokenColor
+\emph default
+ can only return symbols that are used as keys in the 
+\emph on
+colors
+\emph default
+ map.
+ Following is an example implementation, corresponding to syntax element
+ list from the previous example.
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+width "100col%"
+special "none"
+height "1in"
+height_special "totalheight"
+status open
+
+\begin_layout LyX-Code
+override def getTokenColor(token: GenericToken): Symbol = {
+\end_layout
+
+\begin_layout LyX-Code
+    val myToken =
+\end_layout
+
+\begin_layout LyX-Code
+        token.asInstanceOf[CommonToken[SimplKind.Kind]] 
+\end_layout
+
+\begin_layout LyX-Code
+    myToken.kind match {
+\end_layout
+
+\begin_layout LyX-Code
+        case SimplKind.Str => 'strings
+\end_layout
+
+\begin_layout LyX-Code
+        case SimplKind.Code => 'code
+\end_layout
+
+\begin_layout LyX-Code
+        case _ => null
+\end_layout
+
+\begin_layout LyX-Code
+    }
+\end_layout
+
+\begin_layout LyX-Code
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Outline View
+\end_layout
+
+\begin_layout Standard
+Simpl makes it easy to create outline view for a DSL.
+ This is done with the help of two methods:
+\end_layout
+
+\begin_layout LyX-Code
+def treeLabel(node: CommonNode): String 
+\end_layout
+
+\begin_layout LyX-Code
+def addToTree(node: CommonNode): Boolean
+\end_layout
+
+\begin_layout Standard
+The 
+\emph on
+treeLabel
+\emph default
+ method takes as input an AST node and returns human-readable string that
+ is used to represent this node in the outline view.
+ The 
+\emph on
+addToTree
+\emph default
+ method returns true, if the node should be displayed in the outline view.
+ The default behaviour is that node is displayed in the tree if the 
+\emph on
+treeLabel
+\emph default
+ method returns non-null value.
+ If, for some node, 
+\emph on
+treeLabel 
+\emph default
+method returns null and 
+\emph on
+addToTree
+\emph default
+ returns true, the display string is obtained with 
+\emph on
+toString
+\emph default
+ method.
+\end_layout
+
+\begin_layout Subsection
+Code Folding
+\end_layout
+
+\begin_layout Standard
+Simpl supports folding in the source code editor.
+ This can be controlled using 
+\emph on
+isFoldable
+\emph default
+ method.
+\end_layout
+
+\begin_layout LyX-Code
+def isFoldable(node: CommonNode): Boolean
+\end_layout
+
+\begin_layout Standard
+The method takes an input an AST node and returns true if this node should
+ be foldable in the editor.
+ By default behaviour, the node is foldable if it is displayed in the outline
+ view (see the 
+\emph on
+addToTree
+\emph default
+ method).
+ The following example folds all nodes that span three or more lines.
+\end_layout
+
+\begin_layout LyX-Code
+override def isFoldable(node: CommonNode) =
+\end_layout
+
+\begin_layout LyX-Code
+    node.endLine - node.startLine > 1
+\end_layout
+
+\begin_layout Subsection
+Documentation Hovers
+\end_layout
+
+\begin_layout Standard
+Simpl supports documentation hovers which are displayed when the user hovers
+ mouse over some part of the code.
+\end_layout
+
+\begin_layout LyX-Code
+def getDocumentation(node: CommonNode): String
+\end_layout
+
+\begin_layout Standard
+The 
+\emph on
+getDocumentation
+\emph default
+ method takes as input a node and returns string that should be displayed
+ in a pop-up window when the user hovers text over source code representing
+ this node.
+ HTML tags are supported in the text.
+\end_layout
+
+\begin_layout Subsection
+Hyperlinking
+\end_layout
+
+\begin_layout Standard
+Hyperlinking in Simpl works as usual in Eclipse -- the user holds down Ctrl
+ key when clicking on an identifier.
+ This positions cursor at the definition of the identifier.
+ This can be accomplished by implementing 
+\emph on
+referenceTarget
+\emph default
+ method.
+\end_layout
+
+\begin_layout LyX-Code
+def referenceTarget(node: CommonNode): CommonNode
+\end_layout
+
+\begin_layout Standard
+This method takes as input a node (the link) and returns another node that
+ functions as target to that link.
+ If the input node is not link, just return 
+\emph on
+null
+\emph default
+.
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Note Note
+status open
+
+\begin_layout Subsection
+Code Completion
+\end_layout
+
+\begin_layout Subsection
+Running Code Generator
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

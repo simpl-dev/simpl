@@ -1,0 +1,33 @@
+group #{class}Generator;
+
+bean() ::= <<
+package <type()>;
+
+<it.imports:import()>
+
+public class <id.text> {
+    <field:{<field(type=type(), name=it.id.text)>}>
+}
+>>
+
+import() ::= <<
+
+import <type()>;
+
+>>
+
+field(type, name) ::= <<
+
+private <type> <name>;
+
+public <type> get<name;format="upperFirst">() {
+    return <name>;
+}
+
+public void set<name;format="upperFirst">(<type> v) {
+    this.<name> = v;
+}
+
+>>
+
+type() ::= "<it.dotId.head.text><it.dotId.tail:{.<it.text>}>"

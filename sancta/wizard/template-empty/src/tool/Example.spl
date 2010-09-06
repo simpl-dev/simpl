@@ -1,0 +1,8 @@
+grammar #{package}.#{class};
+
+Program: 'program' Id;
+
+terminal Id: ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')*;
+fragment ML_COMMENT: '/*' (~'*' | '*' ~'/')* '*/';
+fragment SL_COMMENT: '//' ~('\n'|'\r')*;
+hidden terminal WS: (' '|'\t'|'\r'|'\n'|SL_COMMENT|ML_COMMENT)+;

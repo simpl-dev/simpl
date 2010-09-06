@@ -1,0 +1,59 @@
+grammar ee.cyber.simplicitas.fowlerdsl.Fowler;
+
+/** Program is a sequence of machines. */
+Program: machines=Machine+;
+
+/** The original state machine DSL is amended with machine keyword
+    which helps to delineate the machines in source file. Additionally,
+    right after the machine keyword comes name of the Java class that will
+    be generated for this machine. */
+Machine: 'machine'
+    name=Id
+    events=EventList
+    resetEvents=ResetEvents?
+    commands=CommandList
+    states=State+
+    'init' initState=StateRef;
+
+/** List of events that will transform the machine to initial state. */
+ResetEvents: 'resetEvents' events=EventRef+ 'end';
+/** List of events that the state machine is able to receive. */
+EventList: 'events' events=Event+ 'end';
+Event: name=Id code=Id;
+
+/** List of commands supported by the state machine. */
+CommandList: 'commands' commands=Command+ 'end';
+Command: name=Id code=Id;
+
+/** State contains name of state, actions (executed when entering the
+    state) and transitions (what happens when events are received in
+    this state. */
+State: 'state'
+    name=Id
+     ('actions' '{' actions=CommandRef+ '}')?
+     transitions=Transition*
+     'end';
+
+/** When machine receives this event, move to this state. */
+Transition: event=EventRef '=>' state=StateRef;
+
+// Intermediate rules so that it is easy to find out which Id is really
+// a reference to some other object.
+EventRef: Id;
+CommandRef: Id;
+StateRef: Id;
+
+/** Artificial rule (not in actual grammar) to create base class
+    for all the different references. */
+option Reference {var ref: NamedItem = null; def id: Id}:
+    EventRef | CommandRef | StateRef;
+/** Base class to all things that can be referenced. */
+option NamedItem {def name: Id;}: Event | Command | State;
+
+terminal Id: ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')*;
+fragment StrBody: ~('\\'|'"') | '\\' .;
+terminal Str(value: String = {$_.substring(1, $_.length() - 1)}):
+	'"' StrBody* '"' | '\'' StrBody* '\'';
+fragment MlComment: '/*' (~'*' | '*' ~'/')* '*/';
+fragment SlComment: '//' ~('\n'|'\r')*;
+hidden terminal Ws: (' '|'\t'|'\r'|'\n'|MlComment|SlComment)+;

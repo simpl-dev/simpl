@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension point="org.eclipse.imp.runtime.languageDescription">
+      <language extensions="#{ext}" description="#{description}"
+                natureID="#{package}" language="#{lang}"/>
+   </extension>
+   <extension id="#{id}.parserWrapper"
+              name="#{description} Parser Wrapper"
+              point="org.eclipse.imp.runtime.parser">
+      <parserWrapper
+            class="#{package}.#{class}ParseController"
+            language="#{lang}"/>
+   </extension>
+   <extension point="org.eclipse.imp.runtime.tokenColorer">
+      <tokenColorer class="#{package}.#{class}TokenColorer"
+                    language="#{lang}"/>
+   </extension>
+   <extension point="org.eclipse.imp.runtime.modelTreeBuilder">
+      <treeBuilder
+            class="#{package}.#{class}TreeModelBuilder"
+            language="#{lang}">
+      </treeBuilder>
+   </extension>
+   <extension point="org.eclipse.imp.runtime.labelProvider">
+   <labelProvider class="#{package}.#{class}LabelProvider"
+   language="#{lang}"/>
+   </extension>
+   <extension point="org.eclipse.imp.runtime.referenceResolvers">
+   <referenceResolver class="#{package}.#{class}ReferenceResolver"
+   language="#{lang}"/>
+   </extension>
+   <extension point="org.eclipse.imp.runtime.foldingUpdater">
+   <foldingUpdater class="#{package}.#{class}FoldingUpdater"
+   language="#{lang}"/>
+   </extension>
+   <extension point="org.eclipse.imp.runtime.documentationProvider">
+   <docProvider class="#{package}.#{class}DocumentationProvider"
+   language="#{lang}"/>
+   </extension>
+   <extension id="#{lang}.hoverHelper"
+              name="#{description} Hover Helper"
+              point="org.eclipse.imp.runtime.hoverHelper">
+      <hoverHelper class="ee.cyber.simplicitas.imp.HoverHelper"
+                 language="#{lang}"/>
+   </extension>
+   <extension point="org.eclipse.imp.runtime.contentProposer">
+      <proposer class="#{package}.#{class}ContentProposer"
+                language="#{lang}"/>
+   </extension>
+   <extension point="org.eclipse.imp.runtime.markOccurrences">
+      <occurrenceMarker class="#{package}.#{class}OccurrenceMarker"
+                        language="#{lang}"/>
+   </extension>
+   
+   <extension point="org.eclipse.ui.preferencePages">
+      <page class="#{package}.#{class}PreferencePage"
+            id="#{package}.#{class}PreferencePage"
+            name="#{description} Preferences">
+      </page>
+   </extension>
+   
+   <extension
+          point="org.eclipse.ui.popupMenus">
+       <objectContribution
+             id="#{id}.generatorPopUp"
+             nameFilter="*.#{ext}"
+             objectClass="org.eclipse.core.resources.IFile">
+          <action
+                class="#{package}.#{class}GenerateAction"
+                enablesFor="1"
+                id="#{package}.#{class}GenerateAction"
+                label="Generate"
+                menubarPath="additions"
+                tooltip="Generate">
+          </action>
+       </objectContribution>
+    </extension>
+</plugin>

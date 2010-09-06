@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension point="org.eclipse.imp.runtime.languageDescription">
+      <language extensions="spl" description="Simpl IDE"
+                natureID="ee.cyber.simplicitas.ide" language="simpl_ide"/>
+   </extension>
+   <extension id="simpl_ide.parserWrapper"
+              name="Simpl IDE Parser Wrapper"
+              point="org.eclipse.imp.runtime.parser">
+      <parserWrapper
+            class="ee.cyber.simplicitas.ide.SimplParseController"
+            language="simpl_ide"/>
+   </extension>
+   <extension point="org.eclipse.imp.runtime.tokenColorer">
+      <tokenColorer class="ee.cyber.simplicitas.ide.SimplTokenColorer"
+                    language="simpl_ide"/>
+   </extension>
+   <extension point="org.eclipse.imp.runtime.modelTreeBuilder">
+      <treeBuilder
+            class="ee.cyber.simplicitas.ide.SimplTreeModelBuilder"
+            language="simpl_ide">
+      </treeBuilder>
+   </extension>
+   <extension point="org.eclipse.imp.runtime.labelProvider">
+   <labelProvider class="ee.cyber.simplicitas.ide.SimplLabelProvider"
+   language="simpl_ide"/>
+   </extension>
+   <extension point="org.eclipse.imp.runtime.referenceResolvers">
+   <referenceResolver class="ee.cyber.simplicitas.ide.SimplReferenceResolver"
+   language="simpl_ide"/>
+   </extension>
+   <extension point="org.eclipse.imp.runtime.foldingUpdater">
+   <foldingUpdater class="ee.cyber.simplicitas.ide.SimplFoldingUpdater"
+   language="simpl_ide"/>
+   </extension>
+   <extension point="org.eclipse.imp.runtime.documentationProvider">
+   <docProvider class="ee.cyber.simplicitas.ide.SimplDocumentationProvider"
+   language="simpl_ide"/>
+   </extension>
+   <extension id="simpl_ide.hoverHelper"
+              name="Simpl IDE Hover Helper"
+              point="org.eclipse.imp.runtime.hoverHelper">
+      <hoverHelper class="ee.cyber.simplicitas.imp.HoverHelper"
+                 language="simpl_ide"/>
+   </extension>
+   <extension point="org.eclipse.imp.runtime.contentProposer">
+      <proposer class="ee.cyber.simplicitas.ide.SimplContentProposer"
+                language="simpl_ide"/>
+   </extension>
+   <extension point="org.eclipse.imp.runtime.markOccurrences">
+      <occurrenceMarker class="ee.cyber.simplicitas.ide.SimplOccurrenceMarker"
+                        language="simpl_ide"/>
+   </extension>
+    <extension point="org.eclipse.ui.preferencePages">
+      <page class="ee.cyber.simplicitas.ide.SimplPreferencePage"
+            id="ee.cyber.simplicitas.ide.SimplPreferencePage"
+            name="Simpl IDE preferences">
+      </page>
+   </extension>
+    <extension
+          point="org.eclipse.ui.popupMenus">
+       <objectContribution
+             id="simpl_ide.generatorPopUp"
+             nameFilter="*.spl"
+             objectClass="org.eclipse.core.resources.IFile">
+          <action
+                class="ee.cyber.simplicitas.ide.SimplGenerateAction"
+                enablesFor="1"
+                id="ee.cyber.simplicitas.ide.SimplGenerateAction"
+                label="Generate"
+                menubarPath="additions"
+                tooltip="Generate">
+          </action>
+       </objectContribution>
+    </extension>
+
+</plugin>

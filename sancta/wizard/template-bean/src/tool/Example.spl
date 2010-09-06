@@ -1,0 +1,26 @@
+grammar #{package}.#{class};
+
+SourceCode: Header Bean+;
+
+/** Header transforms into package and import declarations at
+    the beginning of Java source file. */
+Header: 'package' DotId Imports*;
+
+Imports: 'import' DotId;
+
+/** Bean expands to Java class. */
+Bean: 'bean' Id '{' Field* '}';
+
+Field: DotId Id ';';
+
+/** Matches Java-style (optionally) fully-qualified identifier,
+    such as foo.bar.baz */
+DotId{
+	def text = (head :: tail) map(_.text) mkString(".")
+}: head=Id ('.' tail=Id)*;
+
+terminal Id: ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')*;
+// Java-style single- and multiline comments.
+fragment ML_COMMENT: '/*' (~'*' | '*' ~'/')* '*/';
+fragment SL_COMMENT: '//' ~('\n'|'\r')*;
+hidden terminal WS: (' '|'\t'|'\r'|'\n'|SL_COMMENT|ML_COMMENT)+;

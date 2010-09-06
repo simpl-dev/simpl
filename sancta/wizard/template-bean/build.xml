@@ -1,0 +1,104 @@
+<!-- ex: se sts=4 sw=4 expandtab: -->
+<project name="#{name}" default="plugin" basedir=".">
+    <property file="${basedir}/ant.properties"/>
+
+    <available file="${maven.repo.local}/simplicitas/mvn-ant/1.0/mvn-ant-1.0.xml"
+        property="include_file"
+        value="file://${maven.repo.local}/simplicitas/mvn-ant/1.0/mvn-ant-1.0.xml"/>
+    <property name="include_file"
+        value="${maven.repo.remote}/simplicitas/mvn-ant/1.0/mvn-ant-1.0.xml"/>
+    <import>
+        <url url="${include_file}"/>
+    </import>
+
+    <target name="tool-deps" depends="copy-mvn-ant,init-dep,require-antlr,require-scala">
+        <antcall target="require">
+            <param name="artifact" value="simplicitas-tool/1.0"/>
+        </antcall>
+        <loadfile srcfile="${target}/deps" property="tool-deps"/>
+        <path id="tool-deps" path="${tool-deps}"/>
+    </target>
+
+    <target name="plugin-deps" depends="tool-deps">
+        <antcall target="require">
+            <param name="artifact" value="simplicitas-plugin/1.0"/>
+        </antcall>
+        <loadfile srcfile="${target}/deps" property="plugin-deps"/>
+        <path id="plugin-deps" path="${plugin-deps}"/>
+    </target>
+
+    <target name="tool" depends="tool-deps">
+        <property name="target" value="${basedir}/target"/>
+        <property name="tool-jar" value="${target}/#{name}-tool.jar"/>
+
+        <!-- generate grammar -->
+        <taskdef name="grammar" classpathref="tool-deps"
+                 classname="ee.cyber.simplicitas.parse.GrammarTask"/>
+        <grammar src="${basedir}/src/tool/#{class}.spl"
+                 destdir="${target}/gen/#{package-path}"/>
+
+        <!-- compile sources (together with the generated grammar) -->
+        <mkdir dir="${target}/classes"/>
+        <scalac destdir="${target}/classes" classpathref="tool-deps">
+            <src location="${target}/gen"/>
+            <src location="${basedir}/src/tool"/>
+        </scalac>
+        <javac destdir="${target}/classes" srcdir="${target}/gen" source="1.4"
+               includeantruntime="false" classpathref="tool-deps" encoding="UTF-8"/>
+
+        <!-- create tool jar -->
+        <jar destfile="${tool-jar}" basedir="${target}/classes">
+            <fileset dir="${basedir}/src/tool" includes="*.stg"/>
+        </jar>
+    </target>
+
+    <target name="tool-run" depends="tool">
+        <!-- test run -->
+        <java classname="#{package}.#{class}Main" fork="true">
+            <classpath>
+                <path refid="tool-deps"/>
+                <path location="${tool-jar}"/>
+            </classpath>
+            <arg line="--dest target/test sample.#{ext}"/>
+        </java>
+    </target>
+
+    <!-- generate documentation -->
+    <target name="grammar-doc" depends="tool">
+        <java classname="ee.cyber.simplicitas.ide.SimplMain" fork="true">
+            <classpath>
+                <path refid="tool-deps"/>
+                <path location="${tool-jar}"/>
+            </classpath>
+            <arg line="--dest target/doc src/tool/#{class}.spl"/>
+        </java>
+    </target>
+    
+    <!-- builds the plugin -->
+    <target name="plugin" depends="plugin-deps,tool">
+        <mkdir dir="${target}/plugin"/>
+        <scalac destdir="${target}/plugin">
+            <src location="${basedir}/src/plugin"/>
+            <classpath>
+                <path refid="plugin-deps"/>
+                <path location="${tool-jar}"/>
+                <fileset dir="${eclipse}/plugins" includes="**/*.jar"/>
+            </classpath>
+        </scalac>
+        <jar destfile="${target}/#{name}-plugin.jar" basedir="${target}/plugin"
+             manifest="${basedir}/META-INF/MANIFEST.MF">
+            <!-- This comes from tool.jar fileset dir="${basedir}/src/tool" includes="*.stg"/-->
+            <fileset dir="${basedir}" includes="plugin.xml"/>
+            <!-- If the tool.jar starts to contain other libraries, then we should include
+                 only tool class files here. -->
+            <zipfileset src="${tool-jar}"/>
+        </jar>
+    </target>
+
+    <target name="clean">
+        <delete dir="${target}"/>
+    </target>
+
+    <target name="build" depends="plugin"/>
+    <target name="rebuild" depends="clean,build"/>
+</project>

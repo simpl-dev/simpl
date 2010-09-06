@@ -1,0 +1,46 @@
+grammar ee.cyber.simplicitas.fowlerdsl.Fowler;
+
+Program: (imports=Import | machines=Machine | externals=ExternalMachine)+;
+
+Import: 'import' importURI=Str;
+
+ExternalMachine: 'external' Id;
+
+Machine: 'machine'
+    name=Id
+    events=EventList
+    resetEvents=ResetEvents?
+    commands=CommandList
+    states=State+
+    'init' initState=StateRef;
+
+ResetEvents: 'resetEvents' events=EventRef+ 'end';
+EventList: 'events' events=Event+ 'end';
+Event: name=Id code=Id;
+
+CommandList: 'commands' commands=Command+ 'end';
+Command: name=Id code=Id;
+
+State: 'state'
+    name=Id
+     ('actions' '{' actions=CommandRef+ '}')?
+     transitions=Transition*
+     'end';
+
+Transition: event=EventRef '=>' state=StateRef;
+
+EventRef: Id;
+CommandRef: Id;
+StateRef: Id;
+
+/** Reference is base class for identifiers that point to something. */
+option Reference {var ref: NamedItem = null; def id_: Id}:
+    EventRef | CommandRef | StateRef;
+option NamedItem {def name: Id;}: Event | Command | State;
+terminal Id: ('a'..'z'|'A'..'Z'|'_')('a'..'z'|'A'..'Z'|'_'|'0'..'9')*;
+fragment StrBody: ~('\\'|'"')|'\\' .;
+terminal Str(value: String = {$_.substring(1, $_.length() - 1)}):
+	'"' StrBody* '"' | '\'' StrBody* '\'';
+fragment MlComment: '/*' (~'*' | '*' ~'/')* '*/';
+fragment SlComment: '//' ~('\n'|'\r')*;
+terminal Ws: (' '|'\t'|'\r'|'\n'|SlComment|MlComment)+ {$channel = HIDDEN;};

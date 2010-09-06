@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         id="simplicitas.category.wizards"
+         name="Simplicitas Wizards"
+         point="org.eclipse.ui.newWizards">
+      <category
+            id="simplicitas.category.wizards"
+            name="Simplicitas Wizards">
+      </category>
+      <wizard
+            category="simplicitas.category.wizards"
+            class="ee.cyber.simplicitas.eclipse.NewProjectWizard"
+            id="simplicitas.wizard.new.project"
+            name="Simplicitas Project"
+            project="true">
+      </wizard>
+   </extension>
+   <extension
+         id="simplicitasBuilder"
+         name="Simplicitas Project Builder"
+         point="org.eclipse.core.resources.builders">
+      <builder
+            hasNature="true">
+         <run
+               class="ee.cyber.simplicitas.eclipse.SimplicitasBuilder">
+         </run>
+      </builder>
+   </extension>
+   <extension
+         id="simplicitasNature"
+         name="Simplicitas Project Nature"
+         point="org.eclipse.core.resources.natures">
+      <runtime>
+         <run
+               class="ee.cyber.simplicitas.eclipse.SimplicitasNature">
+         </run>
+      </runtime>
+      <builder
+            id="simplicitas-plugin.simplicitasBuilder">
+      </builder>
+   </extension>
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            adaptable="true"
+            id="simplicitas-plugin.contribution1"
+            nameFilter="*"
+            objectClass="org.eclipse.core.resources.IProject">
+         <action
+               class="ee.cyber.simplicitas.eclipse.ToggleNatureAction"
+               enablesFor="+"
+               id="simplicitas-plugin.addRemoveNatureAction"
+               label="Add Simplicitas Nature"
+               menubarPath="additions"
+               tooltip="Add Simplicitas library to the project">
+         </action>
+         <visibility>
+           <and>
+             <not>
+               <objectState name="projectNature"
+                     value="simplicitas-plugin.simplicitasNature"/>
+             </not>
+             <!--objectClass name="org.eclipse.jdt.core.IJavaProject"/-->
+           </and>
+         </visibility>
+      </objectContribution>
+
+      <objectContribution
+            adaptable="true"
+            id="simplicitas-plugin.contribution2"
+            nameFilter="*"
+            objectClass="org.eclipse.core.resources.IProject">
+         <action
+               class="ee.cyber.simplicitas.eclipse.ToggleNatureAction"
+               enablesFor="+"
+               id="simplicitas-new_project_wizard.addRemoveNatureAction"
+               label="Remove Simplicitas Nature"
+               menubarPath="additions"
+               tooltip="Remove Simplicitas library from the project">
+         </action>
+         <visibility>
+           <and>
+             <objectState name="projectNature"
+                   value="simplicitas-plugin.simplicitasNature"/>
+             <!--objectClass name="org.eclipse.jdt.core.IJavaProject"/-->
+           </and>
+         </visibility>
+      </objectContribution>
+   </extension>
+   <extension
+         id="xmlProblem"
+         name="XML Problem"
+         point="org.eclipse.core.resources.markers">
+      <super
+            type="org.eclipse.core.resources.problemmarker">
+      </super>
+      <persistent
+            value="true">
+      </persistent>
+   </extension>
+   <extension
+         name="Simplicitas library"
+         point="org.eclipse.jdt.core.classpathContainerInitializer">
+      <classpathContainerInitializer
+            class="ee.cyber.simplicitas.eclipse.SimplicitasClasspathContainerInitializer"
+            id="simplicitas-plugin.SIMPLICITAS_CONTAINER">
+      </classpathContainerInitializer>
+   </extension>
+
+</plugin>

@@ -1,0 +1,49 @@
+group Fowler;
+
+program() ::= << <machine(...)> >>
+
+machine() ::= <<
+public class <name.text> extends StateMachine {
+    <events.events:event(); separator="\n">
+
+    <commands.commands:command(); separator="\n">
+    
+    <states:stateVariableDefinition(); separator="\n">
+    
+    public <name.text>() {
+        setInitState(<initState:stateVar()>);
+        <states:stateConstructor(name); separator="\n">
+    
+        <resetEvents:resetEvent(); separator="\n">
+    }
+}
+>>
+
+event() ::=
+    <<private Event <it.name:eventVar()> = new Event("<it.name>", "<it.code>");>>
+
+//resetEvent(name) ::= "addResetEvents(<name:eventVar()>);"
+resetEvent(name) ::= ""
+
+command() ::=
+    <<private Command <it.name:commandVar()> = new Command("<it.name>", "<it.code>");>>
+
+stateVariableDefinition() ::=
+    <<private State <it.name:stateVar()> = new State("<it.name>");>>
+
+stateConstructor(stateName1) ::= <<
+// Stuff for state <stateName1>
+<it.actions:actionConstructor(stateName=stateName1); separator="\n">
+<it.transitions:transitionConstructor(stateName=stateName1); separator="\n">
+
+>>
+
+actionConstructor(stateName) ::=
+    "<stateName:stateVar()>.addAction(<it:commandVar()>);"
+
+transitionConstructor(stateName) ::=
+    "<stateName:stateVar()>.addTransition(<it.event:eventVar()>, <it.state:stateVar()>);"
+
+eventVar() ::= "<it>Event"
+commandVar() ::= "<it>Cmd"
+stateVar() ::= "<it>State"

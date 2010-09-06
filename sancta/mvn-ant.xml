@@ -1,0 +1,90 @@
+<!-- ex: se sts=4 sw=4 expandtab: -->
+<project>
+    <!-- default values for some properties -->
+    <property name="target" value="${basedir}/target"/>
+    <property name="maven.repo.local" value="${user.home}/.m2/repository"/>
+    <property name="maven.repo.remote" value="http://repo1.maven.org/maven2"/>
+    <property name="antlr_2.ver" value="2.7.7"/>
+    <property name="antlr.ver" value="3.2"/>
+    <property name="stringtemplate.ver" value="3.2.1"/>
+	<property name="simplicitas.ver" value="1.0"/>
+    
+    
+    <target name="copy-mvn-ant" unless="sancta.build.ongoing">
+		<antcall target="require">
+            <param name="group" value="simplicitas"/>
+            <param name="artifact" value="mvn-ant/${simplicitas.ver}"/>
+			<param name="ext" value="xml"/>
+		</antcall>
+    </target>
+
+    <target name="init-dep">
+        <mkdir dir="${target}/classes"/>
+        <delete file="${target}/deps"/>
+    </target>
+
+    <target name="dependency" description="internal task to check dependency">
+        <!-- defaults -->
+        <property name="group" value="simplicitas"/>
+        <property name="ext" value="jar"/>
+        <!-- magic -->
+        <pathconvert property="artifact-id">
+            <propertyresource name="artifact"/> <!-- requires ant 1.7 -->
+            <filtermapper>
+                <replacestring from="/" to="-"/>
+            </filtermapper>
+        </pathconvert>
+        <property name="relp"
+                  value="${group}/${artifact}/${artifact-id}.${ext}"/>
+        <property name="local-path" value="${maven.repo.local}/${relp}"/>
+        <echo file="${target}/deps" append="true"
+              message="${local-path}${path.separator}"/>
+        <available property="in.local.repo" file="${local-path}"/>
+    </target>
+
+    <target name="require" depends="dependency" unless="in.local.repo">
+        <mkdir dir="${maven.repo.local}/${group}/${artifact}"/>
+        <get src="${maven.repo.remote}/${relp}" dest="${local-path}"/>
+    </target>
+
+    <target name="actifact-install" depends="dependency">
+        <mkdir dir="${maven.repo.local}/${group}/${artifact}"/>
+        <copy file="${src}" tofile="${local-path}"/>
+        <!-- too lazy to create pom (buildr don't care I think) -->
+    </target>
+
+    <!-- common dependency groups -->
+    <target name="require-antlr">
+        <antcall target="require">
+            <param name="group" value="org/antlr"/>
+            <param name="artifact" value="antlr/${antlr.ver}"/>
+        </antcall>
+        <antcall target="require">
+            <param name="group" value="org/antlr"/>
+            <param name="artifact" value="antlr-runtime/${antlr.ver}"/>
+        </antcall>
+        <antcall target="require">
+            <param name="group" value="org/antlr"/>
+            <param name="artifact" value="stringtemplate/${stringtemplate.ver}"/>
+        </antcall>
+        <!-- antlr3 tool depends on antlr 2.7 -->
+        <antcall target="require">
+            <param name="group" value="antlr"/>
+            <param name="artifact" value="antlr/${antlr_2.ver}"/>
+        </antcall>
+    </target>
+
+    <target name="require-scala">
+        <antcall target="require">
+            <param name="group" value="org/scala-lang"/>
+            <param name="artifact" value="scala-library/2.8.0"/>
+        </antcall>
+        <antcall target="require">
+            <param name="group" value="org/scala-lang"/>
+            <param name="artifact" value="scala-compiler/2.8.0"/>
+        </antcall>
+        <loadfile srcfile="${target}/deps" property="scala-path"/>
+        <taskdef resource="scala/tools/ant/antlib.xml"
+                 classpath="${scala-path}"/>
+    </target>
+</project>

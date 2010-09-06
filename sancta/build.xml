@@ -1,0 +1,173 @@
+<!-- ex: se sts=4 sw=4 expandtab: -->
+<project name="simplicitas-libs" default="build" basedir=".">
+    <property file="ant.properties"/>
+    <property name="sancta.build.ongoing" value="true"/>
+    <property name="eclipse-plugins" value="${eclipse}/plugins"/>
+    <import file="${basedir}/mvn-ant.xml"/>
+    <!-- default values for some properties -->
+    <property name="version" value="1.0"/>
+
+    <target name="dependencies" depends="copy-mvn-ant,init-dep,require-antlr,require-scala">
+        <loadfile srcfile="${target}/deps" property="dep-path"/>
+        <path id="basecp" path="${dep-path}"/>
+    </target>
+
+    <target name="tool-antlr" depends="dependencies">
+        <taskdef resource="org/apache/tools/ant/antlr/antlib.xml"
+                 classpath="${basedir}/lib/antlr3-task.jar"/>
+        <mkdir dir="${target}/tool-java"/>
+        <antlr3 xmlns:antlr="antlib:org/apache/tools/ant/antlr"
+                target="tool/AntLike.g" outputdirectory="${target}/tool-java"
+                libdirectory="${target}/tool-java">
+            <classpath>
+                <path refid="basecp"/>
+            </classpath>
+        </antlr3>
+    </target>
+
+    <target name="tool-lib" depends="tool-antlr">
+        <mkdir dir="${target}/tool-classes"/>
+        <scalac destdir="${target}/tool-classes">
+            <src location="${target}/tool-java"/>
+            <src location="${basedir}/tool"/>
+            <classpath>
+                <path refid="basecp"/>
+                <pathelement path="${java.class.path}"/>
+            </classpath>
+        </scalac>
+        <javac destdir="${target}/tool-classes" srcdir="${target}/tool-java"
+               source="1.4" encoding="UTF-8" classpathref="basecp"
+               includeantruntime="false"/>
+        <jar destfile="${target}/simplicitas-tool.jar"
+             basedir="${target}/tool-classes">
+            <manifest>
+                <attribute name="Bundle-name" value="Simplicitas tool"/>
+                <attribute name="Bundle-SymbolicName" value="simplicitas-tool;singleton:=true"/>
+                <attribute name="Bundle-Version" value="1.0.0"/>
+                <attribute name="Eclipse-LazyStart" value="true"/>
+                <attribute name="Export-Package" value="ee.cyber.simplicitas,ee.cyber.simplicitas.parse,org.antlr,org.antlr.runtime,org.antlr.runtime.tree,org.antlr.stringtemplate"/>
+                <attribute name="Require-Bundle" value="org.scala-ide.scala.library"/>
+                <attribute name="Eclipse-BuddyPolicy" value="registered"/>
+            </manifest>
+            <zipfileset src="${maven.repo.local}/org/antlr/antlr-runtime/${antlr.ver}/antlr-runtime-${antlr.ver}.jar"/>
+            <zipfileset src="${maven.repo.local}/org/antlr/stringtemplate/${stringtemplate.ver}/stringtemplate-${stringtemplate.ver}.jar"/>
+            <zipfileset src="${maven.repo.local}/antlr/antlr/${antlr_2.ver}/antlr-${antlr_2.ver}.jar"/>
+        </jar>
+        <antcall target="actifact-install">
+            <param name="src" value="${target}/simplicitas-tool.jar"/>
+            <param name="artifact" value="simplicitas-tool/${version}"/>
+        </antcall>
+    </target>
+
+    <target name="test" depends="tool-lib">
+        <path id="parselib">
+            <path refid="basecp"/>
+            <path location="${target}/simplicitas-tool.jar"/>
+        </path>
+        <taskdef name="grammar" classpathref="parselib"
+                 classname="ee.cyber.simplicitas.parse.GrammarTask"/>
+        <grammar src="test/FowlerStates.spl" destdir="${target}/test-java"/>
+        <mkdir dir="${target}/test-classes"/>
+        <scalac destdir="${target}/test-classes" classpathref="parselib"
+                unchecked="yes">
+            <src location="${target}/test-java"/>
+        </scalac>
+        <javac destdir="${target}/test-classes" srcdir="${target}/test-java"
+               source="1.4" encoding="UTF-8" classpathref="parselib"
+               includeantruntime="false"/>
+    </target>
+
+    <target name="wizard-lib">
+        <property name="output" value="${target}/wizard"/>
+        <mkdir dir="${output}"/>
+        <javac destdir="${output}" srcdir="${basedir}/wizard"
+            source="1.4" target="1.4" includes="Wizard.java"
+            includeantruntime="false" encoding="UTF-8"/>
+        <zip destfile="${output}/src-bean.zip" encoding="UTF-8"
+            filesonly="true" basedir="${basedir}/wizard/template-bean" />
+        <zip destfile="${output}/src-empty.zip" encoding="UTF-8"
+            filesonly="true" basedir="${basedir}/wizard/template-empty" />
+        <jar destfile="${target}/simplicitas-wizard.jar" basedir="${output}">
+            <manifest>
+                <attribute name="Main-Class"
+                    value="ee.cyber.simplicitas.Wizard" />
+            </manifest>
+        </jar>
+        <antcall target="actifact-install">
+            <param name="src" value="${target}/simplicitas-wizard.jar" />
+            <param name="artifact" value="simplicitas-wizard/${version}" />
+        </antcall>
+        <delete dir="${output}"/>
+    </target>
+
+    <target name="plugin-lib" depends="dependencies,wizard-lib">
+        <path id="plugin-deps">
+            <path location="${target}/simplicitas-tool.jar"/>
+            <path location="${target}/simplicitas-wizard.jar"/>
+            <path refid="basecp"/>
+            <fileset dir="${eclipse-plugins}" includes="**/*.jar"/>
+        </path>
+        <mkdir dir="${target}/plugin-classes"/>
+        <scalac destdir="${target}/plugin-classes" classpathref="plugin-deps"
+                unchecked="yes">
+            <src location="${basedir}/plugin"/>
+        </scalac>
+        <javac destdir="${target}/plugin-classes" srcdir="${basedir}/plugin"
+               includeantruntime="false" source="1.6" target="1.6"
+               encoding="UTF-8" classpathref="plugin-deps"/>
+        <jar destfile="${target}/simplicitas-plugin.jar"
+             basedir="${target}/plugin-classes"
+             manifest="${basedir}/META-INF/MANIFEST.MF">
+            <fileset dir="${basedir}" includes="icons/*.gif"/>
+            <fileset dir="${basedir}" includes="plugin.xml"/>
+            <zipfileset src="${basedir}/target/simplicitas-wizard.jar"/>
+        </jar>
+        <antcall target="actifact-install">
+            <param name="src" value="${target}/simplicitas-plugin.jar"/>
+            <param name="artifact" value="simplicitas-plugin/${version}"/>
+        </antcall>
+    </target>
+
+    <target name="install-build">
+        <antcall target="actifact-install">
+            <param name="src" value="${basedir}/mvn-ant.xml"/>
+            <param name="artifact" value="mvn-ant/${version}"/>
+            <param name="ext" value="xml"/>
+        </antcall>
+    </target>
+
+    <target name="doc" depends="dependencies">
+        <mkdir dir="${target}/doc"/>
+        <scaladoc doctitle="Simpl API documentation"
+                destdir="${target}/doc">
+            <classpath>
+                <path refid="basecp"/>
+                <fileset dir="${eclipse-plugins}" includes="**/*.jar"/>
+            </classpath>
+                    <include name="**/*.scala"/>
+            <src>
+                <dirset dir="${basedir}/tool">
+                </dirset>
+                <dirset dir="${basedir}/plugin">
+                </dirset>
+            </src>
+        </scaladoc>
+    </target>
+
+    <target name="doc-jar" depends="doc">
+        <jar destfile="${target}/simplicitas-doc.jar"
+             basedir="${target}/doc"/>
+        <antcall target="actifact-install">
+            <param name="src" value="${target}/simplicitas-doc.jar"/>
+            <param name="artifact" value="simplicitas-doc/${version}"/>
+        </antcall>
+    </target>
+
+    <target name="clean">
+        <delete dir="${target}"/>
+    </target>
+
+    <target name="build" depends="test,plugin-lib,wizard-lib,doc-jar,install-build"/>
+
+    <target name="rebuild" depends="clean,build"/>
+</project>

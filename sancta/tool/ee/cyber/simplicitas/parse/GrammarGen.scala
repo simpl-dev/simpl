@@ -1,0 +1,582 @@
+// Copyright (c) 2010 Cybernetica AS / STACC
+
+package ee.cyber.simplicitas.parse
+
+import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.HashMap
+
+case class NodeParam(name: String, node: String, var varName: String,
+                     multi: Boolean, tmp: String, option: List[Int])
+
+case class TermParam(name: String, vtype: String, code: String, mod: String)
+
+class RuleClass(name: String) {
+    var hdr = ""
+    var param: Seq[TermParam] = Nil
+    val extend = new ArrayBuffer[String]()
+    var body = ""
+    def antlrName = name
+}
+
+class GrammarException(msg: String) extends Exception(msg)
+
+class GrammarGen(posMap: Any => List[Int]) {
+    private var grammarName = "";
+    private var grammarPackage = "";
+    private var g = new ArrayBuffer[String]()
+    private val treeSrc = new StringBuilder()
+    private val param = new ArrayBuffer[NodeParam]()
+    private val terminals = new HashMap[String, List[TermParam]]()
+    private val rules = new HashMap[String, RuleClass]()
+    private val keywords = new HashMap[String, String]()
+    private var currentOption = List(0)
+    private var multi = 0
+    private var firstInChain = true
+    private var lastInChain: List[() => Unit] = Nil
+    private var idcounter = 0
+    private var firstRule = ""
+
+    def newId = {
+        idcounter += 1
+        "Z" + idcounter
+    }
+
+    def uncapitalize(s: String): String =
+        if (s == "") ""
+        else (Character toLowerCase (s charAt 0)) + (s substring 1)
+
+    def error(where: Any, what: String) =
+        throw new GrammarException(posMap(where) match {
+                case List(line, col) => line + ":" + col + ": " + what
+                case _ => what
+            })
+
+    def endHook(tag: String, embrace: Boolean, id: String) = {
+        val p = g.size - 1
+        var t = tag;
+        if (t == "") {
+            t = newId
+            g(p) = t + "=" + g(p)
+        }
+        val code = 
+            if (id == null || (terminals contains id))
+                "if($" + t + "!=null){TokenLocation _tl = new TokenLocation(" + t + ");" +
+                "if(_start.startIndex()<=_tl.endIndex()){_end=_tl.endIndex();" +
+                "_endLine=_tl.endLine();_endColumn=_tl.endColumn();}}"
+            else
+                "if($" + t + ".r!=null && _start.startIndex()<=$" + t + ".r.endIndex())" +
+                "{_end=$" + t + ".r.endIndex();" +
+                "_endLine=$" + t + ".r.endLine();_endColumn=$" + t + ".r.endColumn();}"
+        if (embrace) {
+            g(p) = "(" + g(p) + "{" + code + "})"
+        } else {
+            g(p) = g(p) + code
+        }
+    }
+
+    def trKeyword(keyword: String): String = {
+        if (!(keyword startsWith "'"))
+            return keyword
+        if (keywords contains keyword)
+            return keywords(keyword)
+        val namebuf = new StringBuilder()
+        for (i <- 1 to keyword.length - 1) {
+            val ch = keyword charAt i
+            if (Character isJavaIdentifierPart ch)
+                namebuf append (if (i > 1) ch
+                                else Character toUpperCase ch)
+        }
+        var id = namebuf.toString
+        if (id != "" &&
+                !(Character isJavaIdentifierStart (id charAt 0)))
+            id = "X_" + id
+        if (id == "" || (rules contains id) || (terminals contains id))
+            id = newId
+        keywords(keyword) = id
+        terminals(id) = Nil
+        id
+    }
+
+    def simpleTerm(name: String, _id: String) {
+        val id = trKeyword(_id)        
+        if (name == null && (_id startsWith "'")) {
+            g += " "
+            val term =
+            if (firstInChain) {
+                val tag = newId
+                g += "(" + tag + "=" + id + "{"
+                if (multi != 0) g += "if(_start==null)"
+                g += "_start=new TokenLocation($" + tag + ");"
+                endHook(tag, false, null)
+                g += "})"
+            } else {
+                g += id
+                endHook("", true, null)
+            }
+            return
+        }
+        val tagName = if (name == null) uncapitalize(id); else name
+        val tmpName = if (multi > 0 || firstInChain) newId; else null
+        NamingService.validateASTAttribute(tagName) match {
+            case Some(errorMsg) => error(_id, errorMsg)
+            case _ =>
+        }
+        val np = NodeParam(tagName, id, "", multi > 0, tmpName, currentOption)
+        param find (_.name == tagName) match {
+            case Some(other) =>
+                if ((other.option zip currentOption) exists
+                        ((a: Tuple2[Int, Int]) => a._1 == a._2))
+                    error(_id, "multiple tokens named '" + tagName + "'")
+                else if (other.node != id)
+                    error(_id, "token type conflict: " + tagName +
+                          " was " + other.node + ", but redefined as " + id)
+                else
+                    np.varName = other.varName
+            case _ =>
+                np.varName = newId
+                param += np
+        }
+        if (tmpName ne null) {
+            g += "\n(" + np.varName + "=" + rules(id).antlrName + "{"
+            if (multi <= 0) {
+                if (multi == 0)
+                    g += "_start=" + tmpName + "=" + nodeValue(np)
+                else
+                    g += tmpName + "=" + nodeValue(np) +
+                        ";if(_start==null)_start=" + tmpName
+            } else if (!firstInChain) {
+                g += tmpName + ".add(" + nodeValue(np) + ")"
+            } else {
+                var iv = ""
+                if (terminals contains id) {
+                    iv = newId
+                    g += "CommonNode " + iv + "=" + nodeValue(np) + ";"
+                } else {
+                    iv = "$" + np.varName + ".r"
+                }
+                g += tmpName + ".add(" + iv + ");if(_start==null)_start=" + iv
+            }
+            g += ";"
+            endHook(np.varName, false, id)
+            g += "})"
+        } else {
+            g += " "
+            g += np.varName + "=" + rules(id).antlrName
+            endHook(np.varName, true, id)
+        }
+    }
+
+    def simple(name: String)(tree: List[Any]): List[Any] = tree match {
+        case (id: String) :: t =>
+            simpleTerm(name, id)
+            firstInChain = false
+            t
+        case ("(" :: alt) :: t =>
+            if (name ne null)
+                    error(name, "The following pattern cannot be given a name")
+            g += "("
+            currentOption = currentOption ++ List(0)
+            altList(matchName, alt)
+            currentOption = currentOption dropRight 1
+            g += ")"
+            firstInChain = false
+            t
+        case Nil => Nil
+    }
+
+    def matchMod(f: List[Any] => List[Any], tree: List[Any]): List[Any] = {
+        def after(v: List[Any], block: String): List[Any] = {
+            val oldMulti = multi
+            val oldFirst = firstInChain
+            val oldLast  = lastInChain
+            if (block != "?")
+                multi = 1
+            val result = f(v)
+            if (block != "+") {
+                firstInChain = oldFirst
+                lastInChain = lastInChain ++ oldLast
+                multi = if (oldMulti > 0) oldMulti; else -1
+            } else {
+                multi = oldMulti
+            }
+            g += block
+            result
+        }
+
+        tree match {
+            case "?" :: t => after(t, "?")
+            case "*" :: t => after(t, "*")
+            case "+" :: t => after(t, "+")
+            case t => f(t)
+        }
+    }
+
+    val simple_null = simple(null)_
+
+    def matchName(tree: List[Any]): List[Any]  = tree match {
+        case List("=", name: String) :: t => matchMod(simple(name), t)
+        case t => matchMod(simple_null, t)
+    }
+
+    def altList(doMatch: List[Any] => List[Any], tree: List[Any]) {
+        var first = true
+        var startingFirst = firstInChain
+        var lastList: List[() => Unit] = Nil
+        for ("NODE" :: matches <- tree) {
+            firstInChain = startingFirst
+            if (!first) {
+                g += "|"
+                currentOption = (currentOption dropRight 1) ++
+                    List(currentOption.last + 1)
+            }
+            lastInChain = Nil
+            var i = matches
+            while (!i.isEmpty) {
+                i = doMatch(i)
+            }
+            first = false
+            lastList = lastInChain ++ lastList
+        }
+        lastInChain = lastList
+    }
+
+    def join(i: Iterable[String]) =
+        if (i isEmpty)
+            ""
+        else
+            i reduceLeft (_ + ", " + _)
+
+    // stupid lowlevel replace...
+    def replaceAll(src: String, needle: String, replacement: String): String = {
+        val buf = new StringBuilder()
+        var end = 0
+        while (true) {
+            val pos = src.indexOf(needle, end)
+            if (pos < 0) {
+                buf append src.substring(end)
+                return buf toString
+            }
+            buf append src.substring(end, pos)
+            buf append replacement
+            end = pos + needle.length
+        }
+        ""
+    }
+
+    def nodeValue(p: NodeParam) = {
+        val name = "$" + p.varName
+        if (terminals contains p.node) {
+            val v = "(" + p.node + ")setTokenPos(new " + p.node + "(" +
+                join(for (t <- terminals(p.node)) yield
+                         replaceAll(t.code, "$_", name + ".getText()")) +
+                ")," + name + ")"
+                //".getText(),((CommonToken)" + name + ").getStartIndex()," +
+                //name + ".getLine()," + name + ".getCharPositionInLine())"
+            if (p.tmp ne null) v else name + "==null?null:" + v
+        } else {
+            name + ".r"
+        }
+    }
+
+    def caseParam(p: NodeParam) = {
+        TermParam(p.name, if (p.multi) "List[" + p.node + "]" else p.node,
+                  "", "var ")
+    }
+
+    def rule(tree: Any) = tree match {
+        case ":" :: (name: String) :: alt =>
+            if (firstRule == "")
+                firstRule = name
+            currentOption = List(0)
+            firstInChain = true
+            lastInChain = Nil
+            multi = 0
+            g += "\n" + rules(name).antlrName + " returns [" + name +
+                " r]\n@init {SourceLocation _start=null;int _end=-1;" +
+                "int _endLine=-1;int _endColumn=-1;"
+            val init_p = g.size
+            g += ""
+            g += "}\n@after {$r = new " + name + "("
+            val p = g.size
+            g += ""
+            g += ");$r.setLocation(_start,_end==-1?(_start==null?0:_start.endIndex()):_end," +
+                "_endLine==-1?(_start==null?0:_start.endLine()):_endLine," +
+                "_endColumn==-1?(_start==null?0:_start.endColumn()):_endColumn);}:\n"
+            altList(matchName, checkParam(alt, name, null))
+            g += ";\n"
+            val init = new StringBuilder()
+            def getParam(p: NodeParam): String = {
+                if (p.tmp == null)
+                    return nodeValue(p)
+                if (p.multi) {
+                    init append ("ArrayList " + p.tmp + "=new ArrayList();")
+                    "scalaList(" + p.tmp + ")"
+                } else {
+                    init append (p.node + " " + p.tmp + "=null;")
+                    p.tmp
+                }
+            }
+            g(p) = join(param map getParam)
+            g(init_p) = init.toString
+            for (action <- lastInChain)
+                action()
+            rules(name).hdr = "case class " + name
+            rules(name).param = param map caseParam
+            for (p <- param)
+                if (!(rules contains p.node))
+                    error(p.node, "Undefined rule " + p.node + " referenced")
+            param clear
+        case "option" :: (name: String) :: alt =>
+            if (firstRule == "")
+                firstRule = name
+            g += "\n" + rules(name).antlrName + " returns [" + name +
+                " r]:\n"
+            val values = checkParam(alt, name, null)
+            var first = true
+            for (t <- values) {
+                val option = t.toString
+                if (!first)
+                    g += " | "
+                if (!(rules contains option))
+                    error(t, "Undefined rule " + option + " referenced")
+                val r = rules(option)
+                if (!(r.extend contains name))
+                    r.extend += name
+                val id = newId
+                val np = NodeParam(id, option, id, false, null, Nil)
+                g += id + "=" + r.antlrName + "{$r=" + nodeValue(np) + ";}"
+                first = false
+            }
+            g += ";\n"
+        case _ => ()
+    }
+
+    def terminal(tree: List[Any]): List[Any] = tree match {
+        case h :: t => h match {
+            case s: String => s match {
+                case "~" =>
+                    g += " ~"
+                    terminal(t)
+                case _ =>
+                    g += " "
+                    g += s  // identifier
+                    t
+            }
+            case l: List[Any] => l match {
+                case "(" :: alt =>
+                    g += "("
+                    altList(termAction, alt)
+                    g += ")"
+                    t
+                case ".." :: (from: String) :: (to: String) :: Nil =>
+                    g += " " + from + ".." + to
+                    t
+                case _ => // Just to satisfy the compiler.
+                    throw new IllegalArgumentException()
+            }
+        }
+        case Nil => Nil
+    }
+
+    def termAction(tree: List[Any]): List[Any] = tree match {
+        case (s: String) :: t if s startsWith "{" =>
+            val r = matchMod(terminal, t)
+            g += s
+            r
+        case _ => matchMod(terminal, tree)
+    }
+
+    def checkParam(tree: List[Any], ruleName: String,
+                   to: ArrayBuffer[TermParam]): List[Any] = tree match {
+        case List("ARG" :: (name: String) :: (code: String) :: t) :: rest =>
+            val codeBlock = code.substring(1, code.length - 1)
+            to += TermParam(name, (t foldLeft "")(_+_), codeBlock, "")
+            checkParam(rest, ruleName, to)
+        case List("BODY", code: String) :: rest =>
+            rules(ruleName).body = "\n" + code.substring(1, code.length - 1)
+            checkParam(rest, ruleName, to)
+        case _ => tree
+    }
+
+    def termDef(isFragment: Boolean, ruleName: String, alt: List[Any], 
+            addHidden: Boolean) {
+        val termClass = new RuleClass(ruleName)
+        val termParam = new ArrayBuffer[TermParam]()
+        if (isFragment) {
+            g += "fragment "
+        } else {
+            termClass.extend += "TerminalNode"
+            rules(ruleName) = termClass
+        }
+        g += ruleName + ':'
+        altList(termAction, checkParam(alt, ruleName, termParam))
+        g += (if (addHidden) "{$channel = HIDDEN;}" else "") + ";\n"
+        if (!isFragment) {
+            if (!(termParam exists (_.name == "text"))) // add default text
+                termParam += TermParam("text", "String", "$_", "")
+            val l = termParam.toList
+            termClass.hdr = "case class " + ruleName
+            termClass.param = l
+            terminals(ruleName) = l
+        }
+    }
+
+    private def checkName(isTerminal: Boolean, typeName: String, name: String, 
+            tree: Any) =
+        NamingService.validateRuleName(name, typeName, isTerminal) match {
+            case Some(errorMsg) => error(tree, errorMsg)
+            case _ =>
+        }
+
+    def tryTerm(tree: Any) = tree match {
+        case "terminal" :: "hidden" :: (name: String) :: alt =>
+            checkName(true, "Terminal", name, tree)
+            termDef(false, name, alt, true)
+        case "terminal" :: (name: String) :: alt =>
+            checkName(true, "Terminal", name, tree)
+            termDef(false, name, alt, false)
+        case "fragment" :: (name: String) :: alt =>
+            checkName(true, "Fragment", name, tree)
+            termDef(true, name, alt, false)
+        case "option" :: (name: String) :: _ =>
+            checkName(false, "Option", name, tree) 
+            val r = new RuleClass(uncapitalize(name) + "_")
+            r.hdr = "trait " + name
+            rules(name) = r
+        case ":" :: (name: String) :: _ =>
+            checkName(false, "Rule", name, tree)
+            rules(name) = new RuleClass(uncapitalize(name) + "_")
+        case _ => ()
+    }
+
+    def grammargen(tree: Object) {
+        val terms = g
+        terminals("EOF") = Nil
+        tree match {
+            case ("grammar" :: nameParts) :: rules =>
+                nameParts.reverse match {
+                    case (name: String) :: "." :: pname =>
+                        grammarName = name
+                        grammarPackage = (pname.reverse foldLeft "")(_+_)
+                    case List(name: String) => grammarName = name
+                    case _ => error(tree, "no grammar name")
+                }
+                treeSrc append ("package " + grammarPackage + ";\n\n" +
+                                "import ee.cyber.simplicitas." +
+                                  "{CommonNode, CommonToken, TerminalNode}\n" +
+                                "import ee.cyber.simplicitas.parse." +
+                                  "{ErrorHandler}\n\n")
+                rules foreach tryTerm
+                g = new ArrayBuffer[String]()
+                g += grammarHeader
+                rules foreach rule
+        }
+        for (kw <- keywords.keys)
+            g += keywords(kw) + ": " + kw + ";\n"
+        g ++= terms
+        grammarClass
+    }
+
+    def getTreeSource = treeSrc.toString
+
+    def getGrammarSource = {
+        val buffer = new StringBuilder()
+        g foreach (buffer append _)
+        buffer.toString
+    }
+
+    def getGrammarName = grammarName
+
+    def grammarHeader =
+        "grammar " + grammarName + ";\noptions { " +
+        "superClass=ParserBase; backtrack=true; memoize=true; }" +
+        "\n@header {\npackage " + grammarPackage +
+        ";\n import java.util.ArrayList;\n" +
+        " import ee.cyber.simplicitas.CommonNode;\n" +
+        " import ee.cyber.simplicitas.parse.ParserBase;\n" +
+        " import ee.cyber.simplicitas.SourceLocation;\n" +
+        " import ee.cyber.simplicitas.parse.TokenLocation;\n}\n" +
+        "@lexer::header { package " + grammarPackage + """; }
+    @lexer::members {
+        private ee.cyber.simplicitas.parse.ErrorHandler handler = null;
+        public void reportError(RecognitionException ex) {
+            handler.reportError(ex);
+            super.reportError(ex);
+        }
+
+        public void emitErrorMessage(String s) {
+            handler.emitErrorMessage(s);
+        }
+
+        public void setErrorHandler(ee.cyber.simplicitas.parse.ErrorHandler handler) {
+            this.handler = handler;
+        }
+
+        public void displayRecognitionError(String[] tokenNames,
+                RecognitionException e) {
+            emitErrorMessage(getErrorMessage(e, tokenNames));
+        }
+    }
+    """
+
+    def grammarClass {
+        for (r <- rules.values) {
+            treeSrc append r.hdr
+            if (!r.param.isEmpty)
+                treeSrc append ("(" + join(
+                    r.param map (t => t.mod + t.name + ": " + t.vtype)) + ")")
+            treeSrc append " extends "
+            r.extend.toList match {
+                case Nil =>
+                    treeSrc append "CommonNode"
+                case h :: t =>
+                    treeSrc append h
+                    if (!t.isEmpty)
+                        treeSrc append (" with " + join(t))
+            }
+            treeSrc append " {"
+            if (r.hdr startsWith "case ")
+                treeSrc append ("\n  def childrenNames = Array(" +
+                    join(r.param map ('"' + _.name + '"')) + ");\n")
+            treeSrc append (r.body + "}\n")
+        }
+        treeSrc append ("\nobject " + grammarName +
+                        "Kind extends Enumeration {\n  type Kind = Value;\n")
+        for (t <- terminals.keys)
+            treeSrc append ("  val " + t + " = Value(" + grammarName +
+                            "Lexer." + t + ");\n")
+        treeSrc append
+           ("}\n\nclass " + grammarName + "Grammar extends " +
+                "ee.cyber.simplicitas.parse.GrammarBase[" +
+                firstRule + ", " + grammarName + "Kind.Kind] {\n" +
+            "  type Token = CommonToken[" + grammarName + "Kind.Kind]\n" +
+            "  def lexer(source: org.antlr.runtime.CharStream, errorHandler:" +
+                " ErrorHandler): org.antlr.runtime.TokenSource = {\n" +
+                "    val lex = new " + grammarName + "Lexer(source)\n" +
+                "    lex.setErrorHandler(errorHandler)\n" +
+                "    lex\n  }\n" +
+            "  def doParse(tokens: org.antlr.runtime.TokenStream," +
+                " errorHandler: ErrorHandler): " + firstRule + " = {\n" +
+                "    val parser = new " + grammarName + "Parser(tokens)\n" +
+                "    parser.errorHandler = errorHandler\n" +
+                "    parser." + rules(firstRule).antlrName + "()\n" +
+                "  }\n" +
+            "  def tokenType(token: Int): " + grammarName + "Kind.Kind =\n" +
+            "    " + grammarName + "Kind(token);\n" +
+            "  def tokenKind(token: Int): Int = token match {\n")
+        val reallyKeywords = new ArrayBuffer[String]()
+        for (kw <- keywords.keys) {
+            val what =
+                if (Character isJavaIdentifierPart (kw charAt 1)) {
+                    reallyKeywords += kw.substring(1, kw.length - 1)
+                    "keyword"
+                } else "operator"
+            treeSrc append ("    case " + grammarName + "Lexer." +
+                            keywords(kw) + " => " + what + ";\n")
+        }
+        treeSrc append "    case _ => normal;\n  }\n" +
+            "  val keywords: Seq[String] = Array(" +
+            join(for (kw <- reallyKeywords) yield '"' + kw + '"') +
+            ")\n}\n"
+    }
+}

@@ -1,0 +1,2 @@
+maven.repo.local=${user.home}/.m2/repository
+eclipse=${user.home}/eclipse
