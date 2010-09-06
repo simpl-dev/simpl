@@ -1,4 +1,4 @@
 maven.repo.local=${user.home}/.m2/repository
 eclipse=${user.home}/eclipse
 
-maven.repo.remote=http://keeks.cyber.ee/~margus/simpl-m2/repository/
+maven.repo.remote=http://repo1.maven.org/maven2
