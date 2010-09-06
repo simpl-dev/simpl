@@ -5,17 +5,13 @@
       version="1.0.0"
       provider-name="Simplicitas">
 
-   <description url="http://www.example.com/description">
-      [Enter Feature Description here.]
+   <description url="http://research.cyber.ee/simpl/">
+      Simpl prerequisites
    </description>
 
-   <copyright url="http://www.example.com/copyright">
-      [Enter Copyright Description here.]
-   </copyright>
-
-   <license url="http://www.example.com/license">
-      [Enter License Description here.]
-   </license>
+   <url>
+      <update url="http://research.cyber.ee/simpl/update-site/"/>
+   </url>
 
    <requires>
       <import plugin="lpg.runtime.java" version="2.0.17" match="greaterOrEqual"/>
