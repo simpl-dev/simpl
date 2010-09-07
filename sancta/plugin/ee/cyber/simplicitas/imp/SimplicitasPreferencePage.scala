@@ -5,7 +5,7 @@ package ee.cyber.simplicitas.imp;
 import org.eclipse.imp.language.ServiceFactory
 
 import org.eclipse.core.runtime.CoreException
-import org.eclipse.jface.preference.ColorFieldEditor
+import org.eclipse.jface.preference.ColorSelector
 import org.eclipse.jface.preference.BooleanFieldEditor
 import org.eclipse.jface.preference.FieldEditorPreferencePage
 import org.eclipse.jface.preference.IPreferenceStore
@@ -44,15 +44,17 @@ import org.w3c.dom.css.RGBColor
  * be accessed directly via the preference store.
  */
 class SimplicitasPreferencePage(pluginFactory: () => SimplicitasPlugin)
-	extends FieldEditorPreferencePage(FieldEditorPreferencePage.GRID) 
+	extends PreferencePage() 
  		with IWorkbenchPreferencePage {
      
     lazy val plugin = pluginFactory()     
 
 	setPreferenceStore(plugin.getPreferenceStore())
+	
+	System.err.println("Initializing preferencepage!!!")
 
 	var colorList: List = null
-	var colorFieldEditor: ColorFieldEditor = null
+	var colorFieldEditor: ColorSelector = null
 	var boldFieldEditor: Button = null
 	var italicFieldEditor: Button = null
 	val tokens = plugin.colorDefs
@@ -62,6 +64,12 @@ class SimplicitasPreferencePage(pluginFactory: () => SimplicitasPlugin)
 	* "field description", "field id", "previous color value",
 	* "previous style value" */
     var colorListModel = makeColorListModel 
+    
+    println("colorListModel:")
+    for (clm <- colorListModel) {
+    	println(clm.toList)
+    }
+    println("-------------")
    
     def makeColorListModel = {
 	    val ret = new Array[Array[String]](tokens.size)
@@ -121,10 +129,23 @@ class SimplicitasPreferencePage(pluginFactory: () => SimplicitasPlugin)
 		stylesComposite.setLayout(layout);
 		stylesComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
 
-		colorFieldEditor = new ColorFieldEditor("colorFieldEditor", "Color:",
-				stylesComposite)
-	  	addField(colorFieldEditor)
+		colorFieldEditor = new ColorSelector(stylesComposite) {
+			override def setColorValue(rgb: RGB) {
+				println("setColorValue("+ rgb +")")
+				super.setColorValue(rgb)
+			}
+			
+			override def updateColorImage() {
+				println("updateColorImage")
+				super.updateColorImage()
+			}
+		}
+//	  	addField(colorFieldEditor)
     
+		addField(new BooleanFieldEditor(
+				"FOOBAR", "&An example of a boolean preference",
+						stylesComposite));
+		
         boldFieldEditor = new Button(stylesComposite, SWT.CHECK)
         boldFieldEditor.setText("Bold")
 
@@ -145,7 +166,7 @@ class SimplicitasPreferencePage(pluginFactory: () => SimplicitasPlugin)
 		}
         boldFieldEditor.addSelectionListener(adapter)
         italicFieldEditor.addSelectionListener(adapter)
-		colorFieldEditor.getColorSelector.getButton.addSelectionListener(adapter)
+//		colorFieldEditor.getButton.addSelectionListener(adapter)
 	}
  	
 	/**
@@ -154,6 +175,7 @@ class SimplicitasPreferencePage(pluginFactory: () => SimplicitasPlugin)
 	override def performCancel() = {
 		for (clm <- colorListModel) {
 			if (clm(2) != null && clm(2).length > 0) {
+				println("asRGB(" + clm(2) + ")")
 				PreferenceConverter.setValue(getPreferenceStore(), clm(1), 
 					StringConverter.asRGB(clm(2)))
 			}
@@ -194,8 +216,8 @@ class SimplicitasPreferencePage(pluginFactory: () => SimplicitasPlugin)
  
 	def handleFieldEditorChange() {	
 		val key = colorListModel(colorList.getSelectionIndex())(1);
-		colorFieldEditor.getColorSelector().setColorValue(
-				PreferenceConverter.getColor(getPreferenceStore(), key))
+//		colorFieldEditor.setColorValue(
+//				PreferenceConverter.getColor(getPreferenceStore(), key))
         var style = SWT.NORMAL
         if (boldFieldEditor.getSelection)
             style |= SWT.BOLD
@@ -205,9 +227,10 @@ class SimplicitasPreferencePage(pluginFactory: () => SimplicitasPlugin)
                                     style)
 	}
  
-	def handleColorListSelection() {	
+	def handleColorListSelection() {
+		println("handleColorListSelection()")
 		val key = colorListModel(colorList.getSelectionIndex())(1);
-		colorFieldEditor.getColorSelector.setColorValue(
+		colorFieldEditor.setColorValue(
 				PreferenceConverter.getColor(getPreferenceStore(), key))
 		boldFieldEditor.setSelection(getStoredBoldFieldValue(key))
 		italicFieldEditor.setSelection(getStoredItalicFieldValue(key))
