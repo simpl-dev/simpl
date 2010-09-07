@@ -1,0 +1,7 @@
+Contents of the source folders:
+
+sancta -- main engine
+simpl-ide -- IDE for editing Simpl grammar files
+examples -- example projects using Simpl
+doc -- Simpl documentation sources
+update-site -- projects for creating Eclipse update site
