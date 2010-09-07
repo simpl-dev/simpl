@@ -302,7 +302,7 @@ status open
 
 \begin_layout Plain Layout
 
-http://keeks.cyber.ee/~margus/simpl-distrib/
+http://research.cyber.ee/simpl/update-site/
 \end_layout
 
 \end_inset
@@ -382,7 +382,7 @@ status open
 
 \begin_layout Plain Layout
 
-http://keeks.cyber.ee/~margus/simpl-distrib/
+http://research.cyber.ee/simpl/update-site/
 \end_layout
 
 \end_inset
@@ -3151,7 +3151,7 @@ colors
  list from the previous example.
 \end_layout
 
-\begin_layout Plain Layout
+\begin_layout Standard
 \begin_inset Box Frameless
 position "t"
 hor_pos "c"
@@ -3344,7 +3344,7 @@ null
 .
 \end_layout
 
-\begin_layout Plain Layout
+\begin_layout Standard
 \begin_inset Note Note
 status open
 
