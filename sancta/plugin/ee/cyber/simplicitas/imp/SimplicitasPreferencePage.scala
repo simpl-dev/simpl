@@ -2,11 +2,12 @@
 
 package ee.cyber.simplicitas.imp;
 
-import org.eclipse.jface.preference.PreferencePage
+import org.eclipse.jface.preference.{PreferencePage, ColorSelector}
 
 import org.eclipse.ui.{IWorkbench, IWorkbenchPreferencePage}
+import org.eclipse.swt.layout.{GridData, GridLayout}
 import org.eclipse.swt.SWT
-import org.eclipse.swt.widgets.{Composite, Control}
+import org.eclipse.swt.widgets.{Composite, Control, Label, Button, List}
 
 
 /**
@@ -26,11 +27,22 @@ class SimplicitasPreferencePage(pluginFactory: () => SimplicitasPlugin)
     var controls: Composite = null
     
     def init(workbench: IWorkbench) {
-        println("PreferencesPage.init()")
+        println("PreferencesPage.init(1)")
+        setPreferenceStore(plugin.getPreferenceStore)
     }
     
     def createContents(parent: Composite): Control = {
         controls = new Composite(parent, SWT.NULL)
+        controls.setLayout(new GridLayout())
+        
+        new Label(controls, SWT.LEFT).setText("Colors")
+        new List(controls,
+                SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER)
+        new Label(controls, SWT.LEFT).setText("Color:")
+        new ColorSelector(controls)
+        new Button(controls, SWT.CHECK).setText("Bold")
+        new Button(controls, SWT.CHECK).setText("Italic")
+        
         controls
     }
 }
