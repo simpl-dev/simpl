@@ -24,7 +24,13 @@ class SimplicitasPreferencePage(pluginFactory: () => SimplicitasPlugin)
 
     lazy val plugin = pluginFactory()
     
+    // Parent control for all the widgets.
     var controls: Composite = null
+    
+    var tokenKinds: List = null
+    var colorSelector: ColorSelector = null
+    var italic: Button = null
+    var bold: Button = null
     
     def init(workbench: IWorkbench) {
         println("PreferencesPage.init(1)")
@@ -33,16 +39,70 @@ class SimplicitasPreferencePage(pluginFactory: () => SimplicitasPlugin)
     
     def createContents(parent: Composite): Control = {
         controls = new Composite(parent, SWT.NULL)
-        controls.setLayout(new GridLayout())
+        controls.setLayout(new GridLayout());
         
-        new Label(controls, SWT.LEFT).setText("Colors")
-        new List(controls,
-                SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER)
-        new Label(controls, SWT.LEFT).setText("Color:")
-        new ColorSelector(controls)
-        new Button(controls, SWT.CHECK).setText("Bold")
-        new Button(controls, SWT.CHECK).setText("Italic")
+        {
+            val lbl = new Label(controls, SWT.LEFT)
+            lbl.setText("Colors")
+            val gd = new GridData(GridData.HORIZONTAL_ALIGN_FILL)
+            gd.horizontalSpan = 2
+            lbl.setLayoutData(gd)
+        }
+        
+        val editorComposite = new Composite(controls, SWT.NONE);
+        {
+            val layout = new GridLayout()
+            layout.numColumns = 2
+            layout.marginHeight = 0
+            layout.marginWidth = 0
+            editorComposite.setLayout(layout)
+            
+            val gd = new GridData(
+                    GridData.HORIZONTAL_ALIGN_FILL | GridData.FILL_VERTICAL)
+            gd.horizontalSpan = 2
+            editorComposite.setLayoutData(gd)
+        }
+        
+        tokenKinds = makeTokenKinds(editorComposite)
+        
+        val styleComposite = new Composite(editorComposite, SWT.NONE);
+        {
+            val layout = new GridLayout()
+            layout.marginHeight = 0
+            layout.marginWidth = 0
+            layout.numColumns = 2
+            styleComposite.setLayout(layout)
+
+            styleComposite.setLayoutData(new GridData(GridData.FILL_BOTH))
+        }
+
+        new Label(styleComposite, SWT.LEFT).setText("Color:")
+
+        colorSelector = new ColorSelector(styleComposite)
+
+        bold = new Button(styleComposite, SWT.CHECK)
+        bold.setText("Bold")
+
+        italic = new Button(styleComposite, SWT.CHECK)
+        italic.setText("Italic")
         
         controls
+    }
+    
+    def makeTokenKinds(parent: Composite) = {
+        val ret = new List(parent,
+                SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER)
+        
+        val gd = new GridData(
+                GridData.VERTICAL_ALIGN_BEGINNING |
+                GridData.FILL_HORIZONTAL)
+        gd.heightHint = convertHeightInCharsToPixels(8)
+        ret.setLayoutData(gd)
+
+        for ((key, (lbl, _, _)) <- plugin.colorDefs) {
+            ret.add(lbl)
+        }
+
+        ret
     }
 }
