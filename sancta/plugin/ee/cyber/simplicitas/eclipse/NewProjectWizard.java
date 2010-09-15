@@ -120,7 +120,7 @@ public class NewProjectWizard extends org.eclipse.jface.wizard.Wizard
 
         desc.setLocationURI(projectLocation);
         desc.setNatureIds(new String[] {
-                "ch.epfl.lamp.sdt.core.scalanature",
+                "org.scala-ide.sdt.core.scalanature",
                 "org.eclipse.pde.PluginNature",
                 "org.eclipse.jdt.core.javanature"});
         
@@ -143,7 +143,7 @@ public class NewProjectWizard extends org.eclipse.jface.wizard.Wizard
                                 "org.eclipse.pde.core.requiredPlugins")),
                 JavaCore.newContainerEntry(
                         Path.fromPortableString(
-                                "ch.epfl.lamp.sdt.launching.SCALA_CONTAINER")),
+                                "org.scala-ide.sdt.launching.SCALA_CONTAINER")),
                 JavaCore.newContainerEntry(
                         Path.fromPortableString(
                                 "org.eclipse.jdt.launching.JRE_CONTAINER")),

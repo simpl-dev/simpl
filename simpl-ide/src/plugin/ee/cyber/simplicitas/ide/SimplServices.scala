@@ -71,4 +71,7 @@ class SimplOccurrenceMarker
 class SimplPreferencePage
     extends SimplicitasPreferencePage(SimplPlugin.factory) {}
 
+class SimplPreferenceInitializer
+    extends SimplicitasPreferenceInitializer(SimplPlugin.factory) {}
+
 class SimplGenerateAction extends GenerateAction(SimplConfig.instance) {}

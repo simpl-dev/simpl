@@ -145,6 +145,7 @@
                 <fileset dir="${eclipse-plugins}" includes="**/*.jar"/>
             </classpath>
                     <include name="**/*.scala"/>
+                    <include name="**/*.java"/>
             <src>
                 <dirset dir="${basedir}/tool">
                 </dirset>
@@ -167,7 +168,9 @@
         <delete dir="${target}"/>
     </target>
 
-    <target name="build" depends="test,plugin-lib,wizard-lib,doc-jar,install-build"/>
+    <target name="build" depends="test,plugin-lib,wizard-lib,install-build"/>
+
+	<target name="dist" depends="build,doc-jar"/>
 
     <target name="rebuild" depends="clean,build"/>
 </project>
