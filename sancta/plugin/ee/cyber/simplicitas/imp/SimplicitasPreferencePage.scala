@@ -8,6 +8,7 @@ import org.eclipse.swt.layout.{GridData, GridLayout}
 import org.eclipse.swt.SWT
 import org.eclipse.swt.widgets.{Composite, Control, Label, Button, List}
 
+import org.eclipse.jface.util.{IPropertyChangeListener, PropertyChangeEvent}
 import org.eclipse.jface.preference.{PreferencePage, ColorSelector}
 import org.eclipse.jface.resource.StringConverter
 
@@ -15,10 +16,10 @@ import org.eclipse.jface.resource.StringConverter
 object SimplicitasPreferencePage {
     /** Stores settings for a given token kind. */
     class TkSettings(
-            key: Symbol,
-            description: String,
+            val key: Symbol,
+            val description: String,
             var color: String,
-            val style: Int)
+            var style: Int)
 }
 
 /**
@@ -46,7 +47,11 @@ class SimplicitasPreferencePage(pluginFactory: () => SimplicitasPlugin)
     val colorDefs = plugin.colorDefs
     
     /** Current settings. */
-    val tokenSettings = readTokenSettings
+    val tokenSettings =
+        (for ((key, (lbl, _, _)) <- colorDefs)
+            yield new SimplicitasPreferencePage.TkSettings(key, lbl, null, 0)
+        ).toArray
+
     
     println("PreferencesPage.construct()")
     
@@ -86,7 +91,23 @@ class SimplicitasPreferencePage(pluginFactory: () => SimplicitasPlugin)
         italic = new Button(styleComposite, SWT.CHECK)
         italic.setText("Italic")
 
+        val selectionAdapter = new SelectionAdapter() {
+            override def widgetSelected(e: SelectionEvent) {
+                colorChanged()
+            }
+        }
+        bold.addSelectionListener(selectionAdapter)
+        italic.addSelectionListener(selectionAdapter)
+        colorSelector.addListener(new IPropertyChangeListener() {
+            def propertyChange(event: PropertyChangeEvent) {
+                if (event.getProperty == ColorSelector.PROP_COLORCHANGE) {
+                    colorChanged()
+                }
+            }
+        })
+        
         // Select the first color.
+        readTokenSettings()
         tokenKinds.select(0)
         colorSelected(0)
 
@@ -94,11 +115,18 @@ class SimplicitasPreferencePage(pluginFactory: () => SimplicitasPlugin)
     }
 
     override def performOk() = super.performOk
-    
+
+    /** Re-read the settings from preference store and redisplay
+      * the controls. */
     override def performDefaults() {
+        readTokenSettings()
+        colorSelected(tokenKinds.getSelectionIndex)
+
         super.performDefaults
     }
 
+    /** User selected new token kind from the list.
+      * Update the dependent controls to display the new token settings. */
     def colorSelected(index: Int) {
         println("Selected item: " + index)
 
@@ -107,11 +135,25 @@ class SimplicitasPreferencePage(pluginFactory: () => SimplicitasPlugin)
         bold.setSelection(boldValue(tk.style))
         italic.setSelection(italicValue(tk.style))
     }
-    
+
+    /** User changed settings for a particular token kind. Store the
+      * new values in the array. */
+    def colorChanged() {
+        println("colorChanged()")
+
+        val tk = tokenSettings(tokenKinds.getSelectionIndex)
+        tk.color = StringConverter.asString(colorSelector.getColorValue)
+        tk.style = SWT.NORMAL
+        if (bold.getSelection)
+            tk.style |= SWT.BOLD
+        if (italic.getSelection)
+            tk.style |= SWT.ITALIC
+    }
+
     def makeTokenKinds(parent: Composite) = {
         val ret = new List(parent,
                 SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER)
-        
+
         val gd = new GridData(
                 GridData.VERTICAL_ALIGN_BEGINNING |
                 GridData.FILL_HORIZONTAL)
@@ -121,7 +163,7 @@ class SimplicitasPreferencePage(pluginFactory: () => SimplicitasPlugin)
         for ((key, (lbl, _, _)) <- plugin.colorDefs) {
             ret.add(lbl)
         }
-        
+
         ret.addSelectionListener(
                 new SelectionAdapter() {
                     override def widgetSelected(e: SelectionEvent) {
@@ -163,24 +205,21 @@ class SimplicitasPreferencePage(pluginFactory: () => SimplicitasPlugin)
         ret
     }
 
-    def readTokenSettings = {
+    /** Read values for color settings from the Eclipse preference store. */
+    def readTokenSettings() {
         val store = plugin.getPreferenceStore
 
-        val ret = for ((key, (lbl, _, _)) <- colorDefs) yield {
-            val color = store.getString(plugin.colorKey(key))
-            val style = store.getInt(plugin.styleKey(key))
-
-            new SimplicitasPreferencePage.TkSettings(key, lbl, color, style)
+        for (tk <- tokenSettings) {
+            tk.color = store.getString(plugin.colorKey(tk.key))
+            tk.style = store.getInt(plugin.styleKey(tk.key))
         }
-        
-        ret.toArray
     }
 
     def string2Rgb(color: String) = {
         println("string2Rgb("+ color +")")
         StringConverter.asRGB(color)
     }
-
+    
     def boldValue(style: Int) = (style | SWT.BOLD) == SWT.BOLD
 
     def italicValue(style: Int) = (style | SWT.ITALIC) == SWT.ITALIC
