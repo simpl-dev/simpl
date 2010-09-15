@@ -10,14 +10,12 @@ import org.eclipse.swt.SWT
 import org.eclipse.swt.widgets.{Composite, Control, Label, Button, List}
 
 object SimplicitasPreferencePage {
-    /** Stores settings for a given token kind. The previousColor
-      * and previousStyle members are used to remember previously set
-      * values. These are used for "revert" and "cancel" actions. */
+    /** Stores settings for a given token kind. */
     class TkSettings(
             key: Symbol,
             description: String,
-            var previousColor: String,
-            val previousStyle: Int)
+            var color: String,
+            val style: Int)
 }
 
 /**
@@ -44,11 +42,8 @@ class SimplicitasPreferencePage(pluginFactory: () => SimplicitasPlugin)
     
     val colorDefs = plugin.colorDefs
     
-    /** Previous values of colors. */
-    val tokenSettings =
-        for ((key, (lbl, _, _)) <- colorDefs)
-            yield new SimplicitasPreferencePage.TkSettings(key, lbl, null, 0)
-                
+    /** Current settings. */
+    val tokenSettings = readTokenSettings
     
     def init(workbench: IWorkbench) {
         println("PreferencesPage.init(1)")
@@ -111,7 +106,7 @@ class SimplicitasPreferencePage(pluginFactory: () => SimplicitasPlugin)
 
         ret
     }
-    
+
     def makeEditorComposite = {
         val ret = new Composite(controls, SWT.NONE);
 
@@ -142,7 +137,18 @@ class SimplicitasPreferencePage(pluginFactory: () => SimplicitasPlugin)
         
         ret
     }
-    
+
+    def readTokenSettings = {
+        val store = plugin.getPreferenceStore
+
+        for ((key, (lbl, _, _)) <- colorDefs) yield {
+            val color = store.getString(plugin.colorKey(key))
+            val style = store.getInt(plugin.styleKey(key))
+
+            new SimplicitasPreferencePage.TkSettings(key, lbl, color, style)
+        }
+    }
+
     def initTokenSettings() {
         for (tk <- tokenSettings) {
 //            tk.previousColor = xx

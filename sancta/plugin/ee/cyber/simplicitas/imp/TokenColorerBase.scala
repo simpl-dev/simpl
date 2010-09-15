@@ -63,10 +63,10 @@ class TokenColorerBase(pluginFactory: () => SimplicitasPlugin,
   }
   
   def getStyle(id: Symbol): Int = {
-    val styleKey = plugin.getPreferencesKeyForStyle(id.name)
+    val styleKey = plugin.styleKey(id)
+
     if (plugin.getPreferenceStore.contains(styleKey)) {
-      return plugin.getPreferenceStore.getInt(
-        plugin.getPreferencesKeyForStyle(id.name))
+      return plugin.getPreferenceStore.getInt(styleKey)
     } else if (plugin.colorDefs != null && plugin.colorDefs.contains(id)) {
        plugin.colorDefs(id)._3.intValue
     } else {
@@ -75,8 +75,10 @@ class TokenColorerBase(pluginFactory: () => SimplicitasPlugin,
   }
   
   def findColor(id: Symbol): String = {
-    if (plugin.getPreferenceStore().contains(id.name)) {
-      return plugin.getPreferenceStore().getString(id.name)
+    val colorKey = plugin.colorKey(id)
+
+    if (plugin.getPreferenceStore().contains(colorKey)) {
+      return plugin.getPreferenceStore().getString(colorKey)
     } else if (plugin.colorDefs.contains(id)) {
        return plugin.colorDefs(id)._2
     } else {

@@ -74,7 +74,11 @@ public abstract class SimplicitasPlugin extends PluginBase {
 
     public scala.collection.Map<Symbol, Tuple3<String, String, Number>> colorDefs;
     
-    public String getPreferencesKeyForStyle(String styleName) {
-        return styleName + "_style";
+    public String colorKey(Symbol key) {
+        return key.name + ".color";
+    }
+
+    public String styleKey(Symbol key) {
+        return key.name + ".style";
     }
 }
