@@ -72,4 +72,7 @@ class #{class}OccurrenceMarker
 class #{class}PreferencePage
     extends SimplicitasPreferencePage(#{class}Plugin.factory) {}
 
+class #{class}PreferenceInitializer
+    extends SimplicitasPreferenceInitializer(#{class}Plugin.factory) {}
+
 class #{class}GenerateAction extends GenerateAction(#{class}Config.instance) {}

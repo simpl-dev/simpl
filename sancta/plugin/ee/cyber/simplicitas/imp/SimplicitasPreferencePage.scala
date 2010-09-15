@@ -2,7 +2,9 @@
 
 package ee.cyber.simplicitas.imp;
 
+import org.eclipse.core.runtime.CoreException
 import org.eclipse.ui.{IWorkbench, IWorkbenchPreferencePage}
+import org.eclipse.ui.editors.text.TextFileDocumentProvider
 import org.eclipse.swt.events.{SelectionEvent, SelectionAdapter}
 import org.eclipse.swt.layout.{GridData, GridLayout}
 import org.eclipse.swt.SWT
@@ -53,17 +55,11 @@ class SimplicitasPreferencePage(pluginFactory: () => SimplicitasPlugin)
         ).toArray
 
     
-    println("PreferencesPage.construct()")
-    
     def init(workbench: IWorkbench) {
-        println("PreferencesPage.init()")
-
         setPreferenceStore(plugin.getPreferenceStore)
     }
     
     def createContents(parent: Composite): Control = {
-        println("PreferencesPage.createContents()")
-
         controls = new Composite(parent, SWT.NULL)
         controls.setLayout(new GridLayout());
         
@@ -114,12 +110,19 @@ class SimplicitasPreferencePage(pluginFactory: () => SimplicitasPlugin)
         controls
     }
 
-    override def performOk() = super.performOk
+    /** Save settings to preferences store and try to refresh open editor
+      * windows. */
+    override def performOk() = {
+        saveTokenSettings()
+        refreshEditors()
+
+        super.performOk()
+    }
 
     /** Re-read the settings from preference store and redisplay
       * the controls. */
     override def performDefaults() {
-        readTokenSettings()
+        readTokenDefaults()
         colorSelected(tokenKinds.getSelectionIndex)
 
         super.performDefaults
@@ -128,10 +131,8 @@ class SimplicitasPreferencePage(pluginFactory: () => SimplicitasPlugin)
     /** User selected new token kind from the list.
       * Update the dependent controls to display the new token settings. */
     def colorSelected(index: Int) {
-        println("Selected item: " + index)
-
         val tk = tokenSettings(index)
-        colorSelector.setColorValue(string2Rgb(tk.color))
+        colorSelector.setColorValue(StringConverter.asRGB(tk.color))
         bold.setSelection(boldValue(tk.style))
         italic.setSelection(italicValue(tk.style))
     }
@@ -139,8 +140,6 @@ class SimplicitasPreferencePage(pluginFactory: () => SimplicitasPlugin)
     /** User changed settings for a particular token kind. Store the
       * new values in the array. */
     def colorChanged() {
-        println("colorChanged()")
-
         val tk = tokenSettings(tokenKinds.getSelectionIndex)
         tk.color = StringConverter.asString(colorSelector.getColorValue)
         tk.style = SWT.NORMAL
@@ -148,6 +147,32 @@ class SimplicitasPreferencePage(pluginFactory: () => SimplicitasPlugin)
             tk.style |= SWT.BOLD
         if (italic.getSelection)
             tk.style |= SWT.ITALIC
+    }
+
+    /** Try to spread the knowledge that token color settings have changed. */
+    def refreshEditors() {
+        plugin.colorCache.clear
+
+        // TODO: find some better way to refresh the editors.
+        val editors = plugin.getWorkbench.getActiveWorkbenchWindow
+                .getActivePage.getEditors
+        val docProvider = new TextFileDocumentProvider()
+
+        editors.foreach(editor =>
+            try {
+                docProvider.connect(editor.getEditorInput)
+                val doc = docProvider.getDocument(editor.getEditorInput)
+                val wasDirty = editor.isDirty
+                if (doc != null) {
+                    doc.set(doc.get)
+                    if (!wasDirty) {
+                        editor.doSave(null)                 
+                    }
+                }
+            } catch {
+                case e: CoreException => e.printStackTrace()
+            }
+        )
     }
 
     def makeTokenKinds(parent: Composite) = {
@@ -215,12 +240,27 @@ class SimplicitasPreferencePage(pluginFactory: () => SimplicitasPlugin)
         }
     }
 
-    def string2Rgb(color: String) = {
-        println("string2Rgb("+ color +")")
-        StringConverter.asRGB(color)
-    }
-    
-    def boldValue(style: Int) = (style | SWT.BOLD) == SWT.BOLD
+    /** Read default values for color settings. */
+    def readTokenDefaults() {
+        val store = plugin.getPreferenceStore
 
-    def italicValue(style: Int) = (style | SWT.ITALIC) == SWT.ITALIC
+        for (tk <- tokenSettings) {
+            tk.color = store.getDefaultString(plugin.colorKey(tk.key))
+            tk.style = store.getDefaultInt(plugin.styleKey(tk.key))
+        }
+    }
+
+    /** Save values to Eclipse preference store. */
+    def saveTokenSettings() {
+        val store = plugin.getPreferenceStore
+        
+        for (tk <- tokenSettings) {
+            store.setValue(plugin.colorKey(tk.key), tk.color)
+            store.setValue(plugin.styleKey(tk.key), tk.style.intValue)
+        }
+    }
+
+    def boldValue(style: Int) = (style & SWT.BOLD) == SWT.BOLD
+
+    def italicValue(style: Int) = (style & SWT.ITALIC) == SWT.ITALIC
 }
