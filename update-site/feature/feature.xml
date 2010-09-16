@@ -2,7 +2,7 @@
 <feature
       id="simplicitas_feature"
       label="Simplicitas"
-      version="1.0.0">
+      version="1.0.1">
 
    <description url="http://research.cyber.ee/simpl/">
       Simpl plugins
