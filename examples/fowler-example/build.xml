@@ -1,11 +1,13 @@
 <!-- ex: se sts=4 sw=4 expandtab: -->
 <project name="fowler-statemachine" default="plugin" basedir=".">
     <property file="${basedir}/ant.properties"/>
-    <import file="${maven.repo.local}/simplicitas/mvn-ant/1.0/mvn-ant-1.0.xml"/>
+    <property name="simpl.version" value="1.0.1"/>
+
+    <import file="${maven.repo.local}/simplicitas/mvn-ant/${simpl.version}/mvn-ant-${simpl.version}.xml"/>
 
     <target name="tool-deps" depends="copy-mvn-ant,init-dep,require-antlr,require-scala">
         <antcall target="require">
-            <param name="artifact" value="simplicitas-tool/1.0"/>
+            <param name="artifact" value="simplicitas-tool/${simpl.version}"/>
         </antcall>
         <loadfile srcfile="${target}/deps" property="tool-deps"/>
         <path id="tool-deps" path="${tool-deps}"/>
@@ -13,7 +15,7 @@
 
     <target name="plugin-deps" depends="tool-deps">
         <antcall target="require">
-            <param name="artifact" value="simplicitas-plugin/1.0"/>
+            <param name="artifact" value="simplicitas-plugin/${simpl.version}"/>
         </antcall>
         <loadfile srcfile="${target}/deps" property="plugin-deps"/>
         <path id="plugin-deps" path="${plugin-deps}"/>

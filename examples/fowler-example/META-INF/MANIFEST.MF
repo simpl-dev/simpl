@@ -14,7 +14,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.imp.preferences,
  simplicitas-plugin,
  simplicitas-tool,
- org.scala-ide.scala.library;bundle-version="2.8.0"
+ org.scala-ide.scala.library
 Bundle-Activator: ee.cyber.simplicitas.fowlerdsl.FowlerPlugin
 Eclipse-LazyStart: true
 Eclipse-RegisterBuddy: simplicitas-plugin,simplicitas-tool

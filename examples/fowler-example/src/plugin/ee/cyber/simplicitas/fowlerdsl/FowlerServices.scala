@@ -71,4 +71,7 @@ class FowlerOccurrenceMarker
 class FowlerPreferencePage
     extends SimplicitasPreferencePage(FowlerPlugin.factory) {}
 
+class FowlerPreferenceInitializer
+    extends SimplicitasPreferenceInitializer(FowlerPlugin.factory) {}
+
 class FowlerGenerateAction extends GenerateAction(FowlerConfig.instance) {}
