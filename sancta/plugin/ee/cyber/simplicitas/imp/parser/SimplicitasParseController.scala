@@ -60,8 +60,6 @@ class SimplicitasParseController(language: Language,
   def getProject() = project
   
   def getTokenIterator(region: IRegion): Iterator[GenericToken] = {
-    println("getTokenIterator: " + region.getOffset + ":" + region.getLength)
-    println("size: " + tokens.size)
     val m = tokens.headMap(region.getOffset() + 1)
     if (m.isEmpty()) {
         println("getTokenIterator: no tokens available")

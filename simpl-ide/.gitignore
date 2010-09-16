@@ -1,2 +1,3 @@
 target
 ant.properties
+.scala_dependencies
