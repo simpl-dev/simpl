@@ -3,6 +3,9 @@
     <property file="${basedir}/ant.properties"/>
     <property name="simpl.version" value="1.0.1"/>
 
+    <property name="target" value="${basedir}/target"/>
+    <property name="tool-jar" value="${target}/spamdetector-rule-tool.jar"/>
+    
     <available file="${maven.repo.local}/simplicitas/mvn-ant/${simpl.version}/mvn-ant-${simpl.version}.xml"
         property="include_file"
         value="file://${maven.repo.local}/simplicitas/mvn-ant/${simpl.version}/mvn-ant-${simpl.version}.xml"/>
@@ -29,9 +32,6 @@
     </target>
 
     <target name="tool" depends="tool-deps">
-        <property name="target" value="${basedir}/target"/>
-        <property name="tool-jar" value="${target}/#{name}-tool.jar"/>
-
         <!-- generate grammar -->
         <taskdef name="grammar" classpathref="tool-deps"
                  classname="ee.cyber.simplicitas.parse.GrammarTask"/>
@@ -53,7 +53,7 @@
         </jar>
     </target>
 
-    <target name="tool-run" depends="tool">
+    <target name="tool-run" depends="tool-deps">
         <!-- test run -->
         <java classname="#{package}.#{class}Main" fork="true">
             <classpath>
