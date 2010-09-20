@@ -575,7 +575,7 @@ class GrammarGen(posMap: Any => List[Int]) {
                             keywords(kw) + " => " + what + ";\n")
         }
         treeSrc append "    case _ => normal;\n  }\n" +
-            "  val keywords: Seq[String] = Array(" +
+            "  val keywords: Seq[String] = Array[String](" +
             join(for (kw <- reallyKeywords) yield '"' + kw + '"') +
             ")\n}\n"
     }
