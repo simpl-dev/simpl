@@ -93,26 +93,16 @@ trait CommonNode extends Product with SourceLocation {
     /** Recursively converts this node to java.util.Map.
       * The result will contain only objects reachable through the
       * <code>children</code> property (additional properties will not be
-      * included in the map).
-      * If the parameter <code>typeAttr</code> is present, then the type
-      * of the object will be included as additional attribute in the map.
-      * The name of the attribute is the value of <code>typeAttr</code>
-      * parameter. If the node already contains child with this name,
-      * the child's value will be overriden. This parameter applies recursively
-      * to all the children.
-      */ 
-    def toJavaMap(typeAttr: String = null): java.util.Map[String, Object] = {
+      * included in the map). */ 
+    def toJavaMap(): java.util.Map[String, Object] = {
         import java.util.{Map, Set, AbstractMap, HashMap, HashSet}
         type Entry = Map.Entry[String, Object]
 
         var index = 0
         val byName = new HashMap[String, Entry]()
         for (name <- childrenNames) {
-            byName.put(name, new MapEntry(name, index, typeAttr))
+            byName.put(name, new MapEntry(name, index))
             index += 1
-        }
-        if (typeAttr ne null) {
-            byName.put(typeAttr, new TypeEntry(typeAttr, this))
         }
         val entries = new HashSet[Entry](byName.values)
         new AbstractMap[String, Object]() {
@@ -131,7 +121,7 @@ trait CommonNode extends Product with SourceLocation {
             }
 
             override def put(key: String, value: Object): Object = {
-                val entry = new MapEntry(key, 0, typeAttr) {
+                val entry = new MapEntry(key, 0) {
                     override def getValue() = value
                 }
                 entries.add(entry)
@@ -144,7 +134,7 @@ trait CommonNode extends Product with SourceLocation {
         }
     }
 
-    class MapEntry(name: String, index: Int, typeAttr: String)
+    class MapEntry(name: String, index: Int)
             extends java.util.Map.Entry[String, Object] {
         private var old: AnyRef = null
         private var value: Object = null
@@ -153,7 +143,7 @@ trait CommonNode extends Product with SourceLocation {
             name
 
         def forJava(v: AnyRef): Object = v match {
-            case node: CommonNode => node.toJavaMap(typeAttr)
+            case node: CommonNode => node.toJavaMap
             case list: List[AnyRef] =>
                 java.util.Arrays.asList((list.toArray map forJava):_*)
             case other => other
@@ -181,23 +171,6 @@ trait CommonNode extends Product with SourceLocation {
             case entry: MapEntry =>
                 name == entry.getKey
             case _ => false
-        }
-    }
-
-    class TypeEntry(key: String, obj: Object)
-            extends java.util.Map.Entry[String, Object] {
-        def getKey = key
-        def getValue = baseName(obj.getClass.getName)
-        override def hashCode = getValue.hashCode
-        def setValue(v: Object) =
-            throw new UnsupportedOperationException
-
-        def baseName(s: String) = {
-            val idx = s.lastIndexOf('.')
-            if (idx == -1)
-                s
-            else
-                s.substring(idx + 1)
         }
     }
 }
