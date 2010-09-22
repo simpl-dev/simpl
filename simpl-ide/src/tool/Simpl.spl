@@ -1,12 +1,17 @@
 grammar ee.cyber.simplicitas.ide.Simpl;
 
+options (backtrack=true; memoize=true;)
+
 /** This is the main entry point for Simpl grammar. Grammar definition
     consists of header and list of rule definitions. */
-GrammarDef: header=PackageDef ';' rules=RuleDef+;
+GrammarDef: header=PackageDef ';' opts=OptionList? rules=RuleDef+;
 
 /** Standard header for grammar, indicates package name where the
     generated code will reside. */
 PackageDef: 'grammar' DottedId;
+
+/** This directive can be used to pass grammar-level options to ANTLR. */
+OptionList: "options" "(" (name=Id "=" value=Id ";")* ")";
 
 /** Java-style identifier in the style of foo.bar.baz */
 DottedId {
