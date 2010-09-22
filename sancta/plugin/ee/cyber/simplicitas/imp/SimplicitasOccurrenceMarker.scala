@@ -29,15 +29,15 @@ class SimplicitasOccurrenceMarker(config: APluginConfig)
                        node: CommonNode): Seq[CommonNode] = {
     println("get occurrences: " + node)
 
-    val target = config referenceTarget node
+    var target = config referenceTarget node
     if (target eq null)
-      return Nil
+      target = node
 
     val tree = ctlr.getCurrentAst.asInstanceOf[CommonNode]
     val ret = new ArrayBuffer[CommonNode]()
 
     def addRef(n: CommonNode) {
-      if (target eq (config referenceTarget n)) {
+      if ((target eq n) || (target eq (config referenceTarget n))) {
         ret += n
       }
     }

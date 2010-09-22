@@ -53,7 +53,7 @@ class SimplConfig extends APluginConfig() {
       node match {
         case id: Id =>
           id.parent match {
-            case ref: Ref => ref.ref
+            case ref: Ref => ref.ref.name
             case _ => null
           }
         case _ => null
