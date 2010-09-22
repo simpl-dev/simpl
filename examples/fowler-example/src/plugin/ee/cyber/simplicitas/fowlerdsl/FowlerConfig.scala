@@ -56,9 +56,9 @@ class FowlerConfig extends APluginConfig {
       id.parent match {
         case ref: Reference =>
           ref.ref.name
-          case item: NamedItem if id == item.name =>
-            id // named items name references to itself
-          case _ => null
+        case item: NamedItem if id == item.name =>
+          id // named items name references to itself
+        case _ => null
       }
     case ref: Reference => // not sure whether this is required
       ref.ref.name
