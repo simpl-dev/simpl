@@ -2526,6 +2526,41 @@ CommonToken
  Also, see the generated AST classes.
 \end_layout
 
+\begin_layout Subsection
+ANTLR Grammar Options
+\end_layout
+
+\begin_layout Standard
+It is possible to pass grammar-level options to ANTLR.
+ This can be done by including 
+\emph on
+options
+\emph default
+ block right after the grammar line.
+ Option syntax is just like in ANTLR, except that instead of curly braces,
+ normal parentheses are used.
+ For example:
+\end_layout
+
+\begin_layout LyX-Code
+grammar foo.Bar;
+\end_layout
+
+\begin_layout LyX-Code
+options (backtrack=true; memoize=true;)
+\end_layout
+
+\begin_layout LyX-Code
+\SpecialChar \ldots{}
+
+\end_layout
+
+\begin_layout LyX-Code
+
+\emph on
+(rest of the grammar)
+\end_layout
+
 \begin_layout Section
 Creating Language Runtime
 \end_layout
