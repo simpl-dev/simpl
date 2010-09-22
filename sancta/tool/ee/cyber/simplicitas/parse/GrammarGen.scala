@@ -35,6 +35,7 @@ class GrammarGen(posMap: Any => List[Int]) {
     private var lastInChain: List[() => Unit] = Nil
     private var idcounter = 0
     private var firstRule = ""
+    private var grammarOptions = ""
 
     def newId = {
         idcounter += 1
@@ -453,7 +454,7 @@ class GrammarGen(posMap: Any => List[Int]) {
         val terms = g
         terminals("EOF") = Nil
         tree match {
-            case ("grammar" :: nameParts) :: rules =>
+            case ("grammar" :: nameParts) :: rest =>
                 nameParts.reverse match {
                     case (name: String) :: "." :: pname =>
                         grammarName = name
@@ -466,6 +467,8 @@ class GrammarGen(posMap: Any => List[Int]) {
                                   "{CommonNode, CommonToken, TerminalNode}\n" +
                                 "import ee.cyber.simplicitas.parse." +
                                   "{ErrorHandler}\n\n")
+                val rules = matchOptions(rest)
+
                 rules foreach tryTerm
                 g = new ArrayBuffer[String]()
                 g += grammarHeader
@@ -475,6 +478,15 @@ class GrammarGen(posMap: Any => List[Int]) {
             g += keywords(kw) + ": " + kw + ";\n"
         g ++= terms
         grammarClass
+    }
+
+    def matchOptions(tree: Any) = tree match {
+        case ("options" :: opts) :: rules =>
+            for (List(name, value) <- opts) {
+                grammarOptions += " " + name + "=" + value + ";"
+            }
+            rules
+        case rules: List[Any] => rules
     }
 
     def getTreeSource = treeSrc.toString
@@ -489,7 +501,7 @@ class GrammarGen(posMap: Any => List[Int]) {
 
     def grammarHeader =
         "grammar " + grammarName + ";\noptions { " +
-        "superClass=ParserBase; backtrack=true; memoize=true; }" +
+        "superClass=ParserBase; " + grammarOptions + " }" +
         "\n@header {\npackage " + grammarPackage +
         ";\n import java.util.ArrayList;\n" +
         " import ee.cyber.simplicitas.CommonNode;\n" +

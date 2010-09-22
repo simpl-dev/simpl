@@ -1,5 +1,7 @@
 grammar ee.cyber.simplicitas.test.FowlerStates;
 
+options (backtrack=false;)
+
 Program: Definition+;
 
 option Definition{val testing = 0}: Import | Machine | ExternalMachine | STRING;

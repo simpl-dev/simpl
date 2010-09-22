@@ -9,7 +9,6 @@ options {
 
 tokens {
     NODE;
-    NAME;
     ARG;
     BODY;
 }
@@ -22,8 +21,12 @@ tokens {
     package ee.cyber.simplicitas.parse;
 }
 
-grammarDef  : headerDef ';'! ruleDef+ EOF!;
-headerDef   : 'grammar'^ dottedId;
+grammarDef  : headerDef ruleDef+ EOF!;
+headerDef   : packageDef optionDef?;
+packageDef  : 'grammar'^ dottedId ';'!;
+optionDef   : 'options'^ '('! optionList ')'!;
+optionList  : option*;
+option      : ID '=' ID ';' -> ^(ID ID);
 dottedId    : ID ('.' ID)*;
 
 ruleDef:
