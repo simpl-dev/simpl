@@ -2,8 +2,13 @@
 <?eclipse version="3.4"?>
 <plugin>
    <extension point="org.eclipse.imp.runtime.languageDescription">
-      <language extensions="spl" description="Simpl IDE"
-                natureID="ee.cyber.simplicitas.ide" language="simpl_ide"/>
+      <language
+            description="Simpl IDE"
+            extensions="spl"
+            icon="icons/simpl.png"
+            language="simpl_ide"
+            natureID="ee.cyber.simplicitas.ide"
+            url="http://research.cyber.ee/simpl/"/>
    </extension>
    <extension id="simpl_ide.parserWrapper"
               name="Simpl IDE Parser Wrapper"

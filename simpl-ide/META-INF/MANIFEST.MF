@@ -23,5 +23,4 @@ Export-Package: ee.cyber.simplicitas.ide;
    org.eclipse.jface.resource,
    org.eclipse.imp.runtime,
    org.osgi.framework"
-Bundle-ClassPath: src/plugin/,
- .
+Bundle-ClassPath: src/plugin/,.
