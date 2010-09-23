@@ -8,8 +8,6 @@ import java.io.File
 
 object SimplMain extends MainBase {
   def main(argv: Array[String]) {
-    println("argv:" + argv)
-    println("argv.toString:" + argv.toString)
     parseOptions(argv)
     
     val grammar = new SimplGrammar()

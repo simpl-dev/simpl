@@ -22,11 +22,6 @@ class SimplCtx(val grammar: SimplGrammar) {
   
   def makeSymbolTable() {
     tree.rules foreach makeSymbolTable
-    
-    println("NonTerms: " + nonTerms)
-    println("Options: " + options)
-    println("Terms: " + terminals)
-    println("Frags: " + fragments)
   }
   
   def makeSymbolTable(r: RuleDef) {
