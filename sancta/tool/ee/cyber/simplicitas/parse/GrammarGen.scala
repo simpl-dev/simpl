@@ -61,7 +61,8 @@ class GrammarGen(posMap: Any => List[Int]) {
         }
         val code = 
             if (id == null || (terminals contains id))
-                "if($" + t + "!=null){TokenLocation _tl = new TokenLocation(" + t + ");" +
+                "if($" + t + "!=null){if (_start == null) _start = new TokenLocation(" + t + ");" +
+                "TokenLocation _tl = new TokenLocation(" + t + ");" +
                 "if(_start.startIndex()<=_tl.endIndex()){_end=_tl.endIndex();" +
                 "_endLine=_tl.endLine();_endColumn=_tl.endColumn();}}"
             else
@@ -106,7 +107,8 @@ class GrammarGen(posMap: Any => List[Int]) {
             if (firstInChain) {
                 val tag = newId
                 g += "(" + tag + "=" + id + "{"
-                if (multi != 0) g += "if(_start==null)"
+                if (multi != 0)
+                    g += "if(_start==null)"
                 g += "_start=new TokenLocation($" + tag + ");"
                 endHook(tag, false, null)
                 g += "})"
