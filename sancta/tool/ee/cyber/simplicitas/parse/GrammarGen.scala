@@ -43,13 +43,17 @@ class GrammarGen(posMap: Any => List[Int]) {
     }
 
     def uncapitalize(s: String): String =
-        if (s == "") ""
-        else (Character toLowerCase (s charAt 0)) + (s substring 1)
+        if (s == "")
+            ""
+        else
+            (Character toLowerCase (s charAt 0)) + (s substring 1)
 
     def error(where: Any, what: String) =
         throw new GrammarException(posMap(where) match {
-                case List(line, col) => line + ":" + col + ": " + what
-                case _ => what
+                case List(line, col) =>
+                    line + ":" + col + ": " + what
+                case _ =>
+                    what
             })
 
     def endHook(tag: String, embrace: Boolean, id: String) = {
@@ -120,6 +124,7 @@ class GrammarGen(posMap: Any => List[Int]) {
         }
         val tagName = if (name == null) uncapitalize(id); else name
         val tmpName = if (multi > 0 || firstInChain) newId; else null
+
         NamingService.validateASTAttribute(tagName) match {
             case Some(errorMsg) => error(_id, errorMsg)
             case _ =>
@@ -176,7 +181,7 @@ class GrammarGen(posMap: Any => List[Int]) {
             t
         case ("(" :: alt) :: t =>
             if (name ne null)
-                    error(name, "The following pattern cannot be given a name")
+                error(name, "The following pattern cannot be given a name")
             g += "("
             currentOption = currentOption ++ List(0)
             altList(matchName, alt)
@@ -184,7 +189,8 @@ class GrammarGen(posMap: Any => List[Int]) {
             g += ")"
             firstInChain = false
             t
-        case Nil => Nil
+        case Nil =>
+            Nil
     }
 
     def matchMod(f: List[Any] => List[Any], tree: List[Any]): List[Any] = {
@@ -217,8 +223,10 @@ class GrammarGen(posMap: Any => List[Int]) {
     val simple_null = simple(null)_
 
     def matchName(tree: List[Any]): List[Any]  = tree match {
-        case List("=", name: String) :: t => matchMod(simple(name), t)
-        case t => matchMod(simple_null, t)
+        case List("=", name: String) :: t => 
+            matchMod(simple(name), t)
+        case t => 
+            matchMod(simple_null, t)
     }
 
     def altList(doMatch: List[Any] => List[Any], tree: List[Any]) {
@@ -253,6 +261,7 @@ class GrammarGen(posMap: Any => List[Int]) {
     def replaceAll(src: String, needle: String, replacement: String): String = {
         val buf = new StringBuilder()
         var end = 0
+ 
         while (true) {
             val pos = src.indexOf(needle, end)
             if (pos < 0) {
@@ -268,6 +277,7 @@ class GrammarGen(posMap: Any => List[Int]) {
 
     def nodeValue(p: NodeParam) = {
         val name = "$" + p.varName
+
         if (terminals contains p.node) {
             val v = "(" + p.node + ")setTokenPos(new " + p.node + "(" +
                 join(for (t <- terminals(p.node)) yield
@@ -275,7 +285,11 @@ class GrammarGen(posMap: Any => List[Int]) {
                 ")," + name + ")"
                 //".getText(),((CommonToken)" + name + ").getStartIndex()," +
                 //name + ".getLine()," + name + ".getCharPositionInLine())"
-            if (p.tmp ne null) v else name + "==null?null:" + v
+
+            if (p.tmp ne null)
+                v
+            else 
+                name + "==null?null:" + v
         } else {
             name + ".r"
         }
@@ -325,17 +339,21 @@ class GrammarGen(posMap: Any => List[Int]) {
                 action()
             rules(name).hdr = "case class " + name
             rules(name).param = param map caseParam
-            for (p <- param)
-                if (!(rules contains p.node))
+            for (p <- param) {
+                if (!(rules contains p.node)) {
                     error(p.node, "Undefined rule " + p.node + " referenced")
+                }
+            }
             param clear
         case "option" :: (name: String) :: alt =>
             if (firstRule == "")
                 firstRule = name
             g += "\n" + rules(name).antlrName + " returns [" + name +
                 " r]:\n"
+
             val values = checkParam(alt, name, null)
             var first = true
+
             for (t <- values) {
                 val option = t.toString
                 if (!first)
@@ -351,7 +369,8 @@ class GrammarGen(posMap: Any => List[Int]) {
                 first = false
             }
             g += ";\n"
-        case _ => ()
+        case _ =>
+            ()
     }
 
     def terminal(tree: List[Any]): List[Any] = tree match {
@@ -386,7 +405,8 @@ class GrammarGen(posMap: Any => List[Int]) {
             val r = matchMod(terminal, t)
             g += s
             r
-        case _ => matchMod(terminal, tree)
+        case _ =>
+            matchMod(terminal, tree)
     }
 
     def checkParam(tree: List[Any], ruleName: String,
@@ -398,13 +418,15 @@ class GrammarGen(posMap: Any => List[Int]) {
         case List("BODY", code: String) :: rest =>
             rules(ruleName).body = "\n" + code.substring(1, code.length - 1)
             checkParam(rest, ruleName, to)
-        case _ => tree
+        case _ =>
+            tree
     }
 
     def termDef(isFragment: Boolean, ruleName: String, alt: List[Any], 
             addHidden: Boolean) {
         val termClass = new RuleClass(ruleName)
         val termParam = new ArrayBuffer[TermParam]()
+
         if (isFragment) {
             g += "fragment "
         } else {
@@ -427,7 +449,8 @@ class GrammarGen(posMap: Any => List[Int]) {
     private def checkName(isTerminal: Boolean, typeName: String, name: String, 
             tree: Any) =
         NamingService.validateRuleName(name, typeName, isTerminal) match {
-            case Some(errorMsg) => error(tree, errorMsg)
+            case Some(errorMsg) => 
+                error(tree, errorMsg)
             case _ =>
         }
 
@@ -449,7 +472,8 @@ class GrammarGen(posMap: Any => List[Int]) {
         case ":" :: (name: String) :: _ =>
             checkName(false, "Rule", name, tree)
             rules(name) = new RuleClass(uncapitalize(name) + "_")
-        case _ => ()
+        case _ => 
+            ()
     }
 
     def grammargen(tree: Object) {
@@ -461,8 +485,10 @@ class GrammarGen(posMap: Any => List[Int]) {
                     case (name: String) :: "." :: pname =>
                         grammarName = name
                         grammarPackage = (pname.reverse foldLeft "")(_+_)
-                    case List(name: String) => grammarName = name
-                    case _ => error(tree, "no grammar name")
+                    case List(name: String) => 
+                        grammarName = name
+                    case _ => 
+                        error(tree, "no grammar name")
                 }
                 treeSrc append ("package " + grammarPackage + ";\n\n" +
                                 "import ee.cyber.simplicitas." +
@@ -488,7 +514,8 @@ class GrammarGen(posMap: Any => List[Int]) {
                 grammarOptions += " " + name + "=" + value + ";"
             }
             rules
-        case rules: List[Any] => rules
+        case rules: List[Any] => 
+            rules
     }
 
     def getTreeSource = treeSrc.toString
@@ -584,7 +611,9 @@ class GrammarGen(posMap: Any => List[Int]) {
                 if (Character isJavaIdentifierPart (kw charAt 1)) {
                     reallyKeywords += kw.substring(1, kw.length - 1)
                     "keyword"
-                } else "operator"
+                } else {
+                    "operator"
+                }
             treeSrc append ("    case " + grammarName + "Lexer." +
                             keywords(kw) + " => " + what + ";\n")
         }
