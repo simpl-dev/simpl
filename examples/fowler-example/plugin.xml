@@ -61,7 +61,7 @@
    <extension
          point="org.eclipse.core.runtime.preferences">
        <initializer
-            class="ee.cyber.simplicitas.ide.SimplPreferenceInitializer">
+            class="ee.cyber.simplicitas.fowlerdsl.FowlerPreferenceInitializer">
        </initializer>
    </extension>
    <extension

@@ -73,6 +73,7 @@
              manifest="${basedir}/META-INF/MANIFEST.MF">
             <!-- This comes from tool.jar fileset dir="${basedir}/src/tool" includes="*.stg"/-->
 			<fileset dir="${basedir}" includes="plugin.xml"/>
+			<fileset dir="${basedir}" includes="icons/*"/>
 			<!-- If the tool.jar starts to contain other libraries, then we should include
 				 only tool class files here. -->
             <zipfileset src="${tool-jar}"/>

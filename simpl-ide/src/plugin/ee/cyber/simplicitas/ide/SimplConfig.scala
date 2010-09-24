@@ -61,7 +61,7 @@ class SimplConfig extends APluginConfig() {
       case d: RuleDef => d.name.text
       case _ => null
     }
-    
+
     override def treeImage(node: CommonNode) = node match {
       case t: TerminalDef => Images.terminal
       case nt: NonTerminalDef => Images.nonTerminal
