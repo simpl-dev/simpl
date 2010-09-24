@@ -3,7 +3,9 @@
 package ee.cyber.simplicitas.imp
 
 import ee.cyber.simplicitas.{GenericToken, CommonNode}
+
 import org.eclipse.jface.text.TextAttribute
+import org.eclipse.core.resources.IFile
 import org.eclipse.swt.graphics.Image
 import org.eclipse.swt.SWT
 
@@ -59,7 +61,17 @@ abstract class APluginConfig {
       * method shows only nodes that have label. */
     def treeLabel(node: CommonNode): String
 
+    /** Return icon that will be used to annotate this node in the
+      * outline view. Normally, the images are loaded in 
+      * <code>YourLangConfig.loadImages</code> method and stored in the
+      * <code>YourLangConfig</code> object. The images must be 16x16 pixels. */
     def treeImage(node: CommonNode): Image = null
+
+    /** Return icon that will be displayed in the editor tab showing
+      * this file. Normally, the images are loaded in 
+      * <code>YourLangConfig.loadImages</code> method and stored in the
+      * <code>YourLangConfig</code> object. The images must be 16x16 pixels. */
+    def fileImage(file: IFile): Image = null
 
     /** Return true, if this node should be shown in the outline view.
       * The default implementation shows nodes for which the

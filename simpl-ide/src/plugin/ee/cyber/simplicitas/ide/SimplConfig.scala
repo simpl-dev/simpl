@@ -7,6 +7,7 @@ import ee.cyber.simplicitas.{GenericToken, CommonToken, CommonNode}
 
 import org.eclipse.imp.language.LanguageRegistry
 import org.eclipse.swt.SWT
+import org.eclipse.core.resources.IFile
 import org.eclipse.swt.graphics.Image
 
 
@@ -23,6 +24,7 @@ object SimplConfig {
     var nonTerminal: Image = null
     var fragment: Image = null
     var option: Image = null
+    var simpl: Image = null
   }
 
   val colors: Map[Symbol, Tuple3[String, String, Number]] =
@@ -31,6 +33,10 @@ object SimplConfig {
       'code -> ("Embedded code", "128, 0, 0", SWT.NORMAL))
 
   def initializeImages(addFun: (String, String) => Image) {
+      /* Simpl file icon. */
+      Images.simpl = addFun("simpl", "icons/simpl.png")
+
+      /* Outline view icons. */
       Images.terminal = addFun("terminal", "icons/terminal.png")
       Images.nonTerminal = addFun("nonTerminal", "icons/nonterminal.png")
       Images.fragment = addFun("fragment", "icons/fragment.png")
@@ -69,6 +75,8 @@ class SimplConfig extends APluginConfig() {
       case o: OptionDef => Images.option
       case _ => null
     }
+
+    override def fileImage(file: IFile) = Images.simpl
 
     override def isFoldable(node: CommonNode) = node match {
       // Fold rule definitions if they span 3 or more lines.

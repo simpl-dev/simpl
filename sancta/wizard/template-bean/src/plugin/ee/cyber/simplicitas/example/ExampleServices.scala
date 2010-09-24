@@ -61,10 +61,7 @@ class #{class}TreeModelBuilder
 }
 
 class #{class}LabelProvider
-    extends SimplicitasLabelProvider(#{class}Config.instance) {
-  def plugin: org.eclipse.ui.plugin.AbstractUIPlugin =
-    #{class}Plugin.getInstance
-}
+    extends SimplicitasLabelProvider(#{class}Config.instance) {}
 
 class #{class}ReferenceResolver
     extends SimplicitasReferenceResolver(#{class}Config.instance) {}
