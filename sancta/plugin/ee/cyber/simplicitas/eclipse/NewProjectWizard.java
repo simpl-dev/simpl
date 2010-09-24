@@ -182,7 +182,7 @@ public class NewProjectWizard extends org.eclipse.jface.wizard.Wizard
 
     @Override
     public void init(IWorkbench workbench, IStructuredSelection selection) {
-        setWindowTitle("New Simplicitas project");
+        setWindowTitle("New Simpl project");
     }
 
     @Override
@@ -190,9 +190,9 @@ public class NewProjectWizard extends org.eclipse.jface.wizard.Wizard
         super.addPages();
 
         _pageOne = new WizardNewProjectCreationPage(
-                "From Scratch Project Wizard");
-        _pageOne.setTitle("From Scratch Project");
-        _pageOne.setDescription("Create something from scratch.");
+                "New Simpl project");
+        _pageOne.setTitle("New Simpl project");
+        _pageOne.setDescription("Create new DSL implementation using Simpl.");
         
         addPage(_pageOne);
     }
