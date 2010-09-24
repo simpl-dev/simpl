@@ -10,7 +10,7 @@ class FowlerGenerator(destDir: String) extends GeneratorBase(destDir) {
     for (machine <- ctx.tree.machines) {
       expandResetEvents(machine)
       
-      val args = machine.toJavaMap
+      val args = machine.toJavaMap()
       val template = templates.getInstanceOf("program", args)
       writeFile(machine.name.text + ".java", template.toString)
     }

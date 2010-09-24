@@ -1,5 +1,8 @@
 grammar ee.cyber.simplicitas.fowlerdsl.Fowler;
 
+// Enable backtracking because of the Reference rule.
+options(backtrack=true;)
+
 /** Program is a sequence of machines. */
 Program: machines=Machine+;
 
