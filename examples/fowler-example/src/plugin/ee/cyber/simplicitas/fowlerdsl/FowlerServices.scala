@@ -46,7 +46,7 @@ class FowlerPlugin extends SimplicitasPlugin {
     val addFun =
       (key: String, path: String) =>
         addImage(key, path, bundle, registry)
-    FowlerConfig.initializeImageRegistry(addFun)
+    FowlerConfig.initializeImages(addFun)
   }
 }
 

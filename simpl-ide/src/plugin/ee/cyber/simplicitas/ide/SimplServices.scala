@@ -45,7 +45,7 @@ class SimplPlugin extends SimplicitasPlugin {
     val addFun =
       (key: String, path: String) =>
         addImage(key, path, bundle, registry)
-    SimplConfig.initializeImageRegistry(addFun)
+    SimplConfig.initializeImages(addFun)
   }
 }
 

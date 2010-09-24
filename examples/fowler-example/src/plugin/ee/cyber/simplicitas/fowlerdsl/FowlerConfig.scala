@@ -26,7 +26,7 @@ object FowlerConfig {
   val colors: Map[Symbol, Tuple3[String, String, Number]] =
     Map.empty
 
-  def initializeImageRegistry(addFun: (String, String) => Image) {
+  def initializeImages(addFun: (String, String) => Image) {
       Images.list = addFun("list", "icons/list.gif")
       Images.state = addFun("state", "icons/state.gif")
       Images.event = addFun("event", "icons/event.gif")

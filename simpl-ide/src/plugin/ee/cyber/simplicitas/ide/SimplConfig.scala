@@ -30,7 +30,7 @@ object SimplConfig {
       'strings -> ("Strings", "0, 128, 0", SWT.BOLD | SWT.ITALIC),
       'code -> ("Embedded code", "128, 0, 0", SWT.NORMAL))
 
-  def initializeImageRegistry(addFun: (String, String) => Image) {
+  def initializeImages(addFun: (String, String) => Image) {
       Images.terminal = addFun("terminal", "icons/terminal.png")
       Images.nonTerminal = addFun("nonTerminal", "icons/nonterminal.png")
       Images.fragment = addFun("fragment", "icons/fragment.png")
