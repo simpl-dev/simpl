@@ -118,7 +118,7 @@
         <jar destfile="${target}/simplicitas-plugin.jar"
              basedir="${target}/plugin-classes"
              manifest="${basedir}/META-INF/MANIFEST.MF">
-            <fileset dir="${basedir}" includes="icons/*.gif"/>
+            <fileset dir="${basedir}" includes="icons/*"/>
             <fileset dir="${basedir}" includes="plugin.xml"/>
             <zipfileset src="${basedir}/target/simplicitas-wizard.jar"/>
         </jar>
