@@ -7,6 +7,7 @@ import ee.cyber.simplicitas.{GenericToken, CommonToken, CommonNode}
 
 import org.eclipse.imp.language.LanguageRegistry
 import org.eclipse.swt.SWT
+import org.eclipse.swt.graphics.Image
 
 
 object SimplConfig {
@@ -14,11 +15,27 @@ object SimplConfig {
   val languageId = "simpl_ide"
   val language = LanguageRegistry.findLanguage(languageId)
   val pluginId = "simpl_ide"
-  
+
+  /** Here are constants for icons. The se items are initialized in the
+    * </code>initializeImageRegistry</code> method. */
+  object Images {
+    var terminal: Image = null
+    var nonTerminal: Image = null
+    var fragment: Image = null
+    var option: Image = null
+  }
+
   val colors: Map[Symbol, Tuple3[String, String, Number]] =
     Map(
       'strings -> ("Strings", "0, 128, 0", SWT.BOLD | SWT.ITALIC),
       'code -> ("Embedded code", "128, 0, 0", SWT.NORMAL))
+
+  def initializeImageRegistry(addFun: (String, String) => Image) {
+      Images.terminal = addFun("terminal", "icons/terminal.png")
+      Images.nonTerminal = addFun("nonTerminal", "icons/nonterminal.png")
+      Images.fragment = addFun("fragment", "icons/fragment.png")
+      Images.option = addFun("option", "icons/option.png")
+  }
 }
 
 class MyGrammar extends SimplGrammar {
@@ -26,6 +43,8 @@ class MyGrammar extends SimplGrammar {
 }
 
 class SimplConfig extends APluginConfig() {
+    import SimplConfig.Images
+
     // parses using some grammar
     def parse(ctx: ParseCtx) {
         val grammar = new MyGrammar()
@@ -43,6 +62,14 @@ class SimplConfig extends APluginConfig() {
       case _ => null
     }
     
+    override def treeImage(node: CommonNode) = node match {
+      case t: TerminalDef => Images.terminal
+      case nt: NonTerminalDef => Images.nonTerminal
+      case f: FragmentDef => Images.fragment
+      case o: OptionDef => Images.option
+      case _ => null
+    }
+
     override def isFoldable(node: CommonNode) = node match {
       // Fold rule definitions if they span 3 or more lines.
       case d: RuleDef if node.endLine - node.startLine > 2 => true

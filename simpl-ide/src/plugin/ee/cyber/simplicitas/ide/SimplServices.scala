@@ -6,6 +6,7 @@ import ee.cyber.simplicitas.eclipse.GenerateAction
 import ee.cyber.simplicitas.imp._
 import ee.cyber.simplicitas.imp.parser._
 
+import org.eclipse.jface.resource.ImageRegistry
 import org.eclipse.swt.SWT
 
 
@@ -35,6 +36,17 @@ class SimplPlugin extends SimplicitasPlugin {
       'operator -> ("Operators", "0,0,0", SWT.NORMAL),
       'comment -> ("Comments", "128,128,0", SWT.ITALIC)) ++
     SimplConfig.colors
+
+  override def initializeImageRegistry(registry: ImageRegistry) {
+    super.initializeImageRegistry(registry)
+
+    val bundle = org.eclipse.core.runtime.Platform.getBundle(
+            SimplConfig.pluginId);
+    val addFun =
+      (key: String, path: String) =>
+        addImage(key, path, bundle, registry)
+    SimplConfig.initializeImageRegistry(addFun)
+  }
 }
 
 class SimplParseController extends 

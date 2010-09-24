@@ -42,9 +42,9 @@ abstract class SimplicitasLabelProvider(config: APluginConfig)
       case file: IFile =>
         getFileImage(file)
       case treeNode: ModelTreeNode =>
-        getOutlineImage(treeNode.getASTNode.asInstanceOf[CommonNode])
+        config.treeImage(treeNode.getASTNode.asInstanceOf[CommonNode])
       case tree: CommonNode =>
-        getOutlineImage(tree)
+        config.treeImage(tree)
       case _ => null
     }
 
@@ -56,10 +56,6 @@ abstract class SimplicitasLabelProvider(config: APluginConfig)
         getOutlineText(tree)
       case _ => null
     }
-
-  // TODO: move to APluginConfig
-  /** Override to provide different images for outline nodes. */
-  def getOutlineImage(node: CommonNode): Image = Images.defaultOutline
 
   /** Override to provide different images for files in navigator. */
   def getFileImage(file: IFile): Image = {
@@ -83,10 +79,6 @@ abstract class SimplicitasLabelProvider(config: APluginConfig)
       label
   }
 
-  /** Retrieves image from the plugin's image registry. */
-  def getImage(fileName: String): Image =
-    Images.registry.get(fileName)
-  
   /**
    * Override to return the current plugin.
    */

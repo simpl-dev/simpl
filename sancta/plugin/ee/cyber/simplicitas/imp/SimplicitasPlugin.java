@@ -2,9 +2,14 @@
 
 package ee.cyber.simplicitas.imp;
 
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.imp.runtime.PluginBase;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.jface.text.TextAttribute;
+import org.eclipse.swt.graphics.Image;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
 import scala.Symbol;
@@ -80,5 +85,13 @@ public abstract class SimplicitasPlugin extends PluginBase {
 
     public String styleKey(Symbol key) {
         return key.name + ".style";
+    }
+
+    public Image addImage(String key, String path, Bundle bundle,
+            ImageRegistry registry) {
+        Path pathObj = new Path(path);
+        ImageDescriptor descriptor = createImageDescriptor(bundle, pathObj);
+        registry.put(key, descriptor);
+        return registry.get(key);
     }
 }

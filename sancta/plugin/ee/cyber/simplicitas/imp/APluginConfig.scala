@@ -4,7 +4,7 @@ package ee.cyber.simplicitas.imp
 
 import ee.cyber.simplicitas.{GenericToken, CommonNode}
 import org.eclipse.jface.text.TextAttribute
-
+import org.eclipse.swt.graphics.Image
 import org.eclipse.swt.SWT
 
 /** This class offers the main entry point for customising the 
@@ -58,6 +58,8 @@ abstract class APluginConfig {
       * view. The default implementation of the <code>addToTree</code>
       * method shows only nodes that have label. */
     def treeLabel(node: CommonNode): String
+
+    def treeImage(node: CommonNode): Image = null
 
     /** Return true, if this node should be shown in the outline view.
       * The default implementation shows nodes for which the
