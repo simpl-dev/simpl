@@ -88,10 +88,9 @@
         </scalac>
         <jar destfile="${target}/#{name}-plugin.jar" basedir="${target}/plugin"
              manifest="${basedir}/META-INF/MANIFEST.MF">
-            <!-- This comes from tool.jar fileset dir="${basedir}/src/tool" includes="*.stg"/-->
             <fileset dir="${basedir}" includes="plugin.xml"/>
-            <!-- If the tool.jar starts to contain other libraries, then we should include
-                 only tool class files here. -->
+            <!-- Include this if the project starts to contain icons.
+             fileset dir="${basedir}" includes="icons/*"/ -->
             <zipfileset src="${tool-jar}"/>
         </jar>
     </target>
