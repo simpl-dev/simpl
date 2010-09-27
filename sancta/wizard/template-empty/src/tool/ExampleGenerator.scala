@@ -7,7 +7,7 @@ class #{class}Generator(destDir: String)
   val templates = getTemplates("#{class}.stg")
     
   def generate(tree: Program) {
-    val args = tree.toJavaMap
+    val args = tree.toJavaMap()
     writeFile("GeneratedProgram.java", templates.getInstanceOf("program", args))
   }
 }
