@@ -60,10 +60,7 @@ class FowlerTreeModelBuilder
     extends SimplicitasTreeModelBuilder(FowlerConfig.instance) {}
 
 class FowlerLabelProvider
-    extends SimplicitasLabelProvider(FowlerConfig.instance) {
-  def plugin: org.eclipse.ui.plugin.AbstractUIPlugin =
-    FowlerPlugin.getInstance
-}
+    extends SimplicitasLabelProvider(FowlerConfig.instance) {}
 
 class FowlerReferenceResolver
     extends SimplicitasReferenceResolver(FowlerConfig.instance) {}
