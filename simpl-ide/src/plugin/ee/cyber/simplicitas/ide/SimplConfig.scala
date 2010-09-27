@@ -6,6 +6,7 @@ import ee.cyber.simplicitas.imp._
 import ee.cyber.simplicitas.{GenericToken, CommonToken, CommonNode}
 
 import org.eclipse.imp.language.LanguageRegistry
+import org.eclipse.core.resources.IFile
 import org.eclipse.swt.SWT
 import org.eclipse.swt.graphics.Image
 
@@ -19,6 +20,10 @@ object SimplConfig {
   /** Here are constants for icons. The se items are initialized in the
     * </code>initializeImageRegistry</code> method. */
   object Images {
+    /* Simpl file icon. */
+    var simpl: Image = null
+
+    /* Outline view icons. */
     var terminal: Image = null
     var nonTerminal: Image = null
     var fragment: Image = null
@@ -31,10 +36,14 @@ object SimplConfig {
       'code -> ("Embedded code", "128, 0, 0", SWT.NORMAL))
 
   def initializeImages(addFun: (String, String) => Image) {
-      Images.terminal = addFun("terminal", "icons/terminal.png")
-      Images.nonTerminal = addFun("nonTerminal", "icons/nonterminal.png")
-      Images.fragment = addFun("fragment", "icons/fragment.png")
-      Images.option = addFun("option", "icons/option.png")
+      import Images._
+
+      simpl = addFun("simpl", "icons/simpl.png")
+
+      terminal = addFun("terminal", "icons/terminal.png")
+      nonTerminal = addFun("nonTerminal", "icons/nonterminal.png")
+      fragment = addFun("fragment", "icons/fragment.png")
+      option = addFun("option", "icons/option.png")
   }
 }
 
@@ -69,6 +78,8 @@ class SimplConfig extends APluginConfig() {
       case o: OptionDef => Images.option
       case _ => null
     }
+
+    override def fileImage(file: IFile) = Images.simpl
 
     override def isFoldable(node: CommonNode) = node match {
       // Fold rule definitions if they span 3 or more lines.
