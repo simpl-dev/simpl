@@ -4,6 +4,7 @@ package ee.cyber.simplicitas.imp
 
 import ee.cyber.simplicitas.{GenericToken, CommonNode}
 import org.eclipse.jface.text.TextAttribute
+import org.eclipse.core.resources.IFile
 import org.eclipse.swt.graphics.Image
 import org.eclipse.swt.SWT
 
@@ -60,6 +61,7 @@ abstract class APluginConfig {
     def treeLabel(node: CommonNode): String
 
     def treeImage(node: CommonNode): Image = null
+    def fileImage(file: IFile): Image = null
 
     /** Return true, if this node should be shown in the outline view.
       * The default implementation shows nodes for which the

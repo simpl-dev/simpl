@@ -14,33 +14,20 @@ import org.eclipse.swt.graphics.Image
 
 import ee.cyber.simplicitas._
 
-object LabelStrings {
-  val STATES_DEFAULT_OUTLINE_ITEM =
-        SimplicitasPlugin.SIMPLICITAS_DEFAULT_OUTLINE_ITEM
-  val STATES_FILE = SimplicitasPlugin.SIMPLICITAS_FILE
-  val STATES_FILE_WARNING = SimplicitasPlugin.SIMPLICITAS_FILE_WARNING
-  val STATES_FILE_ERROR = SimplicitasPlugin.SIMPLICITAS_FILE_ERROR
-}
-
 /** Label provider service. It can be configured by extending the
     APluginConfig class. */
 abstract class SimplicitasLabelProvider(config: APluginConfig)
     extends ILabelProvider {
-  private object Images {
-    val registry = plugin.getImageRegistry
-    
-    val file = registry.get(LabelStrings.STATES_FILE)
-    val fileWithWarning = registry.get(LabelStrings.STATES_FILE_WARNING)
-    val fileWithError = registry.get(LabelStrings.STATES_FILE_ERROR)
-    
-    val defaultOutline = registry.get(LabelStrings.STATES_DEFAULT_OUTLINE_ITEM)
-  }
-
   // Plumbing.
   def getImage(element: Object): Image =
     element match {
-      case file: IFile =>
-        getFileImage(file)
+      case file: IFile => {
+        val img = config.fileImage(file)
+        if (img ne null)
+          img
+        else
+          SimplicitasPlugin.getFileImage
+      }
       case treeNode: ModelTreeNode =>
         config.treeImage(treeNode.getASTNode.asInstanceOf[CommonNode])
       case tree: CommonNode =>
@@ -56,17 +43,6 @@ abstract class SimplicitasLabelProvider(config: APluginConfig)
         getOutlineText(tree)
       case _ => null
     }
-
-  /** Override to provide different images for files in navigator. */
-  def getFileImage(file: IFile): Image = {
-    val severity = MarkerUtils.getMaxProblemMarkerSeverity(
-      file, IResource.DEPTH_ONE)
-    severity match {
-      case IMarker.SEVERITY_ERROR => Images.fileWithError
-      case IMarker.SEVERITY_WARNING => Images.fileWithWarning
-      case _ => Images.file
-    }
-  }
 
   /** Override to provide text for outline node.*/
   def getOutlineText(node: CommonNode): String = {
