@@ -60,7 +60,10 @@ class SimplTreeModelBuilder
 }
 
 class SimplLabelProvider
-    extends SimplicitasLabelProvider(SimplConfig.instance) {}
+    extends SimplicitasLabelProvider(SimplConfig.instance) {
+  def plugin: org.eclipse.ui.plugin.AbstractUIPlugin =
+    SimplPlugin.getInstance
+}
 
 class SimplReferenceResolver
     extends SimplicitasReferenceResolver(SimplConfig.instance) {}
