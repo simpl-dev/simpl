@@ -4,6 +4,7 @@ import ee.cyber.simplicitas.imp._
 import ee.cyber.simplicitas.{GenericToken, CommonNode}
 
 import org.eclipse.imp.language.LanguageRegistry
+import org.eclipse.swt.graphics.Image
 
 
 object #{class}Config {

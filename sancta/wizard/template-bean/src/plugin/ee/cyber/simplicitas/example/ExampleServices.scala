@@ -8,6 +8,7 @@ import ee.cyber.simplicitas.imp.parser._
 import ee.cyber.simplicitas.eclipse.GenerateAction
 
 import org.eclipse.jface.resource.ImageRegistry
+import org.eclipse.swt.graphics.Image
 import org.eclipse.swt.SWT
 
 
@@ -46,7 +47,7 @@ class #{class}Plugin extends SimplicitasPlugin {
     val addFun =
       (key: String, path: String) =>
         addImage(key, path, bundle, registry)
-    #{class}Config.initializeImageRegistry(addFun)
+    #{class}Config.initializeImages(addFun)
   }
 }
 
