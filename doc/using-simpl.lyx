@@ -3246,11 +3246,15 @@ Outline View
 
 \begin_layout Standard
 Simpl makes it easy to create outline view for a DSL.
- This is done with the help of two methods:
+ This is done with the help of three methods:
 \end_layout
 
 \begin_layout LyX-Code
 def treeLabel(node: CommonNode): String 
+\end_layout
+
+\begin_layout LyX-Code
+def treeImage(node: CommonNode): Image
 \end_layout
 
 \begin_layout LyX-Code
@@ -3265,6 +3269,48 @@ treeLabel
  method takes as input an AST node and returns human-readable string that
  is used to represent this node in the outline view.
  The 
+\emph on
+treeImage
+\emph default
+ method returns 16x16 icon that is displayed next to the outline view item.
+ The recommended way to load the image is in the 
+\emph on
+initializeImages 
+\emph default
+method of the 
+\emph on
+YourLangConfig
+\emph default
+ class.
+\end_layout
+
+\begin_layout LyX-Code
+def initializeImages(addFun: (String, String) => Image)
+\end_layout
+
+\begin_layout Standard
+This method is called by the automatically generated framework when the
+ plugin is loaded.
+ In the body of this method, call the 
+\emph on
+addFun
+\emph default
+ function to load images that are packaged with the plugin (do not forget
+ to edit the build file to include icon files in the plugin .jar).
+ This function takes as the first parameter key that is used to reference
+ the image in plugin's image registry.
+ The second parameter is path to the image (relative to plugin's directory).
+ The key must be unique for all the loaded images.
+ The loaded images should be saved somewhere where they can be accessed
+ by the 
+\emph on
+treeImage
+\emph default
+ method.
+\end_layout
+
+\begin_layout Standard
+The 
 \emph on
 addToTree
 \emph default
