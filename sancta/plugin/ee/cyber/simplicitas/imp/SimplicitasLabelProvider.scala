@@ -55,11 +55,6 @@ abstract class SimplicitasLabelProvider(config: APluginConfig)
       label
   }
 
-  /**
-   * Override to return the current plugin.
-   */
-  def plugin: org.eclipse.ui.plugin.AbstractUIPlugin
-
   // dummy methods until I figure out what these listeners are actually for.
   def addListener(listener: ILabelProviderListener): Unit = {}
   def dispose(): Unit = {}

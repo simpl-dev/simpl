@@ -59,8 +59,16 @@ abstract class APluginConfig {
       * view. The default implementation of the <code>addToTree</code>
       * method shows only nodes that have label. */
     def treeLabel(node: CommonNode): String
-
+    /** Return icon that will be used to annotate this node in the
+      * outline view. Normally, the images are loaded in 
+      * <code>YourLangConfig.loadImages</code> method and stored in the
+      * <code>YourLangConfig</code> object. The images must be 16x16 pixels. */
     def treeImage(node: CommonNode): Image = null
+
+    /** Return icon that will be displayed in the editor tab showing
+      * this file. Normally, the images are loaded in 
+      * <code>YourLangConfig.loadImages</code> method and stored in the
+      * <code>YourLangConfig</code> object. The images must be 16x16 pixels. */
     def fileImage(file: IFile): Image = null
 
     /** Return true, if this node should be shown in the outline view.
