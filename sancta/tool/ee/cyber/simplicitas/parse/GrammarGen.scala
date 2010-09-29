@@ -39,6 +39,7 @@ class GrammarGen(posMap: Any => List[Int]) {
 
     def newId = {
         idcounter += 1
+        println("newId(" + "Z" + idcounter + ")")
         "Z" + idcounter
     }
 
@@ -57,6 +58,7 @@ class GrammarGen(posMap: Any => List[Int]) {
             })
 
     def endHook(tag: String, embrace: Boolean, id: String) = {
+        println("endHook(" + tag + ", " + id + ")")
         val p = g.size - 1
         var t = tag;
         if (t == "") {
@@ -81,6 +83,7 @@ class GrammarGen(posMap: Any => List[Int]) {
     }
 
     def trKeyword(keyword: String): String = {
+        println("trKeyword(" + keyword + ")")
         if (!(keyword startsWith "'"))
             return keyword
         if (keywords contains keyword)
@@ -93,22 +96,27 @@ class GrammarGen(posMap: Any => List[Int]) {
                                 else Character toUpperCase ch)
         }
         var id = namebuf.toString
+        println("namebuf=\"" + id + "\"")
         if (id != "" &&
                 !(Character isJavaIdentifierStart (id charAt 0)))
             id = "X_" + id
-        if (id == "" || (rules contains id) || (terminals contains id))
+        if (id == "" || (rules contains id) || (terminals contains id)) {
+            println("trKeyword: newId")
             id = newId
+        }
         keywords(keyword) = id
         terminals(id) = Nil
         id
     }
 
     def simpleTerm(name: String, _id: String) {
+        println("simpleTerm(" + name + ", " + _id + ")")
         val id = trKeyword(_id)        
         if (name == null && (_id startsWith "'")) {
             g += " "
             val term =
             if (firstInChain) {
+                println("firstInChain")
                 val tag = newId
                 g += "(" + tag + "=" + id + "{"
                 if (multi != 0)
@@ -123,6 +131,7 @@ class GrammarGen(posMap: Any => List[Int]) {
             return
         }
         val tagName = if (name == null) uncapitalize(id); else name
+        println("tmpName")
         val tmpName = if (multi > 0 || firstInChain) newId; else null
 
         NamingService.validateASTAttribute(tagName) match {
@@ -141,6 +150,7 @@ class GrammarGen(posMap: Any => List[Int]) {
                 else
                     np.varName = other.varName
             case _ =>
+                println("varName")
                 np.varName = newId
                 param += np
         }
@@ -157,6 +167,7 @@ class GrammarGen(posMap: Any => List[Int]) {
             } else {
                 var iv = ""
                 if (terminals contains id) {
+                    println("iv")
                     iv = newId
                     g += "CommonNode " + iv + "=" + nodeValue(np) + ";"
                 } else {
@@ -346,6 +357,7 @@ class GrammarGen(posMap: Any => List[Int]) {
             }
             param clear
         case "option" :: (name: String) :: alt =>
+            println("option(" + name + ")")
             if (firstRule == "")
                 firstRule = name
             g += "\n" + rules(name).antlrName + " returns [" + name +
@@ -363,6 +375,7 @@ class GrammarGen(posMap: Any => List[Int]) {
                 val r = rules(option)
                 if (!(r.extend contains name))
                     r.extend += name
+                println("t(" + option + ")")
                 val id = newId
                 val np = NodeParam(id, option, id, false, null, Nil)
                 g += id + "=" + r.antlrName + "{$r=" + nodeValue(np) + ";}"
