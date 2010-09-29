@@ -138,7 +138,7 @@ class GrammarGen(posMap: Any => List[Int]) {
             return
         }
         val tagName = if (name == null) uncapitalize(id); else name
-        println("tmpName")
+        println("tmpName, multi = " + multi + ", firstInChain = " + firstInChain)
         val tmpName = if (multi > 0 || firstInChain) newId; else null
 
         NamingService.validateASTAttribute(tagName) match {
