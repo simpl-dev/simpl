@@ -318,7 +318,9 @@ class GrammarGen(posMap: Any => List[Int]) {
                   "", "var ")
     }
 
-    def rule(tree: Any) = tree match {
+    def rule(tree: Any) = {
+        println("tree: " + tree)
+        tree match {
         case ":" :: (name: String) :: alt =>
             if (firstRule == "")
                 firstRule = name
@@ -391,7 +393,7 @@ class GrammarGen(posMap: Any => List[Int]) {
             g += ";\n"
         case _ =>
             ()
-    }
+    }}
 
     def terminal(tree: List[Any]): List[Any] = tree match {
         case h :: t => h match {
