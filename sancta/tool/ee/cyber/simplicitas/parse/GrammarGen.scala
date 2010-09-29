@@ -28,6 +28,8 @@ class GrammarGen(posMap: Any => List[Int]) {
     private val param = new ArrayBuffer[NodeParam]()
     private val terminals = new HashMap[String, List[TermParam]]()
     private val rules = new HashMap[String, RuleClass]()
+    /** Keywords supported by this language. Map is from keyword
+      * to identifier representing the corresponding lexer rule. */
     private val keywords = new HashMap[String, String]()
     private var currentOption = List(0)
     private var multi = 0
@@ -82,20 +84,25 @@ class GrammarGen(posMap: Any => List[Int]) {
         }
     }
 
+    /** Turns string 'foo' into Foo. */
+    def makeKwIdentifier(s: String) = {
+        val buf = new StringBuilder()
+        for (i <- 1 to s.length - 1) {
+            val ch = s.charAt(i)
+            if (Character.isJavaIdentifierPart(ch))
+                buf.append(if (i > 1) ch
+                        else Character.toUpperCase(ch))
+        }
+        buf.toString
+    }
+
     def trKeyword(keyword: String): String = {
         println("trKeyword(" + keyword + ")")
         if (!(keyword startsWith "'"))
             return keyword
         if (keywords contains keyword)
             return keywords(keyword)
-        val namebuf = new StringBuilder()
-        for (i <- 1 to keyword.length - 1) {
-            val ch = keyword charAt i
-            if (Character isJavaIdentifierPart ch)
-                namebuf append (if (i > 1) ch
-                                else Character toUpperCase ch)
-        }
-        var id = namebuf.toString
+        var id = makeKwIdentifier(keyword)
         println("namebuf=\"" + id + "\"")
         if (id != "" &&
                 !(Character isJavaIdentifierStart (id charAt 0)))
