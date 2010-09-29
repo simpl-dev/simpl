@@ -3,6 +3,7 @@ package #{package}
 import ee.cyber.simplicitas.imp._
 import ee.cyber.simplicitas.{GenericToken, CommonNode}
 
+import org.eclipse.swt.graphics.Image
 import org.eclipse.imp.language.LanguageRegistry
 
 
