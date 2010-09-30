@@ -134,7 +134,7 @@ class GrammarGen(posMap: Any => List[Int]) {
                 println("firstInChain")
                 val tag = newId
                 g += "(" + tag + "=" + id + "{"
-                if (multi != 0)
+                if (multi != RepeatType.None)
                     g += "if(_start==null)"
                 g += "_start=new TokenLocation($" + tag + ");"
                 endHook(tag, false, null)
