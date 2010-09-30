@@ -325,79 +325,86 @@ class GrammarGen(posMap: Any => List[Int]) {
                   "", "var ")
     }
 
-    def rule(tree: Any) = {
-        println("tree: " + tree)
-        tree match {
+    def matchNormalRule(name: String, alt: List[Any]) {
+        println("normal rule: " + name + ": " + alt)
+        if (firstRule == "")
+            firstRule = name
+        currentOption = List(0)
+        firstInChain = true
+        multi = RepeatType.None
+        g += "\n" + rules(name).antlrName + " returns [" + name +
+            " r]\n@init {SourceLocation _start=null;int _end=-1;" +
+            "int _endLine=-1;int _endColumn=-1;"
+        val init_p = g.size
+        g += ""
+        g += "}\n@after {$r = new " + name + "("
+        val p = g.size
+        g += ""
+        g += ");$r.setLocation(_start,_end==-1?(_start==null?0:_start.endIndex()):_end," +
+            "_endLine==-1?(_start==null?0:_start.endLine()):_endLine," +
+            "_endColumn==-1?(_start==null?0:_start.endColumn()):_endColumn);}:\n"
+        altList(matchName, matchCodeBlock(alt, name))
+        g += ";\n"
+        val init = new StringBuilder()
+        def getParam(p: NodeParam): String = {
+            if (p.tmp == null)
+                return nodeValue(p)
+            if (p.isList) {
+                init append ("ArrayList " + p.tmp + "=new ArrayList();")
+                "scalaList(" + p.tmp + ")"
+            } else {
+                init append (p.node + " " + p.tmp + "=null;")
+                p.tmp
+            }
+        }
+        g(p) = join(param map getParam)
+        g(init_p) = init.toString
+        rules(name).hdr = "case class " + name
+        rules(name).param = param map caseParam
+        for (p <- param) {
+            if (!(rules contains p.node)) {
+                error(p.node, "Undefined rule " + p.node + " referenced")
+            }
+        }
+        param clear
+    }
+
+    def matchOptionRule(name: String, alt: List[Any]) {
+        println("option: " + name + ": " + alt)
+        if (firstRule == "")
+            firstRule = name
+        g += "\n" + rules(name).antlrName + " returns [" + name +
+            " r]:\n"
+
+        val values = matchCodeBlock(alt, name)
+        var first = true
+
+        for (t <- values) {
+            val option = t.toString
+            if (!first)
+                g += " | "
+            if (!(rules contains option))
+                error(t, "Undefined rule " + option + " referenced")
+            val r = rules(option)
+            if (!(r.extend contains name))
+                r.extend += name
+            println("t(" + option + ")")
+            val id = newId
+            val np = NodeParam(id, option, id, false, null, Nil)
+            g += id + "=" + r.antlrName + "{$r=" + nodeValue(np) + ";}"
+            first = false
+        }
+        g += ";\n"
+    }
+
+    def rule(tree: Any) = tree match {
         case ":" :: (name: String) :: alt =>
-            if (firstRule == "")
-                firstRule = name
-            currentOption = List(0)
-            firstInChain = true
-            multi = RepeatType.None
-            g += "\n" + rules(name).antlrName + " returns [" + name +
-                " r]\n@init {SourceLocation _start=null;int _end=-1;" +
-                "int _endLine=-1;int _endColumn=-1;"
-            val init_p = g.size
-            g += ""
-            g += "}\n@after {$r = new " + name + "("
-            val p = g.size
-            g += ""
-            g += ");$r.setLocation(_start,_end==-1?(_start==null?0:_start.endIndex()):_end," +
-                "_endLine==-1?(_start==null?0:_start.endLine()):_endLine," +
-                "_endColumn==-1?(_start==null?0:_start.endColumn()):_endColumn);}:\n"
-            altList(matchName, matchCodeBlock(alt, name))
-            g += ";\n"
-            val init = new StringBuilder()
-            def getParam(p: NodeParam): String = {
-                if (p.tmp == null)
-                    return nodeValue(p)
-                if (p.isList) {
-                    init append ("ArrayList " + p.tmp + "=new ArrayList();")
-                    "scalaList(" + p.tmp + ")"
-                } else {
-                    init append (p.node + " " + p.tmp + "=null;")
-                    p.tmp
-                }
-            }
-            g(p) = join(param map getParam)
-            g(init_p) = init.toString
-            rules(name).hdr = "case class " + name
-            rules(name).param = param map caseParam
-            for (p <- param) {
-                if (!(rules contains p.node)) {
-                    error(p.node, "Undefined rule " + p.node + " referenced")
-                }
-            }
-            param clear
+            matchNormalRule(name, alt)
         case "option" :: (name: String) :: alt =>
-            println("option(" + name + ")")
-            if (firstRule == "")
-                firstRule = name
-            g += "\n" + rules(name).antlrName + " returns [" + name +
-                " r]:\n"
-
-            val values = matchCodeBlock(alt, name)
-            var first = true
-
-            for (t <- values) {
-                val option = t.toString
-                if (!first)
-                    g += " | "
-                if (!(rules contains option))
-                    error(t, "Undefined rule " + option + " referenced")
-                val r = rules(option)
-                if (!(r.extend contains name))
-                    r.extend += name
-                println("t(" + option + ")")
-                val id = newId
-                val np = NodeParam(id, option, id, false, null, Nil)
-                g += id + "=" + r.antlrName + "{$r=" + nodeValue(np) + ";}"
-                first = false
-            }
-            g += ";\n"
+            matchOptionRule(name, alt)
         case _ =>
             ()
-    }}
+    }
 
     def terminal(tree: List[Any]): List[Any] = tree match {
         case h :: t => h match {
