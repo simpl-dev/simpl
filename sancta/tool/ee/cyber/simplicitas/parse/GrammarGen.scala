@@ -8,11 +8,12 @@ import scala.collection.mutable.HashMap
 case class NodeParam(name: String, node: String, var varName: String,
                      isList: Boolean, tmp: String, option: List[Int])
 
-case class TermParam(name: String, vtype: String, code: String, mod: String)
+case class ConstructorParam(name: String, vtype: String, code: String,
+        mod: String)
 
 class RuleClass(name: String) {
     var hdr = ""
-    var param: Seq[TermParam] = Nil
+    var param: Seq[ConstructorParam] = Nil
     val extend = new ArrayBuffer[String]()
     var body = ""
     def antlrName = name
@@ -33,7 +34,7 @@ class GrammarGen(posMap: Any => List[Int]) {
     private val param = new ArrayBuffer[NodeParam]()
 
     /** Set of used terminal identifiers. */
-    private val terminals = new HashMap[String, List[TermParam]]()
+    private val terminals = collection.mutable.Set.empty[String]
 
     /** Rules in this language, indexed by rule name. */
     private val rules = new HashMap[String, RuleClass]()
@@ -122,7 +123,7 @@ class GrammarGen(posMap: Any => List[Int]) {
             id = newId
         }
         keywords(keyword) = id
-        terminals(id) = Nil
+        terminals += id
         id
     }
 
@@ -308,11 +309,7 @@ class GrammarGen(posMap: Any => List[Int]) {
 
         if (terminals contains p.node) {
             val v = "(" + p.node + ")setTokenPos(new " + p.node + "(" +
-                join(for (t <- terminals(p.node)) yield
-                         replaceAll(t.code, "$_", name + ".getText()")) +
-                ")," + name + ")"
-                //".getText(),((CommonToken)" + name + ").getStartIndex()," +
-                //name + ".getLine()," + name + ".getCharPositionInLine())"
+                name + ".getText()" + ")," + name + ")"
 
             if (p.tmp ne null)
                 v
@@ -324,7 +321,7 @@ class GrammarGen(posMap: Any => List[Int]) {
     }
 
     def caseParam(p: NodeParam) = {
-        TermParam(p.name, if (p.isList) "List[" + p.node + "]" else p.node,
+        ConstructorParam(p.name, if (p.isList) "List[" + p.node + "]" else p.node,
                   "", "var ")
     }
 
@@ -460,10 +457,10 @@ class GrammarGen(posMap: Any => List[Int]) {
         altList(termAction, checkParam(alt, ruleName))
         g += (if (addHidden) "{$channel = HIDDEN;}" else "") + ";\n"
         if (!isFragment) {
-            val l = List(TermParam("text", "String", "$_", ""))
+            val l = List(ConstructorParam("text", "String", "$_", ""))
             termClass.hdr = "case class " + ruleName
             termClass.param = l
-            terminals(ruleName) = l
+            terminals += ruleName
         }
     }
 
@@ -500,7 +497,7 @@ class GrammarGen(posMap: Any => List[Int]) {
 
     def grammargen(tree: Object) {
         val terms = g
-        terminals("EOF") = Nil
+        terminals += "EOF"
         tree match {
             case ("grammar" :: nameParts) :: rest =>
                 matchGrammarName(nameParts, tree)
@@ -617,7 +614,7 @@ class GrammarGen(posMap: Any => List[Int]) {
         }
         treeSrc append ("\nobject " + grammarName +
                         "Kind extends Enumeration {\n  type Kind = Value;\n")
-        for (t <- terminals.keys)
+        for (t <- terminals)
             treeSrc append ("  val " + t + " = Value(" + grammarName +
                             "Lexer." + t + ");\n")
         treeSrc append
