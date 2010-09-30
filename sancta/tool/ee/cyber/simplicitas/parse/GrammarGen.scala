@@ -32,10 +32,14 @@ class GrammarGen(posMap: Any => List[Int]) {
     private val treeSrc = new StringBuilder()
     private val param = new ArrayBuffer[NodeParam]()
     private val terminals = new HashMap[String, List[TermParam]]()
+
+    /** Rules in this language, indexed by rule name. */
     private val rules = new HashMap[String, RuleClass]()
+
     /** Keywords supported by this language. Map is from keyword
       * to identifier representing the corresponding lexer rule. */
     private val keywords = new HashMap[String, String]()
+
     private var currentOption = List(0)
     private var multi = RepeatType.None
     private var firstInChain = true
@@ -548,8 +552,6 @@ class GrammarGen(posMap: Any => List[Int]) {
         g foreach (buffer append _)
         buffer.toString
     }
-
-    def getGrammarName = grammarName
 
     def grammarHeader =
         "grammar " + grammarName + ";\noptions { " +
