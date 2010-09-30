@@ -547,6 +547,8 @@ class GrammarGen(posMap: Any => List[Int]) {
 
     def getTreeSource = treeSrc.toString
 
+    def getGrammarName = grammarName
+
     def getGrammarSource = {
         val buffer = new StringBuilder()
         g foreach (buffer append _)
