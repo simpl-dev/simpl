@@ -5,6 +5,15 @@ package ee.cyber.simplicitas.parse
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
 
+/** Information about other rule that is called from current rule.
+  * Constructor parameters:
+  * - name ??
+  * - node -- type of the node.
+  * - var ??
+  * - isList -- whether the result of the rule call is list (use of + or *).
+  * - tmp ??
+  * - option ??
+  */
 case class NodeParam(name: String, node: String, var varName: String,
                      isList: Boolean, tmp: String, option: List[Int])
 
@@ -47,7 +56,11 @@ class GrammarGen(posMap: Any => List[Int]) {
     private var multi = RepeatType.None
     private var firstInChain = true
     private var idcounter = 0
+
+    /** First rule in the grammar. This will become the start symbol. */
     private var firstRule = ""
+
+    /** Grammar-level options that are passed to ANTLR. */
     private var grammarOptions = ""
 
     def newId = {
@@ -325,10 +338,18 @@ class GrammarGen(posMap: Any => List[Int]) {
                   "", "var ")
     }
 
-    def matchNormalRule(name: String, alt: List[Any]) {
-        println("normal rule: " + name + ": " + alt)
+    /** Checks whether this rule is the first rule that is destined
+      * to be grammar's start symbol. */
+    def checkFirstRule(name: String) {
         if (firstRule == "")
             firstRule = name
+    }
+
+    def matchNormalRule(name: String, alt: List[Any]) {
+        println("normal rule: " + name + ": " + alt)
+
+        checkFirstRule(name)
+
         currentOption = List(0)
         firstInChain = true
         multi = RepeatType.None
@@ -371,20 +392,24 @@ class GrammarGen(posMap: Any => List[Int]) {
 
     def matchOptionRule(name: String, alt: List[Any]) {
         println("option: " + name + ": " + alt)
-        if (firstRule == "")
-            firstRule = name
+
+        checkFirstRule(name)
+
         g += "\n" + rules(name).antlrName + " returns [" + name +
             " r]:\n"
 
-        val values = matchCodeBlock(alt, name)
+        val optionList = matchCodeBlock(alt, name)
         var first = true
 
-        for (t <- values) {
+        for (t <- optionList) {
             val option = t.toString
+
             if (!first)
                 g += " | "
+
             if (!(rules contains option))
                 error(t, "Undefined rule " + option + " referenced")
+
             val r = rules(option)
             if (!(r.extend contains name))
                 r.extend += name
@@ -477,6 +502,8 @@ class GrammarGen(posMap: Any => List[Int]) {
         }
     }
 
+    /** Checks whether given name can safely be used as identifier, 
+      * i.e., it does not clash with Scala keyword. */
     private def checkName(isTerminal: Boolean, typeName: String, name: String, 
             tree: Any) =
         NamingService.validateRuleName(name, typeName, isTerminal) match {
