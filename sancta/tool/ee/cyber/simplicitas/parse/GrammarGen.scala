@@ -163,12 +163,11 @@ class GrammarGen(posMap: Any => List[Int]) {
         }
         if (tmpName ne null) {
             g += "\n(" + np.varName + "=" + rules(id).antlrName + "{"
-            if (multi <= 0) {
-                if (multi == 0)
-                    g += "_start=" + tmpName + "=" + nodeValue(np)
-                else
-                    g += tmpName + "=" + nodeValue(np) +
-                        ";if(_start==null)_start=" + tmpName
+            if (multi == 0) {
+                g += "_start=" + tmpName + "=" + nodeValue(np)
+            } else if (multi < 0) {
+                g += tmpName + "=" + nodeValue(np) +
+                    ";if(_start==null)_start=" + tmpName
             } else if (!firstInChain) {
                 g += tmpName + ".add(" + nodeValue(np) + ")"
             } else {
