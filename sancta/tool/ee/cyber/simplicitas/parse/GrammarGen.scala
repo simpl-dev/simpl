@@ -6,7 +6,7 @@ import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
 
 case class NodeParam(name: String, node: String, var varName: String,
-                     multi: Boolean, tmp: String, option: List[Int])
+                     isList: Boolean, tmp: String, option: List[Int])
 
 case class TermParam(name: String, vtype: String, code: String, mod: String)
 
@@ -318,7 +318,7 @@ class GrammarGen(posMap: Any => List[Int]) {
     }
 
     def caseParam(p: NodeParam) = {
-        TermParam(p.name, if (p.multi) "List[" + p.node + "]" else p.node,
+        TermParam(p.name, if (p.isList) "List[" + p.node + "]" else p.node,
                   "", "var ")
     }
 
@@ -348,7 +348,7 @@ class GrammarGen(posMap: Any => List[Int]) {
             def getParam(p: NodeParam): String = {
                 if (p.tmp == null)
                     return nodeValue(p)
-                if (p.multi) {
+                if (p.isList) {
                     init append ("ArrayList " + p.tmp + "=new ArrayList();")
                     "scalaList(" + p.tmp + ")"
                 } else {
