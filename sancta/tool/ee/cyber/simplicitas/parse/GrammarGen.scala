@@ -190,11 +190,13 @@ class GrammarGen(posMap: Any => List[Int]) {
         }
         if (tmpName ne null) {
             g += "\n(" + np.varName + "=" + rules(id).antlrName + "{"
-            if (multi == RepeatType.None) {
-                g += "_start=" + tmpName + "=" + nodeValue(np)
-            } else if (multi == RepeatType.Optional ) {
-                g += tmpName + "=" + nodeValue(np) +
-                    ";if(_start==null)_start=" + tmpName
+            if (multi == RepeatType.None || multi == RepeatType.Optional) {
+                if (multi == RepeatType.None) {
+                    g += "_start=" + tmpName + "=" + nodeValue(np)
+                } else if (multi == RepeatType.Optional ) {
+                    g += tmpName + "=" + nodeValue(np) +
+                        ";if(_start==null)_start=" + tmpName
+                }
             } else if (!firstInChain) {
                 g += tmpName + ".add(" + nodeValue(np) + ")"
             } else {
@@ -368,6 +370,7 @@ class GrammarGen(posMap: Any => List[Int]) {
         g += ";\n"
         val init = new StringBuilder()
         def getParam(p: NodeParam): String = {
+            println("getParam(" + p + ")")
             if (p.tmp == null)
                 return nodeValue(p)
             if (p.isList) {
