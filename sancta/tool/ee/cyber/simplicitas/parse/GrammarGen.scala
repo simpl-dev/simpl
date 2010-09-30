@@ -20,6 +20,11 @@ class RuleClass(name: String) {
 
 class GrammarException(msg: String) extends Exception(msg)
 
+object RepeatType extends Enumeration {
+    type Type = Value
+    val None, List, Optional = Value
+}
+
 class GrammarGen(posMap: Any => List[Int]) {
     private var grammarName = "";
     private var grammarPackage = "";
@@ -32,7 +37,7 @@ class GrammarGen(posMap: Any => List[Int]) {
       * to identifier representing the corresponding lexer rule. */
     private val keywords = new HashMap[String, String]()
     private var currentOption = List(0)
-    private var multi = 0
+    private var multi = RepeatType.None
     private var firstInChain = true
     private var idcounter = 0
     private var firstRule = ""
@@ -138,13 +143,16 @@ class GrammarGen(posMap: Any => List[Int]) {
         }
         val tagName = if (name == null) uncapitalize(id); else name
         println("tmpName, multi = " + multi + ", firstInChain = " + firstInChain)
-        val tmpName = if (multi > 0 || firstInChain) newId; else null
+        val tmpName =
+            if (multi == RepeatType.List || firstInChain) newId
+            else null
 
         NamingService.validateASTAttribute(tagName) match {
             case Some(errorMsg) => error(_id, errorMsg)
             case _ =>
         }
-        val np = NodeParam(tagName, id, "", multi > 0, tmpName, currentOption)
+        val np = NodeParam(tagName, id, "", multi == RepeatType.List,
+                tmpName, currentOption)
         param find (_.name == tagName) match {
             case Some(other) =>
                 if ((other.option zip currentOption) exists
@@ -162,9 +170,9 @@ class GrammarGen(posMap: Any => List[Int]) {
         }
         if (tmpName ne null) {
             g += "\n(" + np.varName + "=" + rules(id).antlrName + "{"
-            if (multi == 0) {
+            if (multi == RepeatType.None) {
                 g += "_start=" + tmpName + "=" + nodeValue(np)
-            } else if (multi < 0) {
+            } else if (multi == RepeatType.Optional ) {
                 g += tmpName + "=" + nodeValue(np) +
                     ";if(_start==null)_start=" + tmpName
             } else if (!firstInChain) {
@@ -214,11 +222,15 @@ class GrammarGen(posMap: Any => List[Int]) {
             val oldMulti = multi
             val oldFirst = firstInChain
             if (block != "?")
-                multi = 1
+                multi = RepeatType.List
             val result = f(v)
             if (block != "+") {
                 firstInChain = oldFirst
-                multi = if (oldMulti > 0) oldMulti; else -1
+                multi = 
+                    if (oldMulti == RepeatType.List)
+                        oldMulti
+                    else
+                        RepeatType.Optional
             } else {
                 multi = oldMulti
             }
@@ -318,7 +330,7 @@ class GrammarGen(posMap: Any => List[Int]) {
                 firstRule = name
             currentOption = List(0)
             firstInChain = true
-            multi = 0
+            multi = RepeatType.None
             g += "\n" + rules(name).antlrName + " returns [" + name +
                 " r]\n@init {SourceLocation _start=null;int _end=-1;" +
                 "int _endLine=-1;int _endColumn=-1;"
