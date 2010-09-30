@@ -508,21 +508,9 @@ class GrammarGen(posMap: Any => List[Int]) {
         terminals("EOF") = Nil
         tree match {
             case ("grammar" :: nameParts) :: rest =>
-                nameParts.reverse match {
-                    case (name: String) :: "." :: pname =>
-                        grammarName = name
-                        grammarPackage = (pname.reverse foldLeft "")(_+_)
-                    case List(name: String) => 
-                        grammarName = name
-                    case _ => 
-                        error(tree, "no grammar name")
-                }
-                treeSrc append ("package " + grammarPackage + ";\n\n" +
-                                "import ee.cyber.simplicitas." +
-                                  "{CommonNode, CommonToken, TerminalNode}\n" +
-                                "import ee.cyber.simplicitas.parse." +
-                                  "{ErrorHandler}\n\n")
-                val rules = matchOptions(rest)
+                matchGrammarName(nameParts, tree)
+
+                val rules = matchGrammarOptions(rest)
 
                 rules foreach tryTerm
                 g = new ArrayBuffer[String]()
@@ -535,7 +523,22 @@ class GrammarGen(posMap: Any => List[Int]) {
         grammarClass
     }
 
-    def matchOptions(tree: Any) = tree match {
+    /** Parses the full name of the grammar. Fills grammarName and
+      * grammarPackage variables. */
+    def matchGrammarName(nameParts: List[Any], tree: Object) {
+        nameParts.reverse match {
+            case (name: String) :: "." :: pname =>
+                grammarName = name
+                grammarPackage = (pname.reverse foldLeft "")(_+_)
+            case List(name: String) => 
+                grammarName = name
+            case _ => 
+                error(tree, "no grammar name")
+        }
+    }
+
+    /** Parses grammar-level "options(foo = bar;)" declaration. */
+    def matchGrammarOptions(tree: Any) = tree match {
         case ("options" :: opts) :: rules =>
             for (List(name, value) <- opts) {
                 grammarOptions += " " + name + "=" + value + ";"
@@ -588,6 +591,12 @@ class GrammarGen(posMap: Any => List[Int]) {
     """
 
     def grammarClass {
+        treeSrc append ("package " + grammarPackage + ";\n\n" +
+                        "import ee.cyber.simplicitas." +
+                          "{CommonNode, CommonToken, TerminalNode}\n" +
+                        "import ee.cyber.simplicitas.parse." +
+                          "{ErrorHandler}\n\n")
+
         for (r <- rules.values) {
             treeSrc append r.hdr
             if (!r.param.isEmpty)
