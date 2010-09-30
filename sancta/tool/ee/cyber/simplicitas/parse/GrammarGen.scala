@@ -221,7 +221,7 @@ class GrammarGen(posMap: Any => List[Int]) {
             Nil
     }
 
-    def matchMod(f: List[Any] => List[Any], tree: List[Any]): List[Any] = {
+    def matchModifier(f: List[Any] => List[Any], tree: List[Any]): List[Any] = {
         def after(v: List[Any], block: String): List[Any] = {
             val oldMulti = multi
             val oldFirst = firstInChain
@@ -254,9 +254,9 @@ class GrammarGen(posMap: Any => List[Int]) {
 
     def matchName(tree: List[Any]): List[Any]  = tree match {
         case List("=", name: String) :: t => 
-            matchMod(simple(name), t)
+            matchModifier(simple(name), t)
         case t => 
-            matchMod(simple_null, t)
+            matchModifier(simple_null, t)
     }
 
     def altList(doMatch: List[Any] => List[Any], tree: List[Any]) {
@@ -429,11 +429,11 @@ class GrammarGen(posMap: Any => List[Int]) {
 
     def termAction(tree: List[Any]): List[Any] = tree match {
         case (s: String) :: t if s startsWith "{" =>
-            val r = matchMod(terminal, t)
+            val r = matchModifier(terminal, t)
             g += s
             r
         case _ =>
-            matchMod(terminal, tree)
+            matchModifier(terminal, tree)
     }
 
     def checkParam(tree: List[Any], ruleName: String,
@@ -481,7 +481,8 @@ class GrammarGen(posMap: Any => List[Int]) {
             case _ =>
         }
 
-    def tryTerm(tree: Any) = tree match {
+    /** Parses given rule and adds it to global <code>rules</code> map. */
+    def addToRuleTable(tree: Any) = tree match {
         case "terminal" :: "hidden" :: (name: String) :: alt =>
             checkName(true, "Terminal", name, tree)
             termDef(false, name, alt, true)
@@ -510,15 +511,18 @@ class GrammarGen(posMap: Any => List[Int]) {
             case ("grammar" :: nameParts) :: rest =>
                 matchGrammarName(nameParts, tree)
 
-                val rules = matchGrammarOptions(rest)
+                val ruleList = matchGrammarOptions(rest)
 
-                rules foreach tryTerm
+                ruleList foreach addToRuleTable
+                /* Reset the output source code, the previously generated
+                 * code will remain in variable terms. */
                 g = new ArrayBuffer[String]()
                 g += grammarHeader
-                rules foreach rule
+                ruleList foreach rule
         }
         for (kw <- keywords.keys)
             g += keywords(kw) + ": " + kw + ";\n"
+        println("terms = " + terms)
         g ++= terms
         grammarClass
     }
