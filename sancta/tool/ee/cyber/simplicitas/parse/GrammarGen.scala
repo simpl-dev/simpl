@@ -34,7 +34,6 @@ class GrammarGen(posMap: Any => List[Int]) {
     private var currentOption = List(0)
     private var multi = 0
     private var firstInChain = true
-    private var lastInChain: List[() => Unit] = Nil
     private var idcounter = 0
     private var firstRule = ""
     private var grammarOptions = ""
@@ -214,13 +213,11 @@ class GrammarGen(posMap: Any => List[Int]) {
         def after(v: List[Any], block: String): List[Any] = {
             val oldMulti = multi
             val oldFirst = firstInChain
-            val oldLast  = lastInChain
             if (block != "?")
                 multi = 1
             val result = f(v)
             if (block != "+") {
                 firstInChain = oldFirst
-                lastInChain = lastInChain ++ oldLast
                 multi = if (oldMulti > 0) oldMulti; else -1
             } else {
                 multi = oldMulti
@@ -249,7 +246,6 @@ class GrammarGen(posMap: Any => List[Int]) {
     def altList(doMatch: List[Any] => List[Any], tree: List[Any]) {
         var first = true
         var startingFirst = firstInChain
-        var lastList: List[() => Unit] = Nil
         for ("NODE" :: matches <- tree) {
             firstInChain = startingFirst
             if (!first) {
@@ -257,15 +253,12 @@ class GrammarGen(posMap: Any => List[Int]) {
                 currentOption = (currentOption dropRight 1) ++
                     List(currentOption.last + 1)
             }
-            lastInChain = Nil
             var i = matches
             while (!i.isEmpty) {
                 i = doMatch(i)
             }
             first = false
-            lastList = lastInChain ++ lastList
         }
-        lastInChain = lastList
     }
 
     def join(i: Iterable[String]) =
@@ -325,7 +318,6 @@ class GrammarGen(posMap: Any => List[Int]) {
                 firstRule = name
             currentOption = List(0)
             firstInChain = true
-            lastInChain = Nil
             multi = 0
             g += "\n" + rules(name).antlrName + " returns [" + name +
                 " r]\n@init {SourceLocation _start=null;int _end=-1;" +
@@ -354,8 +346,6 @@ class GrammarGen(posMap: Any => List[Int]) {
             }
             g(p) = join(param map getParam)
             g(init_p) = init.toString
-            for (action <- lastInChain)
-                action()
             rules(name).hdr = "case class " + name
             rules(name).param = param map caseParam
             for (p <- param) {
