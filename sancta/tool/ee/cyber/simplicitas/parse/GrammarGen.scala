@@ -31,6 +31,8 @@ class GrammarGen(posMap: Any => List[Int]) {
     private var g = new ArrayBuffer[String]()
     private val treeSrc = new StringBuilder()
     private val param = new ArrayBuffer[NodeParam]()
+
+    /** Set of used terminal identifiers. */
     private val terminals = new HashMap[String, List[TermParam]]()
 
     /** Rules in this language, indexed by rule name. */
@@ -346,7 +348,7 @@ class GrammarGen(posMap: Any => List[Int]) {
             g += ");$r.setLocation(_start,_end==-1?(_start==null?0:_start.endIndex()):_end," +
                 "_endLine==-1?(_start==null?0:_start.endLine()):_endLine," +
                 "_endColumn==-1?(_start==null?0:_start.endColumn()):_endColumn);}:\n"
-            altList(matchName, checkParam(alt, name, null))
+            altList(matchName, checkParam(alt, name))
             g += ";\n"
             val init = new StringBuilder()
             def getParam(p: NodeParam): String = {
@@ -377,7 +379,7 @@ class GrammarGen(posMap: Any => List[Int]) {
             g += "\n" + rules(name).antlrName + " returns [" + name +
                 " r]:\n"
 
-            val values = checkParam(alt, name, null)
+            val values = checkParam(alt, name)
             var first = true
 
             for (t <- values) {
@@ -436,15 +438,10 @@ class GrammarGen(posMap: Any => List[Int]) {
             matchModifier(terminal, tree)
     }
 
-    def checkParam(tree: List[Any], ruleName: String,
-                   to: ArrayBuffer[TermParam]): List[Any] = tree match {
-        case List("ARG" :: (name: String) :: (code: String) :: t) :: rest =>
-            val codeBlock = code.substring(1, code.length - 1)
-            to += TermParam(name, (t foldLeft "")(_+_), codeBlock, "")
-            checkParam(rest, ruleName, to)
+    def checkParam(tree: List[Any], ruleName: String): List[Any] = tree match {
         case List("BODY", code: String) :: rest =>
             rules(ruleName).body = "\n" + code.substring(1, code.length - 1)
-            checkParam(rest, ruleName, to)
+            checkParam(rest, ruleName)
         case _ =>
             tree
     }
@@ -452,7 +449,6 @@ class GrammarGen(posMap: Any => List[Int]) {
     def termDef(isFragment: Boolean, ruleName: String, alt: List[Any], 
             addHidden: Boolean) {
         val termClass = new RuleClass(ruleName)
-        val termParam = new ArrayBuffer[TermParam]()
 
         if (isFragment) {
             g += "fragment "
@@ -461,12 +457,10 @@ class GrammarGen(posMap: Any => List[Int]) {
             rules(ruleName) = termClass
         }
         g += ruleName + ':'
-        altList(termAction, checkParam(alt, ruleName, termParam))
+        altList(termAction, checkParam(alt, ruleName))
         g += (if (addHidden) "{$channel = HIDDEN;}" else "") + ";\n"
         if (!isFragment) {
-            if (!(termParam exists (_.name == "text"))) // add default text
-                termParam += TermParam("text", "String", "$_", "")
-            val l = termParam.toList
+            val l = List(TermParam("text", "String", "$_", ""))
             termClass.hdr = "case class " + ruleName
             termClass.param = l
             terminals(ruleName) = l

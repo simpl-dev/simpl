@@ -30,7 +30,7 @@ option      : ID '=' ID ';' -> ^(ID ID);
 dottedId    : ID ('.' ID)*;
 
 ruleDef:
-      ('hidden'?) 'terminal'^ ID termParams? body? ':'! termAltList ';'!
+      ('hidden'?) 'terminal'^ ID body? ':'! termAltList ';'!
     | 'fragment'^ ID ':'! termAltList ';'!
     | 'option'^ ID body? ':'! ID ('|'! ID)* ';'!
     | ID body? ':'^ altList ';'!;
@@ -44,8 +44,8 @@ modifier    : '?' | '*' | '+';
 token       : '('^ altList ')'! | ID | STR;
 
 // terminals
-termParams  : '('! termParam (','! termParam)* ')'!;
-termParam   : ID ':' dottedId '=' CODE -> ^(ARG ID CODE dottedId);
+//termParams  : '('! termParam (','! termParam)* ')'!;
+//termParam   : ID ':' dottedId '=' CODE -> ^(ARG ID CODE dottedId);
 termAltList : termList ('|'! termList)*;
 termList    : termMatch+ -> ^(NODE termMatch+);
 termMatch   : (inv='~')? terminal modifier? CODE*

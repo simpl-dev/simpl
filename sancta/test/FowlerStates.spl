@@ -34,7 +34,7 @@ Transition: event=Id Id '=>' state=Id;
 
 terminal Id: ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')*;
 fragment STR_BODY: ~('\\'|'"') | '\\' .;
-terminal STRING(value: String = {$_.substring(1, $_.length() - 1)}) {var doh = 0}:
+terminal STRING {var doh = 0}:
 	'"' STR_BODY* '"' | '\'' STR_BODY* '\'';
 fragment ML_COMMENT: '/*' (~'*' | '*' ~'/')* '*/';
 fragment SL_COMMENT: '//' ~('\n'|'\r')*;
