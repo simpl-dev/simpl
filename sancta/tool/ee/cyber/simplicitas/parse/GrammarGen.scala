@@ -190,6 +190,7 @@ class GrammarGen(posMap: Any => List[Int]) {
         }
         if (tmpName ne null) {
             g += "\n(" + np.varName + "=" + rules(id).antlrName + "{"
+            // must be firstInChain
             if (multi == RepeatType.None || multi == RepeatType.Optional) {
                 if (multi == RepeatType.None) {
                     g += "_start=" + tmpName + "=" + nodeValue(np)
@@ -197,9 +198,9 @@ class GrammarGen(posMap: Any => List[Int]) {
                     g += tmpName + "=" + nodeValue(np) +
                         ";if(_start==null)_start=" + tmpName
                 }
-            } else if (!firstInChain) {
+            } else if (!firstInChain) {  // only multi
                 g += tmpName + ".add(" + nodeValue(np) + ")"
-            } else {
+            } else { // both multi and firstinchain
                 var iv = ""
                 if (terminals contains id) {
                     println("iv")
