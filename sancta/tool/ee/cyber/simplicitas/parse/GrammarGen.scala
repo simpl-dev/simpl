@@ -345,7 +345,7 @@ class GrammarGen(posMap: Any => List[Int]) {
             g += ");$r.setLocation(_start,_end==-1?(_start==null?0:_start.endIndex()):_end," +
                 "_endLine==-1?(_start==null?0:_start.endLine()):_endLine," +
                 "_endColumn==-1?(_start==null?0:_start.endColumn()):_endColumn);}:\n"
-            altList(matchName, checkParam(alt, name))
+            altList(matchName, matchCodeBlock(alt, name))
             g += ";\n"
             val init = new StringBuilder()
             def getParam(p: NodeParam): String = {
@@ -376,7 +376,7 @@ class GrammarGen(posMap: Any => List[Int]) {
             g += "\n" + rules(name).antlrName + " returns [" + name +
                 " r]:\n"
 
-            val values = checkParam(alt, name)
+            val values = matchCodeBlock(alt, name)
             var first = true
 
             for (t <- values) {
@@ -435,13 +435,19 @@ class GrammarGen(posMap: Any => List[Int]) {
             matchModifier(terminal, tree)
     }
 
-    def checkParam(tree: List[Any], ruleName: String): List[Any] = tree match {
-        case List("BODY", code: String) :: rest =>
-            rules(ruleName).body = "\n" + code.substring(1, code.length - 1)
-            checkParam(rest, ruleName)
-        case _ =>
-            tree
-    }
+    /** Matches code block at the beginning of the rule. 
+      * @param tree AST corresponding to rule.
+      * @param ruleName name of the rule.
+      * @return the rule body without the code block.
+      */
+    def matchCodeBlock(tree: List[Any], ruleName: String): List[Any] =
+        tree match {
+            case List("BODY", code: String) :: rest =>
+                rules(ruleName).body = "\n" + code.substring(1, code.length - 1)
+                rest
+            case _ =>
+                tree
+        }
 
     def termDef(isFragment: Boolean, ruleName: String, alt: List[Any], 
             addHidden: Boolean) {
@@ -454,7 +460,7 @@ class GrammarGen(posMap: Any => List[Int]) {
             rules(ruleName) = termClass
         }
         g += ruleName + ':'
-        altList(termAction, checkParam(alt, ruleName))
+        altList(termAction, matchCodeBlock(alt, ruleName))
         g += (if (addHidden) "{$channel = HIDDEN;}" else "") + ";\n"
         if (!isFragment) {
             val l = List(ConstructorParam("text", "String", "$_", ""))
@@ -472,7 +478,8 @@ class GrammarGen(posMap: Any => List[Int]) {
             case _ =>
         }
 
-    /** Parses given rule and adds it to global <code>rules</code> map. */
+    /** Parses given rule and adds it to global <code>rules</code> map.
+      * XXX: for terminals, also generates the code. */
     def addToRuleTable(tree: Any) = tree match {
         case "terminal" :: "hidden" :: (name: String) :: alt =>
             checkName(true, "Terminal", name, tree)
