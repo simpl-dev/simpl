@@ -1,0 +1,17 @@
+2:8:Expr {
+  plus=2:8:Plus {
+    left=(null)
+    right=4:8:Mul {
+      left=4:4:IdExpr {
+        id=4:4:Id {
+          text="b"
+        }
+      }
+      right=8:8:IdExpr {
+        id=8:8:Id {
+          text="c"
+        }
+      }
+    }
+  }
+}

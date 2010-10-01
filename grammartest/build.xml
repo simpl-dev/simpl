@@ -29,6 +29,12 @@
                  classname="ee.cyber.simplicitas.parse.GrammarTask"/>
         <grammar src="${basedir}/src/tool/ee/cyber/simplicitas/grammartest/Simpl.spl"
                  destdir="${target}/gen/ee/cyber/simplicitas/grammartest"/>
+        <grammar src="${basedir}/src/tool/ee/cyber/simplicitas/grammartest/Expr.spl"
+                 destdir="${target}/gen/ee/cyber/simplicitas/grammartest"/>
+        <grammar src="${basedir}/src/tool/ee/cyber/simplicitas/grammartest/Fowler.spl"
+                 destdir="${target}/gen/ee/cyber/simplicitas/grammartest"/>
+        <grammar src="${basedir}/src/tool/ee/cyber/simplicitas/grammartest/Fowler2.spl"
+                 destdir="${target}/gen/ee/cyber/simplicitas/grammartest"/>
 
         <!-- compile sources (together with the generated grammar) -->
         <mkdir dir="${target}/classes"/>

@@ -1,0 +1,212 @@
+0:612:Program {
+  machines=List {
+    0:612:Machine {
+      commands=180:267:CommandList {
+        commands=List {
+          191:206:Command {
+            code=203:206:Id {
+              text="PNUL"
+            }
+            name=191:201:Id {
+              text="unlockPanel"
+            }
+          }
+          210:225:Command {
+            code=222:225:Id {
+              text="PNLK"
+            }
+            name=210:218:Id {
+              text="lockPanel"
+            }
+          }
+          229:244:Command {
+            code=241:244:Id {
+              text="D1LK"
+            }
+            name=229:236:Id {
+              text="lockDoor"
+            }
+          }
+          248:263:Command {
+            code=260:263:Id {
+              text="D1UL"
+            }
+            name=248:257:Id {
+              text="unlockDoor"
+            }
+          }
+        }
+      }
+      events=19:123:EventList {
+        events=List {
+          28:43:Event {
+            code=40:43:Id {
+              text="D1CL"
+            }
+            name=28:37:Id {
+              text="doorClosed"
+            }
+          }
+          47:62:Event {
+            code=59:62:Id {
+              text="D2OP"
+            }
+            name=47:56:Id {
+              text="drawOpened"
+            }
+          }
+          66:81:Event {
+            code=78:81:Id {
+              text="L1ON"
+            }
+            name=66:72:Id {
+              text="lightOn"
+            }
+          }
+          85:100:Event {
+            code=97:100:Id {
+              text="D1OP"
+            }
+            name=85:94:Id {
+              text="doorOpened"
+            }
+          }
+          104:119:Event {
+            code=116:119:Id {
+              text="PNCL"
+            }
+            name=104:114:Id {
+              text="panelClosed"
+            }
+          }
+        }
+      }
+      initState=609:612:StateRef {
+        id=609:612:Id {
+          text="idle"
+        }
+      }
+      name=8:16:Id {
+        text="MyMachine"
+      }
+      resetEvents=150:177:ResetEvents {
+        events=List {
+          164:173:EventRef {
+            id=164:173:Id {
+              text="doorOpened"
+            }
+          }
+        }
+      }
+      states=List {
+        (null)
+        332:410:State {
+          actions=List {
+          }
+          name=338:343:Id {
+            text="active"
+          }
+          transitions=List {
+            347:375:Transition {
+              event=347:356:EventRef {
+                id=347:356:Id {
+                  text="drawOpened"
+                }
+              }
+              state=361:375:StateRef {
+                id=361:375:Id {
+                  text="waitingForLight"
+                }
+              }
+            }
+            379:406:Transition {
+              event=379:385:EventRef {
+                id=379:385:Id {
+                  text="lightOn"
+                }
+              }
+              state=393:406:StateRef {
+                id=393:406:Id {
+                  text="waitingForDraw"
+                }
+              }
+            }
+          }
+        }
+        413:464:State {
+          actions=List {
+          }
+          name=419:433:Id {
+            text="waitingForLight"
+          }
+          transitions=List {
+            437:460:Transition {
+              event=437:443:EventRef {
+                id=437:443:Id {
+                  text="lightOn"
+                }
+              }
+              state=448:460:StateRef {
+                id=448:460:Id {
+                  text="unlockedPanel"
+                }
+              }
+            }
+          }
+        }
+        467:521:State {
+          actions=List {
+          }
+          name=473:486:Id {
+            text="waitingForDraw"
+          }
+          transitions=List {
+            491:517:Transition {
+              event=491:500:EventRef {
+                id=491:500:Id {
+                  text="drawOpened"
+                }
+              }
+              state=505:517:StateRef {
+                id=505:517:Id {
+                  text="unlockedPanel"
+                }
+              }
+            }
+          }
+        }
+        524:601:State {
+          actions=List {
+            555:565:CommandRef {
+              id=555:565:Id {
+                text="unlockPanel"
+              }
+            }
+            567:574:CommandRef {
+              id=567:574:Id {
+                text="lockDoor"
+              }
+            }
+          }
+          name=530:542:Id {
+            text="unlockedPanel"
+          }
+          transitions=List {
+            579:597:Transition {
+              event=579:589:EventRef {
+                id=579:589:Id {
+                  text="panelClosed"
+                }
+              }
+              state=594:597:StateRef {
+                id=594:597:Id {
+                  text="idle"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

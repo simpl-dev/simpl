@@ -1,0 +1,167 @@
+0:618:Program {
+  definition=List {
+    0:618:Machine {
+      commands=List {
+        191:206:Command {
+          code=203:206:Id {
+            text="PNUL"
+          }
+          name=191:201:Id {
+            text="unlockPanel"
+          }
+        }
+        210:225:Command {
+          code=222:225:Id {
+            text="PNLK"
+          }
+          name=210:218:Id {
+            text="lockPanel"
+          }
+        }
+        229:244:Command {
+          code=241:244:Id {
+            text="D1LK"
+          }
+          name=229:236:Id {
+            text="lockDoor"
+          }
+        }
+        248:263:Command {
+          code=260:263:Id {
+            text="D1UL"
+          }
+          name=248:257:Id {
+            text="unlockDoor"
+          }
+        }
+      }
+      events=List {
+        28:43:Event {
+          code=40:43:Id {
+            text="D1CL"
+          }
+          name=28:37:Id {
+            text="doorClosed"
+          }
+        }
+        47:62:Event {
+          code=59:62:Id {
+            text="D2OP"
+          }
+          name=47:56:Id {
+            text="drawOpened"
+          }
+        }
+        66:81:Event {
+          code=78:81:Id {
+            text="L1ON"
+          }
+          name=66:72:Id {
+            text="lightOn"
+          }
+        }
+        85:100:Event {
+          code=97:100:Id {
+            text="D1OP"
+          }
+          name=85:94:Id {
+            text="doorOpened"
+          }
+        }
+        104:119:Event {
+          code=116:119:Id {
+            text="PNCL"
+          }
+          name=104:114:Id {
+            text="panelClosed"
+          }
+        }
+      }
+      initState=615:618:Id {
+        text="idle"
+      }
+      name=8:16:Id {
+        text="MyMachine"
+      }
+      resetEvents=List {
+        164:173:Id {
+          text="doorOpened"
+        }
+      }
+      states=List {
+        270:335:State {
+          actions=List {
+            292:301:Id {
+              text="unlockDoor"
+            }
+            303:311:Id {
+              text="lockPanel"
+            }
+          }
+          name=276:279:Id {
+            text="idle"
+          }
+          transitions=List {
+            (null)
+          }
+        }
+        338:416:State {
+          actions=List {
+          }
+          name=344:349:Id {
+            text="active"
+          }
+          transitions=List {
+            353:412:Transition {
+              event=353:362:Id {
+                text="drawOpened"
+              }
+              id=367:381:Id {
+                text="waitingForLight"
+              }
+              state=399:412:Id {
+                text="waitingForDraw"
+              }
+            }
+          }
+        }
+        419:470:State {
+          actions=List {
+          }
+          name=425:439:Id {
+            text="waitingForLight"
+          }
+          transitions=List {
+            (null)
+          }
+        }
+        473:527:State {
+          actions=List {
+          }
+          name=479:492:Id {
+            text="waitingForDraw"
+          }
+          transitions=List {
+            (null)
+          }
+        }
+        530:607:State {
+          actions=List {
+            561:571:Id {
+              text="unlockPanel"
+            }
+            573:580:Id {
+              text="lockDoor"
+            }
+          }
+          name=536:548:Id {
+            text="unlockedPanel"
+          }
+          transitions=List {
+            (null)
+          }
+        }
+      }
+    }
+  }
+}

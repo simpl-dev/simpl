@@ -1,0 +1,41 @@
+grammar ee.cyber.simplicitas.grammartest.fowler2.Fowler2;
+
+options (backtrack=false;)
+
+Program: Definition+;
+
+option Definition{val testing = 0}: Import | Machine | ExternalMachine | STRING;
+
+Import: 'import' importURI=STRING;
+
+ExternalMachine: 'external' Id;
+
+Machine: 'machine'
+    name=Id
+    'events' events=Event+ 'end'
+    ('resetEvents' (resetEvents=Id)+ 'end')?
+    'commands' (commands=Command)+ 'end'
+    states=State+
+    'init' 'skip();' initState=Id;
+
+Event {
+    var whatever = ""
+}: name=Id code=Id;
+
+Command: name=Id code=Id;
+
+State: 'state'
+    name=Id
+     ('actions' '{' actions=Id+ '}')?
+     transitions=Transition*
+     'end';
+
+Transition: event=Id Id '=>' state=Id;
+
+terminal Id: ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')*;
+fragment STR_BODY: ~('\\'|'"') | '\\' .;
+terminal STRING {var doh = 0}:
+'"' STR_BODY* '"' | '\'' STR_BODY* '\'';
+fragment ML_COMMENT: '/*' (~'*' | '*' ~'/')* '*/';
+fragment SL_COMMENT: '//' ~('\n'|'\r')*;
+terminal WS: (' '|'\t'|'\r'|'\n'|SL_COMMENT|ML_COMMENT)+ {skip();} ;

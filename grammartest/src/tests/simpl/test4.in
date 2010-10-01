@@ -1,0 +1,11 @@
+grammar ee.cyber.simplicitas.example.Example;
+
+options(backtrack=true;)
+
+Expr: Plus;
+
+Plus: left=Mul | left=Mul "+" right=Plus;
+
+Mul: left1=IdExpr | left=IdExpr "*" right=Mul;
+
+IdExpr: id=Id;

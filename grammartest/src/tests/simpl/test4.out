@@ -1,0 +1,241 @@
+0:190:GrammarDef {
+  header=0:43:PackageDef {
+    dottedId=8:43:DottedId {
+      head=8:9:Id {
+        text="ee"
+      }
+      tail=List {
+        11:15:Id {
+          text="cyber"
+        }
+        17:27:Id {
+          text="simplicitas"
+        }
+        29:35:Id {
+          text="example"
+        }
+        37:43:Id {
+          text="Example"
+        }
+      }
+    }
+  }
+  opts=47:70:OptionList {
+    name=List {
+      55:63:Id {
+        text="backtrack"
+      }
+    }
+    value=List {
+      65:68:Id {
+        text="true"
+      }
+    }
+  }
+  rules=List {
+    73:83:NonTerminalDef {
+      alt=79:82:AltList {
+        lst=79:82:MatchList {
+          m=List {
+            79:82:Match {
+              modifier=(null)
+              name=(null)
+              token=79:82:MatchToken {
+                alt=(null)
+                ref=79:82:RuleRef {
+                  id=79:82:Id {
+                    text="Plus"
+                  }
+                }
+                str=(null)
+              }
+            }
+          }
+        }
+        lst2=List {
+        }
+      }
+      body=(null)
+      name=73:76:Id {
+        text="Expr"
+      }
+    }
+    86:126:NonTerminalDef {
+      alt=92:125:AltList {
+        lst=92:99:MatchList {
+          m=List {
+            92:99:Match {
+              modifier=(null)
+              name=92:95:Id {
+                text="left"
+              }
+              token=97:99:MatchToken {
+                alt=(null)
+                ref=97:99:RuleRef {
+                  id=97:99:Id {
+                    text="Mul"
+                  }
+                }
+                str=(null)
+              }
+            }
+          }
+        }
+        lst2=List {
+          103:125:MatchList {
+            m=List {
+              103:110:Match {
+                modifier=(null)
+                name=103:106:Id {
+                  text="left"
+                }
+                token=108:110:MatchToken {
+                  alt=(null)
+                  ref=108:110:RuleRef {
+                    id=108:110:Id {
+                      text="Mul"
+                    }
+                  }
+                  str=(null)
+                }
+              }
+              112:114:Match {
+                modifier=(null)
+                name=(null)
+                token=112:114:MatchToken {
+                  alt=(null)
+                  ref=(null)
+                  str=112:114:Str {
+                    text=""+""
+                  }
+                }
+              }
+              116:125:Match {
+                modifier=(null)
+                name=116:120:Id {
+                  text="right"
+                }
+                token=122:125:MatchToken {
+                  alt=(null)
+                  ref=122:125:RuleRef {
+                    id=122:125:Id {
+                      text="Plus"
+                    }
+                  }
+                  str=(null)
+                }
+              }
+            }
+          }
+        }
+      }
+      body=(null)
+      name=86:89:Id {
+        text="Plus"
+      }
+    }
+    129:174:NonTerminalDef {
+      alt=134:173:AltList {
+        lst=134:145:MatchList {
+          m=List {
+            134:145:Match {
+              modifier=(null)
+              name=134:138:Id {
+                text="left1"
+              }
+              token=140:145:MatchToken {
+                alt=(null)
+                ref=140:145:RuleRef {
+                  id=140:145:Id {
+                    text="IdExpr"
+                  }
+                }
+                str=(null)
+              }
+            }
+          }
+        }
+        lst2=List {
+          149:173:MatchList {
+            m=List {
+              149:159:Match {
+                modifier=(null)
+                name=149:152:Id {
+                  text="left"
+                }
+                token=154:159:MatchToken {
+                  alt=(null)
+                  ref=154:159:RuleRef {
+                    id=154:159:Id {
+                      text="IdExpr"
+                    }
+                  }
+                  str=(null)
+                }
+              }
+              161:163:Match {
+                modifier=(null)
+                name=(null)
+                token=161:163:MatchToken {
+                  alt=(null)
+                  ref=(null)
+                  str=161:163:Str {
+                    text=""*""
+                  }
+                }
+              }
+              165:173:Match {
+                modifier=(null)
+                name=165:169:Id {
+                  text="right"
+                }
+                token=171:173:MatchToken {
+                  alt=(null)
+                  ref=171:173:RuleRef {
+                    id=171:173:Id {
+                      text="Mul"
+                    }
+                  }
+                  str=(null)
+                }
+              }
+            }
+          }
+        }
+      }
+      body=(null)
+      name=129:131:Id {
+        text="Mul"
+      }
+    }
+    177:190:NonTerminalDef {
+      alt=185:189:AltList {
+        lst=185:189:MatchList {
+          m=List {
+            185:189:Match {
+              modifier=(null)
+              name=185:186:Id {
+                text="id"
+              }
+              token=188:189:MatchToken {
+                alt=(null)
+                ref=188:189:RuleRef {
+                  id=188:189:Id {
+                    text="Id"
+                  }
+                }
+                str=(null)
+              }
+            }
+          }
+        }
+        lst2=List {
+        }
+      }
+      body=(null)
+      name=177:182:Id {
+        text="IdExpr"
+      }
+    }
+  }
+}
