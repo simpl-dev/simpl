@@ -22,12 +22,12 @@ object Main {
     def runGrammar(name: String, dir: File) {
         val className = "ee.cyber.simplicitas.grammartest." + name +
                 "." + name.capitalize + "Grammar"
-        val constructor = Class.forName(className).getConstructor(null)
+        val constructor = Class.forName(className).getConstructor()
 
         for (testFile <- dir.listFiles if testFile.getName.endsWith(".in")) {
             println("Running grammar " + name + " for file " + testFile.getName)
 
-            val grammar = constructor.newInstance(null)
+            val grammar = constructor.newInstance()
                     .asInstanceOf[GenericGrammar]
             grammar.parseFile(testFile.getAbsolutePath)
             val dumped = dumpNode(grammar.tree)

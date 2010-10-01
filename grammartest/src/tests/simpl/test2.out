@@ -1,0 +1,657 @@
+0:423:GrammarDef {
+  header=0:49:PackageDef {
+    dottedId=8:49:DottedId {
+      head=8:9:Id {
+        text="ee"
+      }
+      tail=List {
+        11:15:Id {
+          text="cyber"
+        }
+        17:27:Id {
+          text="simplicitas"
+        }
+        29:39:Id {
+          text="grammartest"
+        }
+        41:44:Id {
+          text="expr"
+        }
+        46:49:Id {
+          text="Expr"
+        }
+      }
+    }
+  }
+  opts=(null)
+  rules=List {
+    53:63:NonTerminalDef {
+      alt=59:62:AltList {
+        lst=59:62:MatchList {
+          m=List {
+            59:62:Match {
+              modifier=(null)
+              name=(null)
+              token=59:62:MatchToken {
+                alt=(null)
+                ref=59:62:RuleRef {
+                  id=59:62:Id {
+                    text="Plus"
+                  }
+                }
+                str=(null)
+              }
+            }
+          }
+        }
+        lst2=List {
+        }
+      }
+      body=(null)
+      name=53:56:Id {
+        text="Expr"
+      }
+    }
+    66:97:NonTerminalDef {
+      alt=72:96:AltList {
+        lst=72:96:MatchList {
+          m=List {
+            72:79:Match {
+              modifier=(null)
+              name=72:75:Id {
+                text="left"
+              }
+              token=77:79:MatchToken {
+                alt=(null)
+                ref=77:79:RuleRef {
+                  id=77:79:Id {
+                    text="Mul"
+                  }
+                }
+                str=(null)
+              }
+            }
+            81:96:Match {
+              modifier=96:96:Modifier {
+                text="*"
+              }
+              name=(null)
+              token=81:95:MatchToken {
+                alt=82:94:AltList {
+                  lst=82:94:MatchList {
+                    m=List {
+                      82:84:Match {
+                        modifier=(null)
+                        name=(null)
+                        token=82:84:MatchToken {
+                          alt=(null)
+                          ref=(null)
+                          str=82:84:Str {
+                            text=""+""
+                          }
+                        }
+                      }
+                      86:94:Match {
+                        modifier=(null)
+                        name=86:90:Id {
+                          text="right"
+                        }
+                        token=92:94:MatchToken {
+                          alt=(null)
+                          ref=92:94:RuleRef {
+                            id=92:94:Id {
+                              text="Mul"
+                            }
+                          }
+                          str=(null)
+                        }
+                      }
+                    }
+                  }
+                  lst2=List {
+                  }
+                }
+                ref=(null)
+                str=(null)
+              }
+            }
+          }
+        }
+        lst2=List {
+        }
+      }
+      body=(null)
+      name=66:69:Id {
+        text="Plus"
+      }
+    }
+    100:133:NonTerminalDef {
+      alt=105:132:AltList {
+        lst=105:132:MatchList {
+          m=List {
+            105:115:Match {
+              modifier=(null)
+              name=105:108:Id {
+                text="left"
+              }
+              token=110:115:MatchToken {
+                alt=(null)
+                ref=110:115:RuleRef {
+                  id=110:115:Id {
+                    text="IdExpr"
+                  }
+                }
+                str=(null)
+              }
+            }
+            117:119:Match {
+              modifier=(null)
+              name=(null)
+              token=117:119:MatchToken {
+                alt=(null)
+                ref=(null)
+                str=117:119:Str {
+                  text=""*""
+                }
+              }
+            }
+            121:132:Match {
+              modifier=(null)
+              name=121:125:Id {
+                text="right"
+              }
+              token=127:132:MatchToken {
+                alt=(null)
+                ref=127:132:RuleRef {
+                  id=127:132:Id {
+                    text="IdExpr"
+                  }
+                }
+                str=(null)
+              }
+            }
+          }
+        }
+        lst2=List {
+        }
+      }
+      body=(null)
+      name=100:102:Id {
+        text="Mul"
+      }
+    }
+    135:148:NonTerminalDef {
+      alt=143:147:AltList {
+        lst=143:147:MatchList {
+          m=List {
+            143:147:Match {
+              modifier=(null)
+              name=143:144:Id {
+                text="id"
+              }
+              token=146:147:MatchToken {
+                alt=(null)
+                ref=146:147:RuleRef {
+                  id=146:147:Id {
+                    text="Id"
+                  }
+                }
+                str=(null)
+              }
+            }
+          }
+        }
+        lst2=List {
+        }
+      }
+      body=(null)
+      name=135:140:Id {
+        text="IdExpr"
+      }
+    }
+    196:266:TerminalDef {
+      body=(null)
+      name=205:206:Id {
+        text="Id"
+      }
+      params=(null)
+      pattern=209:265:Pattern {
+        lst=209:265:TermList {
+          termMatch=List {
+            209:231:TermMatch {
+              code=List {
+              }
+              inv=(null)
+              modifier=(null)
+              t=209:231:TerminalList {
+                pattern=210:230:Pattern {
+                  lst=210:217:TermList {
+                    termMatch=List {
+                      210:217:TermMatch {
+                        code=List {
+                        }
+                        inv=(null)
+                        modifier=(null)
+                        t=210:217:TerminalRange {
+                          end=215:217:Str {
+                            text="'z'"
+                          }
+                          start=210:212:Str {
+                            text="'a'"
+                          }
+                        }
+                      }
+                    }
+                  }
+                  lst2=List {
+                    219:226:TermList {
+                      termMatch=List {
+                        219:226:TermMatch {
+                          code=List {
+                          }
+                          inv=(null)
+                          modifier=(null)
+                          t=219:226:TerminalRange {
+                            end=224:226:Str {
+                              text="'Z'"
+                            }
+                            start=219:221:Str {
+                              text="'A'"
+                            }
+                          }
+                        }
+                      }
+                    }
+                    228:230:TermList {
+                      termMatch=List {
+                        228:230:TermMatch {
+                          code=List {
+                          }
+                          inv=(null)
+                          modifier=(null)
+                          t=228:230:TerminalLiteral {
+                            str=228:230:Str {
+                              text="'_'"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            233:265:TermMatch {
+              code=List {
+              }
+              inv=(null)
+              modifier=265:265:Modifier {
+                text="*"
+              }
+              t=233:264:TerminalList {
+                pattern=234:263:Pattern {
+                  lst=234:241:TermList {
+                    termMatch=List {
+                      234:241:TermMatch {
+                        code=List {
+                        }
+                        inv=(null)
+                        modifier=(null)
+                        t=234:241:TerminalRange {
+                          end=239:241:Str {
+                            text="'z'"
+                          }
+                          start=234:236:Str {
+                            text="'a'"
+                          }
+                        }
+                      }
+                    }
+                  }
+                  lst2=List {
+                    243:250:TermList {
+                      termMatch=List {
+                        243:250:TermMatch {
+                          code=List {
+                          }
+                          inv=(null)
+                          modifier=(null)
+                          t=243:250:TerminalRange {
+                            end=248:250:Str {
+                              text="'Z'"
+                            }
+                            start=243:245:Str {
+                              text="'A'"
+                            }
+                          }
+                        }
+                      }
+                    }
+                    252:254:TermList {
+                      termMatch=List {
+                        252:254:TermMatch {
+                          code=List {
+                          }
+                          inv=(null)
+                          modifier=(null)
+                          t=252:254:TerminalLiteral {
+                            str=252:254:Str {
+                              text="'_'"
+                            }
+                          }
+                        }
+                      }
+                    }
+                    256:263:TermList {
+                      termMatch=List {
+                        256:263:TermMatch {
+                          code=List {
+                          }
+                          inv=(null)
+                          modifier=(null)
+                          t=256:263:TerminalRange {
+                            end=261:263:Str {
+                              text="'9'"
+                            }
+                            start=256:258:Str {
+                              text="'0'"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        lst2=List {
+        }
+      }
+    }
+    268:317:FragmentDef {
+      name=277:286:Id {
+        text="ML_COMMENT"
+      }
+      pattern=289:316:Pattern {
+        lst=289:316:TermList {
+          termMatch=List {
+            289:292:TermMatch {
+              code=List {
+              }
+              inv=(null)
+              modifier=(null)
+              t=289:292:TerminalLiteral {
+                str=289:292:Str {
+                  text="'/*'"
+                }
+              }
+            }
+            294:311:TermMatch {
+              code=List {
+              }
+              inv=(null)
+              modifier=311:311:Modifier {
+                text="*"
+              }
+              t=294:310:TerminalList {
+                pattern=295:309:Pattern {
+                  lst=295:298:TermList {
+                    termMatch=List {
+                      295:298:TermMatch {
+                        code=List {
+                        }
+                        inv=295:295:Tilde {
+                          text="~"
+                        }
+                        modifier=(null)
+                        t=296:298:TerminalLiteral {
+                          str=296:298:Str {
+                            text="'*'"
+                          }
+                        }
+                      }
+                    }
+                  }
+                  lst2=List {
+                    302:309:TermList {
+                      termMatch=List {
+                        302:304:TermMatch {
+                          code=List {
+                          }
+                          inv=(null)
+                          modifier=(null)
+                          t=302:304:TerminalLiteral {
+                            str=302:304:Str {
+                              text="'*'"
+                            }
+                          }
+                        }
+                        306:309:TermMatch {
+                          code=List {
+                          }
+                          inv=306:306:Tilde {
+                            text="~"
+                          }
+                          modifier=(null)
+                          t=307:309:TerminalLiteral {
+                            str=307:309:Str {
+                              text="'/'"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            313:316:TermMatch {
+              code=List {
+              }
+              inv=(null)
+              modifier=(null)
+              t=313:316:TerminalLiteral {
+                str=313:316:Str {
+                  text="'*/'"
+                }
+              }
+            }
+          }
+        }
+        lst2=List {
+        }
+      }
+    }
+    319:358:FragmentDef {
+      name=328:337:Id {
+        text="SL_COMMENT"
+      }
+      pattern=340:357:Pattern {
+        lst=340:357:TermList {
+          termMatch=List {
+            340:343:TermMatch {
+              code=List {
+              }
+              inv=(null)
+              modifier=(null)
+              t=340:343:TerminalLiteral {
+                str=340:343:Str {
+                  text="'//'"
+                }
+              }
+            }
+            345:357:TermMatch {
+              code=List {
+              }
+              inv=345:345:Tilde {
+                text="~"
+              }
+              modifier=357:357:Modifier {
+                text="*"
+              }
+              t=346:356:TerminalList {
+                pattern=347:355:Pattern {
+                  lst=347:350:TermList {
+                    termMatch=List {
+                      347:350:TermMatch {
+                        code=List {
+                        }
+                        inv=(null)
+                        modifier=(null)
+                        t=347:350:TerminalLiteral {
+                          str=347:350:Str {
+                            text="'\n'"
+                          }
+                        }
+                      }
+                    }
+                  }
+                  lst2=List {
+                    352:355:TermList {
+                      termMatch=List {
+                        352:355:TermMatch {
+                          code=List {
+                          }
+                          inv=(null)
+                          modifier=(null)
+                          t=352:355:TerminalLiteral {
+                            str=352:355:Str {
+                              text="'\r'"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        lst2=List {
+        }
+      }
+    }
+    360:423:TerminalDef {
+      body=(null)
+      name=376:377:Id {
+        text="WS"
+      }
+      params=(null)
+      pattern=380:422:Pattern {
+        lst=380:422:TermList {
+          termMatch=List {
+            380:422:TermMatch {
+              code=List {
+              }
+              inv=(null)
+              modifier=422:422:Modifier {
+                text="+"
+              }
+              t=380:421:TerminalList {
+                pattern=381:420:Pattern {
+                  lst=381:383:TermList {
+                    termMatch=List {
+                      381:383:TermMatch {
+                        code=List {
+                        }
+                        inv=(null)
+                        modifier=(null)
+                        t=381:383:TerminalLiteral {
+                          str=381:383:Str {
+                            text="' '"
+                          }
+                        }
+                      }
+                    }
+                  }
+                  lst2=List {
+                    385:388:TermList {
+                      termMatch=List {
+                        385:388:TermMatch {
+                          code=List {
+                          }
+                          inv=(null)
+                          modifier=(null)
+                          t=385:388:TerminalLiteral {
+                            str=385:388:Str {
+                              text="'\t'"
+                            }
+                          }
+                        }
+                      }
+                    }
+                    390:393:TermList {
+                      termMatch=List {
+                        390:393:TermMatch {
+                          code=List {
+                          }
+                          inv=(null)
+                          modifier=(null)
+                          t=390:393:TerminalLiteral {
+                            str=390:393:Str {
+                              text="'\r'"
+                            }
+                          }
+                        }
+                      }
+                    }
+                    395:398:TermList {
+                      termMatch=List {
+                        395:398:TermMatch {
+                          code=List {
+                          }
+                          inv=(null)
+                          modifier=(null)
+                          t=395:398:TerminalLiteral {
+                            str=395:398:Str {
+                              text="'\n'"
+                            }
+                          }
+                        }
+                      }
+                    }
+                    400:409:TermList {
+                      termMatch=List {
+                        400:409:TermMatch {
+                          code=List {
+                          }
+                          inv=(null)
+                          modifier=(null)
+                          t=400:409:FragmentRef {
+                            id=400:409:Id {
+                              text="SL_COMMENT"
+                            }
+                          }
+                        }
+                      }
+                    }
+                    411:420:TermList {
+                      termMatch=List {
+                        411:420:TermMatch {
+                          code=List {
+                          }
+                          inv=(null)
+                          modifier=(null)
+                          t=411:420:FragmentRef {
+                            id=411:420:Id {
+                              text="ML_COMMENT"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        lst2=List {
+        }
+      }
+    }
+  }
+}
