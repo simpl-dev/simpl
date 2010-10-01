@@ -1,1 +1,2669 @@
-0:3821:GrammarDef
+0:3821:GrammarDef {
+  header=0:37:PackageDef {
+    dottedId=8:37:DottedId {
+      head=8:9:Id {
+        text="ee"
+      }
+      tail=List {
+        11:15:Id {
+          text="cyber"
+        }
+        17:27:Id {
+          text="simplicitas"
+        }
+        29:31:Id {
+          text="ide"
+        }
+        33:37:Id {
+          text="Simpl"
+        }
+      }
+    }
+  }
+  opts=41:79:OptionList {
+    name=List {
+      50:58:Id {
+        text="backtrack"
+      }
+      66:72:Id {
+        text="memoize"
+      }
+    }
+    value=List {
+      60:63:Id {
+        text="true"
+      }
+      74:77:Id {
+        text="true"
+      }
+    }
+  }
+  rules=List {
+    209:274:NonTerminalDef {
+      alt=221:273:AltList {
+        lst=221:273:MatchList {
+          m=List {
+            221:237:Match {
+              modifier=(null)
+              name=221:226:Id {
+                text="header"
+              }
+              token=228:237:MatchToken {
+                alt=(null)
+                ref=228:237:RuleRef {
+                  id=228:237:Id {
+                    text="PackageDef"
+                  }
+                }
+                str=(null)
+              }
+            }
+            239:241:Match {
+              modifier=(null)
+              name=(null)
+              token=239:241:MatchToken {
+                alt=(null)
+                ref=(null)
+                str=239:241:Str {
+                  text="';'"
+                }
+              }
+            }
+            243:258:Match {
+              modifier=258:258:Modifier {
+                text="?"
+              }
+              name=243:246:Id {
+                text="opts"
+              }
+              token=248:257:MatchToken {
+                alt=(null)
+                ref=248:257:RuleRef {
+                  id=248:257:Id {
+                    text="OptionList"
+                  }
+                }
+                str=(null)
+              }
+            }
+            260:273:Match {
+              modifier=273:273:Modifier {
+                text="+"
+              }
+              name=260:264:Id {
+                text="rules"
+              }
+              token=266:272:MatchToken {
+                alt=(null)
+                ref=266:272:RuleRef {
+                  id=266:272:Id {
+                    text="RuleDef"
+                  }
+                }
+                str=(null)
+              }
+            }
+          }
+        }
+        lst2=List {
+        }
+      }
+      body=(null)
+      name=209:218:Id {
+        text="GrammarDef"
+      }
+    }
+    378:408:NonTerminalDef {
+      alt=390:407:AltList {
+        lst=390:407:MatchList {
+          m=List {
+            390:398:Match {
+              modifier=(null)
+              name=(null)
+              token=390:398:MatchToken {
+                alt=(null)
+                ref=(null)
+                str=390:398:Str {
+                  text="'grammar'"
+                }
+              }
+            }
+            400:407:Match {
+              modifier=(null)
+              name=(null)
+              token=400:407:MatchToken {
+                alt=(null)
+                ref=400:407:RuleRef {
+                  id=400:407:Id {
+                    text="DottedId"
+                  }
+                }
+                str=(null)
+              }
+            }
+          }
+        }
+        lst2=List {
+        }
+      }
+      body=(null)
+      name=378:387:Id {
+        text="PackageDef"
+      }
+    }
+    485:542:NonTerminalDef {
+      alt=497:541:AltList {
+        lst=497:541:MatchList {
+          m=List {
+            497:505:Match {
+              modifier=(null)
+              name=(null)
+              token=497:505:MatchToken {
+                alt=(null)
+                ref=(null)
+                str=497:505:Str {
+                  text=""options""
+                }
+              }
+            }
+            507:509:Match {
+              modifier=(null)
+              name=(null)
+              token=507:509:MatchToken {
+                alt=(null)
+                ref=(null)
+                str=507:509:Str {
+                  text=""(""
+                }
+              }
+            }
+            511:537:Match {
+              modifier=537:537:Modifier {
+                text="*"
+              }
+              name=(null)
+              token=511:536:MatchToken {
+                alt=512:535:AltList {
+                  lst=512:535:MatchList {
+                    m=List {
+                      512:518:Match {
+                        modifier=(null)
+                        name=512:515:Id {
+                          text="name"
+                        }
+                        token=517:518:MatchToken {
+                          alt=(null)
+                          ref=517:518:RuleRef {
+                            id=517:518:Id {
+                              text="Id"
+                            }
+                          }
+                          str=(null)
+                        }
+                      }
+                      520:522:Match {
+                        modifier=(null)
+                        name=(null)
+                        token=520:522:MatchToken {
+                          alt=(null)
+                          ref=(null)
+                          str=520:522:Str {
+                            text=""=""
+                          }
+                        }
+                      }
+                      524:531:Match {
+                        modifier=(null)
+                        name=524:528:Id {
+                          text="value"
+                        }
+                        token=530:531:MatchToken {
+                          alt=(null)
+                          ref=530:531:RuleRef {
+                            id=530:531:Id {
+                              text="Id"
+                            }
+                          }
+                          str=(null)
+                        }
+                      }
+                      533:535:Match {
+                        modifier=(null)
+                        name=(null)
+                        token=533:535:MatchToken {
+                          alt=(null)
+                          ref=(null)
+                          str=533:535:Str {
+                            text="";""
+                          }
+                        }
+                      }
+                    }
+                  }
+                  lst2=List {
+                  }
+                }
+                ref=(null)
+                str=(null)
+              }
+            }
+            539:541:Match {
+              modifier=(null)
+              name=(null)
+              token=539:541:MatchToken {
+                alt=(null)
+                ref=(null)
+                str=539:541:Str {
+                  text="")""
+                }
+              }
+            }
+          }
+        }
+        lst2=List {
+        }
+      }
+      body=(null)
+      name=485:494:Id {
+        text="OptionList"
+      }
+    }
+    602:694:NonTerminalDef {
+      alt=672:693:AltList {
+        lst=672:693:MatchList {
+          m=List {
+            672:678:Match {
+              modifier=(null)
+              name=672:675:Id {
+                text="head"
+              }
+              token=677:678:MatchToken {
+                alt=(null)
+                ref=677:678:RuleRef {
+                  id=677:678:Id {
+                    text="Id"
+                  }
+                }
+                str=(null)
+              }
+            }
+            680:693:Match {
+              modifier=693:693:Modifier {
+                text="*"
+              }
+              name=(null)
+              token=680:692:MatchToken {
+                alt=681:691:AltList {
+                  lst=681:691:MatchList {
+                    m=List {
+                      681:683:Match {
+                        modifier=(null)
+                        name=(null)
+                        token=681:683:MatchToken {
+                          alt=(null)
+                          ref=(null)
+                          str=681:683:Str {
+                            text="'.'"
+                          }
+                        }
+                      }
+                      685:691:Match {
+                        modifier=(null)
+                        name=685:688:Id {
+                          text="tail"
+                        }
+                        token=690:691:MatchToken {
+                          alt=(null)
+                          ref=690:691:RuleRef {
+                            id=690:691:Id {
+                              text="Id"
+                            }
+                          }
+                          str=(null)
+                        }
+                      }
+                    }
+                  }
+                  lst2=List {
+                  }
+                }
+                ref=(null)
+                str=(null)
+              }
+            }
+          }
+        }
+        lst2=List {
+        }
+      }
+      body=611:669:Code {
+        text="{
+    def text = (head :: tail) map(_.text) mkString(".")
+}"
+      }
+      name=602:609:Id {
+        text="DottedId"
+      }
+    }
+    838:981:OptionDef {
+      alts=915:925:RuleRef {
+        id=915:925:Id {
+          text="TerminalDef"
+        }
+      }
+      alts2=List {
+        933:943:RuleRef {
+          id=933:943:Id {
+            text="FragmentDef"
+          }
+        }
+        951:959:RuleRef {
+          id=951:959:Id {
+            text="OptionDef"
+          }
+        }
+        967:980:RuleRef {
+          id=967:980:Id {
+            text="NonTerminalDef"
+          }
+        }
+      }
+      body=853:909:Code {
+        text="{
+    def name: Id
+    var documentation: String = null
+}"
+      }
+      name=845:851:Id {
+        text="RuleDef"
+      }
+    }
+    1245:1344:NonTerminalDef {
+      alt=1258:1343:AltList {
+        lst=1258:1343:MatchList {
+          m=List {
+            1258:1266:Match {
+              modifier=1266:1266:Modifier {
+                text="?"
+              }
+              name=(null)
+              token=1258:1265:MatchToken {
+                alt=(null)
+                ref=(null)
+                str=1258:1265:Str {
+                  text="'hidden'"
+                }
+              }
+            }
+            1268:1277:Match {
+              modifier=(null)
+              name=(null)
+              token=1268:1277:MatchToken {
+                alt=(null)
+                ref=(null)
+                str=1268:1277:Str {
+                  text="'terminal'"
+                }
+              }
+            }
+            1279:1285:Match {
+              modifier=(null)
+              name=1279:1282:Id {
+                text="name"
+              }
+              token=1284:1285:MatchToken {
+                alt=(null)
+                ref=1284:1285:RuleRef {
+                  id=1284:1285:Id {
+                    text="Id"
+                  }
+                }
+                str=(null)
+              }
+            }
+            1287:1304:Match {
+              modifier=1304:1304:Modifier {
+                text="?"
+              }
+              name=1287:1292:Id {
+                text="params"
+              }
+              token=1294:1303:MatchToken {
+                alt=(null)
+                ref=1294:1303:RuleRef {
+                  id=1294:1303:Id {
+                    text="TermParams"
+                  }
+                }
+                str=(null)
+              }
+            }
+            1306:1315:Match {
+              modifier=1315:1315:Modifier {
+                text="?"
+              }
+              name=1306:1309:Id {
+                text="body"
+              }
+              token=1311:1314:MatchToken {
+                alt=(null)
+                ref=1311:1314:RuleRef {
+                  id=1311:1314:Id {
+                    text="Code"
+                  }
+                }
+                str=(null)
+              }
+            }
+            1317:1319:Match {
+              modifier=(null)
+              name=(null)
+              token=1317:1319:MatchToken {
+                alt=(null)
+                ref=(null)
+                str=1317:1319:Str {
+                  text="':'"
+                }
+              }
+            }
+            1325:1339:Match {
+              modifier=(null)
+              name=1325:1331:Id {
+                text="pattern"
+              }
+              token=1333:1339:MatchToken {
+                alt=(null)
+                ref=1333:1339:RuleRef {
+                  id=1333:1339:Id {
+                    text="Pattern"
+                  }
+                }
+                str=(null)
+              }
+            }
+            1341:1343:Match {
+              modifier=(null)
+              name=(null)
+              token=1341:1343:MatchToken {
+                alt=(null)
+                ref=(null)
+                str=1341:1343:Str {
+                  text="';'"
+                }
+              }
+            }
+          }
+        }
+        lst2=List {
+        }
+      }
+      body=(null)
+      name=1245:1255:Id {
+        text="TerminalDef"
+      }
+    }
+    1413:1482:OptionDef {
+      alts=1461:1467:RuleRef {
+        id=1461:1467:Id {
+          text="RuleRef"
+        }
+      }
+      alts2=List {
+        1471:1481:RuleRef {
+          id=1471:1481:Id {
+            text="FragmentRef"
+          }
+        }
+      }
+      body=1424:1458:Code {
+        text="{
+    var ref: RuleDef = null
+    }"
+      }
+      name=1420:1422:Id {
+        text="Ref"
+      }
+    }
+    1586:1597:NonTerminalDef {
+      alt=1595:1596:AltList {
+        lst=1595:1596:MatchList {
+          m=List {
+            1595:1596:Match {
+              modifier=(null)
+              name=(null)
+              token=1595:1596:MatchToken {
+                alt=(null)
+                ref=1595:1596:RuleRef {
+                  id=1595:1596:Id {
+                    text="Id"
+                  }
+                }
+                str=(null)
+              }
+            }
+          }
+        }
+        lst2=List {
+        }
+      }
+      body=(null)
+      name=1586:1592:Id {
+        text="RuleRef"
+      }
+    }
+    1740:1795:NonTerminalDef {
+      alt=1753:1794:AltList {
+        lst=1753:1794:MatchList {
+          m=List {
+            1753:1762:Match {
+              modifier=(null)
+              name=(null)
+              token=1753:1762:MatchToken {
+                alt=(null)
+                ref=(null)
+                str=1753:1762:Str {
+                  text="'fragment'"
+                }
+              }
+            }
+            1764:1770:Match {
+              modifier=(null)
+              name=1764:1767:Id {
+                text="name"
+              }
+              token=1769:1770:MatchToken {
+                alt=(null)
+                ref=1769:1770:RuleRef {
+                  id=1769:1770:Id {
+                    text="Id"
+                  }
+                }
+                str=(null)
+              }
+            }
+            1772:1774:Match {
+              modifier=(null)
+              name=(null)
+              token=1772:1774:MatchToken {
+                alt=(null)
+                ref=(null)
+                str=1772:1774:Str {
+                  text="':'"
+                }
+              }
+            }
+            1776:1790:Match {
+              modifier=(null)
+              name=1776:1782:Id {
+                text="pattern"
+              }
+              token=1784:1790:MatchToken {
+                alt=(null)
+                ref=1784:1790:RuleRef {
+                  id=1784:1790:Id {
+                    text="Pattern"
+                  }
+                }
+                str=(null)
+              }
+            }
+            1792:1794:Match {
+              modifier=(null)
+              name=(null)
+              token=1792:1794:MatchToken {
+                alt=(null)
+                ref=(null)
+                str=1792:1794:Str {
+                  text="';'"
+                }
+              }
+            }
+          }
+        }
+        lst2=List {
+        }
+      }
+      body=(null)
+      name=1740:1750:Id {
+        text="FragmentDef"
+      }
+    }
+    1912:1996:NonTerminalDef {
+      alt=1923:1995:AltList {
+        lst=1923:1995:MatchList {
+          m=List {
+            1923:1930:Match {
+              modifier=(null)
+              name=(null)
+              token=1923:1930:MatchToken {
+                alt=(null)
+                ref=(null)
+                str=1923:1930:Str {
+                  text="'option'"
+                }
+              }
+            }
+            1932:1938:Match {
+              modifier=(null)
+              name=1932:1935:Id {
+                text="name"
+              }
+              token=1937:1938:MatchToken {
+                alt=(null)
+                ref=1937:1938:RuleRef {
+                  id=1937:1938:Id {
+                    text="Id"
+                  }
+                }
+                str=(null)
+              }
+            }
+            1940:1949:Match {
+              modifier=1949:1949:Modifier {
+                text="?"
+              }
+              name=1940:1943:Id {
+                text="body"
+              }
+              token=1945:1948:MatchToken {
+                alt=(null)
+                ref=1945:1948:RuleRef {
+                  id=1945:1948:Id {
+                    text="Code"
+                  }
+                }
+                str=(null)
+              }
+            }
+            1951:1953:Match {
+              modifier=(null)
+              name=(null)
+              token=1951:1953:MatchToken {
+                alt=(null)
+                ref=(null)
+                str=1951:1953:Str {
+                  text="':'"
+                }
+              }
+            }
+            1959:1970:Match {
+              modifier=(null)
+              name=1959:1962:Id {
+                text="alts"
+              }
+              token=1964:1970:MatchToken {
+                alt=(null)
+                ref=1964:1970:RuleRef {
+                  id=1964:1970:Id {
+                    text="RuleRef"
+                  }
+                }
+                str=(null)
+              }
+            }
+            1972:1991:Match {
+              modifier=1991:1991:Modifier {
+                text="*"
+              }
+              name=(null)
+              token=1972:1990:MatchToken {
+                alt=1973:1989:AltList {
+                  lst=1973:1989:MatchList {
+                    m=List {
+                      1973:1975:Match {
+                        modifier=(null)
+                        name=(null)
+                        token=1973:1975:MatchToken {
+                          alt=(null)
+                          ref=(null)
+                          str=1973:1975:Str {
+                            text="'|'"
+                          }
+                        }
+                      }
+                      1977:1989:Match {
+                        modifier=(null)
+                        name=1977:1981:Id {
+                          text="alts2"
+                        }
+                        token=1983:1989:MatchToken {
+                          alt=(null)
+                          ref=1983:1989:RuleRef {
+                            id=1983:1989:Id {
+                              text="RuleRef"
+                            }
+                          }
+                          str=(null)
+                        }
+                      }
+                    }
+                  }
+                  lst2=List {
+                  }
+                }
+                ref=(null)
+                str=(null)
+              }
+            }
+            1993:1995:Match {
+              modifier=(null)
+              name=(null)
+              token=1993:1995:MatchToken {
+                alt=(null)
+                ref=(null)
+                str=1993:1995:Str {
+                  text="';'"
+                }
+              }
+            }
+          }
+        }
+        lst2=List {
+        }
+      }
+      body=(null)
+      name=1912:1920:Id {
+        text="OptionDef"
+      }
+    }
+    2033:2087:NonTerminalDef {
+      alt=2049:2086:AltList {
+        lst=2049:2086:MatchList {
+          m=List {
+            2049:2055:Match {
+              modifier=(null)
+              name=2049:2052:Id {
+                text="name"
+              }
+              token=2054:2055:MatchToken {
+                alt=(null)
+                ref=2054:2055:RuleRef {
+                  id=2054:2055:Id {
+                    text="Id"
+                  }
+                }
+                str=(null)
+              }
+            }
+            2057:2066:Match {
+              modifier=2066:2066:Modifier {
+                text="?"
+              }
+              name=2057:2060:Id {
+                text="body"
+              }
+              token=2062:2065:MatchToken {
+                alt=(null)
+                ref=2062:2065:RuleRef {
+                  id=2062:2065:Id {
+                    text="Code"
+                  }
+                }
+                str=(null)
+              }
+            }
+            2068:2070:Match {
+              modifier=(null)
+              name=(null)
+              token=2068:2070:MatchToken {
+                alt=(null)
+                ref=(null)
+                str=2068:2070:Str {
+                  text="':'"
+                }
+              }
+            }
+            2072:2082:Match {
+              modifier=(null)
+              name=2072:2074:Id {
+                text="alt"
+              }
+              token=2076:2082:MatchToken {
+                alt=(null)
+                ref=2076:2082:RuleRef {
+                  id=2076:2082:Id {
+                    text="AltList"
+                  }
+                }
+                str=(null)
+              }
+            }
+            2084:2086:Match {
+              modifier=(null)
+              name=(null)
+              token=2084:2086:MatchToken {
+                alt=(null)
+                ref=(null)
+                str=2084:2086:Str {
+                  text="';'"
+                }
+              }
+            }
+          }
+        }
+        lst2=List {
+        }
+      }
+      body=(null)
+      name=2033:2046:Id {
+        text="NonTerminalDef"
+      }
+    }
+    2148:2192:NonTerminalDef {
+      alt=2157:2191:AltList {
+        lst=2157:2191:MatchList {
+          m=List {
+            2157:2169:Match {
+              modifier=(null)
+              name=2157:2159:Id {
+                text="lst"
+              }
+              token=2161:2169:MatchToken {
+                alt=(null)
+                ref=2161:2169:RuleRef {
+                  id=2161:2169:Id {
+                    text="MatchList"
+                  }
+                }
+                str=(null)
+              }
+            }
+            2171:2191:Match {
+              modifier=2191:2191:Modifier {
+                text="*"
+              }
+              name=(null)
+              token=2171:2190:MatchToken {
+                alt=2172:2189:AltList {
+                  lst=2172:2189:MatchList {
+                    m=List {
+                      2172:2174:Match {
+                        modifier=(null)
+                        name=(null)
+                        token=2172:2174:MatchToken {
+                          alt=(null)
+                          ref=(null)
+                          str=2172:2174:Str {
+                            text="'|'"
+                          }
+                        }
+                      }
+                      2176:2189:Match {
+                        modifier=(null)
+                        name=2176:2179:Id {
+                          text="lst2"
+                        }
+                        token=2181:2189:MatchToken {
+                          alt=(null)
+                          ref=2181:2189:RuleRef {
+                            id=2181:2189:Id {
+                              text="MatchList"
+                            }
+                          }
+                          str=(null)
+                        }
+                      }
+                    }
+                  }
+                  lst2=List {
+                  }
+                }
+                ref=(null)
+                str=(null)
+              }
+            }
+          }
+        }
+        lst2=List {
+        }
+      }
+      body=(null)
+      name=2148:2154:Id {
+        text="AltList"
+      }
+    }
+    2194:2213:NonTerminalDef {
+      alt=2205:2212:AltList {
+        lst=2205:2212:MatchList {
+          m=List {
+            2205:2212:Match {
+              modifier=2212:2212:Modifier {
+                text="+"
+              }
+              name=2205:2205:Id {
+                text="m"
+              }
+              token=2207:2211:MatchToken {
+                alt=(null)
+                ref=2207:2211:RuleRef {
+                  id=2207:2211:Id {
+                    text="Match"
+                  }
+                }
+                str=(null)
+              }
+            }
+          }
+        }
+        lst2=List {
+        }
+      }
+      body=(null)
+      name=2194:2202:Id {
+        text="MatchList"
+      }
+    }
+    2215:2272:NonTerminalDef {
+      alt=2222:2271:AltList {
+        lst=2222:2271:MatchList {
+          m=List {
+            2222:2235:Match {
+              modifier=2235:2235:Modifier {
+                text="?"
+              }
+              name=(null)
+              token=2222:2234:MatchToken {
+                alt=2223:2233:AltList {
+                  lst=2223:2233:MatchList {
+                    m=List {
+                      2223:2229:Match {
+                        modifier=(null)
+                        name=2223:2226:Id {
+                          text="name"
+                        }
+                        token=2228:2229:MatchToken {
+                          alt=(null)
+                          ref=2228:2229:RuleRef {
+                            id=2228:2229:Id {
+                              text="Id"
+                            }
+                          }
+                          str=(null)
+                        }
+                      }
+                      2231:2233:Match {
+                        modifier=(null)
+                        name=(null)
+                        token=2231:2233:MatchToken {
+                          alt=(null)
+                          ref=(null)
+                          str=2231:2233:Str {
+                            text="'='"
+                          }
+                        }
+                      }
+                    }
+                  }
+                  lst2=List {
+                  }
+                }
+                ref=(null)
+                str=(null)
+              }
+            }
+            2237:2252:Match {
+              modifier=(null)
+              name=2237:2241:Id {
+                text="token"
+              }
+              token=2243:2252:MatchToken {
+                alt=(null)
+                ref=2243:2252:RuleRef {
+                  id=2243:2252:Id {
+                    text="MatchToken"
+                  }
+                }
+                str=(null)
+              }
+            }
+            2254:2271:Match {
+              modifier=2271:2271:Modifier {
+                text="?"
+              }
+              name=2254:2261:Id {
+                text="modifier"
+              }
+              token=2263:2270:MatchToken {
+                alt=(null)
+                ref=2263:2270:RuleRef {
+                  id=2263:2270:Id {
+                    text="Modifier"
+                  }
+                }
+                str=(null)
+              }
+            }
+          }
+        }
+        lst2=List {
+        }
+      }
+      body=(null)
+      name=2215:2219:Id {
+        text="Match"
+      }
+    }
+    2274:2308:TerminalDef {
+      body=(null)
+      name=2283:2290:Id {
+        text="Modifier"
+      }
+      params=(null)
+      pattern=2293:2307:Pattern {
+        lst=2293:2295:TermList {
+          termMatch=List {
+            2293:2295:TermMatch {
+              code=List {
+              }
+              inv=(null)
+              modifier=(null)
+              t=2293:2295:TerminalLiteral {
+                str=2293:2295:Str {
+                  text="'?'"
+                }
+              }
+            }
+          }
+        }
+        lst2=List {
+          2299:2301:TermList {
+            termMatch=List {
+              2299:2301:TermMatch {
+                code=List {
+                }
+                inv=(null)
+                modifier=(null)
+                t=2299:2301:TerminalLiteral {
+                  str=2299:2301:Str {
+                    text="'*'"
+                  }
+                }
+              }
+            }
+          }
+          2305:2307:TermList {
+            termMatch=List {
+              2305:2307:TermMatch {
+                code=List {
+                }
+                inv=(null)
+                modifier=(null)
+                t=2305:2307:TerminalLiteral {
+                  str=2305:2307:Str {
+                    text="'+'"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    2310:2361:NonTerminalDef {
+      alt=2322:2360:AltList {
+        lst=2322:2340:MatchList {
+          m=List {
+            2322:2324:Match {
+              modifier=(null)
+              name=(null)
+              token=2322:2324:MatchToken {
+                alt=(null)
+                ref=(null)
+                str=2322:2324:Str {
+                  text="'('"
+                }
+              }
+            }
+            2326:2336:Match {
+              modifier=(null)
+              name=2326:2328:Id {
+                text="alt"
+              }
+              token=2330:2336:MatchToken {
+                alt=(null)
+                ref=2330:2336:RuleRef {
+                  id=2330:2336:Id {
+                    text="AltList"
+                  }
+                }
+                str=(null)
+              }
+            }
+            2338:2340:Match {
+              modifier=(null)
+              name=(null)
+              token=2338:2340:MatchToken {
+                alt=(null)
+                ref=(null)
+                str=2338:2340:Str {
+                  text="')'"
+                }
+              }
+            }
+          }
+        }
+        lst2=List {
+          2344:2354:MatchList {
+            m=List {
+              2344:2354:Match {
+                modifier=(null)
+                name=2344:2346:Id {
+                  text="ref"
+                }
+                token=2348:2354:MatchToken {
+                  alt=(null)
+                  ref=2348:2354:RuleRef {
+                    id=2348:2354:Id {
+                      text="RuleRef"
+                    }
+                  }
+                  str=(null)
+                }
+              }
+            }
+          }
+          2358:2360:MatchList {
+            m=List {
+              2358:2360:Match {
+                modifier=(null)
+                name=(null)
+                token=2358:2360:MatchToken {
+                  alt=(null)
+                  ref=2358:2360:RuleRef {
+                    id=2358:2360:Id {
+                      text="Str"
+                    }
+                  }
+                  str=(null)
+                }
+              }
+            }
+          }
+        }
+      }
+      body=(null)
+      name=2310:2319:Id {
+        text="MatchToken"
+      }
+    }
+    2377:2436:NonTerminalDef {
+      alt=2389:2435:AltList {
+        lst=2389:2435:MatchList {
+          m=List {
+            2389:2391:Match {
+              modifier=(null)
+              name=(null)
+              token=2389:2391:MatchToken {
+                alt=(null)
+                ref=(null)
+                str=2389:2391:Str {
+                  text="'('"
+                }
+              }
+            }
+            2393:2407:Match {
+              modifier=(null)
+              name=2393:2397:Id {
+                text="param"
+              }
+              token=2399:2407:MatchToken {
+                alt=(null)
+                ref=2399:2407:RuleRef {
+                  id=2399:2407:Id {
+                    text="TermParam"
+                  }
+                }
+                str=(null)
+              }
+            }
+            2409:2431:Match {
+              modifier=2431:2431:Modifier {
+                text="*"
+              }
+              name=(null)
+              token=2409:2430:MatchToken {
+                alt=2410:2429:AltList {
+                  lst=2410:2429:MatchList {
+                    m=List {
+                      2410:2412:Match {
+                        modifier=(null)
+                        name=(null)
+                        token=2410:2412:MatchToken {
+                          alt=(null)
+                          ref=(null)
+                          str=2410:2412:Str {
+                            text="','"
+                          }
+                        }
+                      }
+                      2414:2429:Match {
+                        modifier=(null)
+                        name=2414:2419:Id {
+                          text="param2"
+                        }
+                        token=2421:2429:MatchToken {
+                          alt=(null)
+                          ref=2421:2429:RuleRef {
+                            id=2421:2429:Id {
+                              text="TermParam"
+                            }
+                          }
+                          str=(null)
+                        }
+                      }
+                    }
+                  }
+                  lst2=List {
+                  }
+                }
+                ref=(null)
+                str=(null)
+              }
+            }
+            2433:2435:Match {
+              modifier=(null)
+              name=(null)
+              token=2433:2435:MatchToken {
+                alt=(null)
+                ref=(null)
+                str=2433:2435:Str {
+                  text="')'"
+                }
+              }
+            }
+          }
+        }
+        lst2=List {
+        }
+      }
+      body=(null)
+      name=2377:2386:Id {
+        text="TermParams"
+      }
+    }
+    2438:2485:NonTerminalDef {
+      alt=2449:2484:AltList {
+        lst=2449:2484:MatchList {
+          m=List {
+            2449:2455:Match {
+              modifier=(null)
+              name=2449:2452:Id {
+                text="name"
+              }
+              token=2454:2455:MatchToken {
+                alt=(null)
+                ref=2454:2455:RuleRef {
+                  id=2454:2455:Id {
+                    text="Id"
+                  }
+                }
+                str=(null)
+              }
+            }
+            2457:2459:Match {
+              modifier=(null)
+              name=(null)
+              token=2457:2459:MatchToken {
+                alt=(null)
+                ref=(null)
+                str=2457:2459:Str {
+                  text="':'"
+                }
+              }
+            }
+            2461:2475:Match {
+              modifier=(null)
+              name=2461:2466:Id {
+                text="dotted"
+              }
+              token=2468:2475:MatchToken {
+                alt=(null)
+                ref=2468:2475:RuleRef {
+                  id=2468:2475:Id {
+                    text="DottedId"
+                  }
+                }
+                str=(null)
+              }
+            }
+            2477:2479:Match {
+              modifier=(null)
+              name=(null)
+              token=2477:2479:MatchToken {
+                alt=(null)
+                ref=(null)
+                str=2477:2479:Str {
+                  text="'='"
+                }
+              }
+            }
+            2481:2484:Match {
+              modifier=(null)
+              name=(null)
+              token=2481:2484:MatchToken {
+                alt=(null)
+                ref=2481:2484:RuleRef {
+                  id=2481:2484:Id {
+                    text="Code"
+                  }
+                }
+                str=(null)
+              }
+            }
+          }
+        }
+        lst2=List {
+        }
+      }
+      body=(null)
+      name=2438:2446:Id {
+        text="TermParam"
+      }
+    }
+    2487:2529:NonTerminalDef {
+      alt=2496:2528:AltList {
+        lst=2496:2528:MatchList {
+          m=List {
+            2496:2507:Match {
+              modifier=(null)
+              name=2496:2498:Id {
+                text="lst"
+              }
+              token=2500:2507:MatchToken {
+                alt=(null)
+                ref=2500:2507:RuleRef {
+                  id=2500:2507:Id {
+                    text="TermList"
+                  }
+                }
+                str=(null)
+              }
+            }
+            2509:2528:Match {
+              modifier=2528:2528:Modifier {
+                text="*"
+              }
+              name=(null)
+              token=2509:2527:MatchToken {
+                alt=2510:2526:AltList {
+                  lst=2510:2526:MatchList {
+                    m=List {
+                      2510:2512:Match {
+                        modifier=(null)
+                        name=(null)
+                        token=2510:2512:MatchToken {
+                          alt=(null)
+                          ref=(null)
+                          str=2510:2512:Str {
+                            text="'|'"
+                          }
+                        }
+                      }
+                      2514:2526:Match {
+                        modifier=(null)
+                        name=2514:2517:Id {
+                          text="lst2"
+                        }
+                        token=2519:2526:MatchToken {
+                          alt=(null)
+                          ref=2519:2526:RuleRef {
+                            id=2519:2526:Id {
+                              text="TermList"
+                            }
+                          }
+                          str=(null)
+                        }
+                      }
+                    }
+                  }
+                  lst2=List {
+                  }
+                }
+                ref=(null)
+                str=(null)
+              }
+            }
+          }
+        }
+        lst2=List {
+        }
+      }
+      body=(null)
+      name=2487:2493:Id {
+        text="Pattern"
+      }
+    }
+    2531:2561:NonTerminalDef {
+      alt=2541:2560:AltList {
+        lst=2541:2560:MatchList {
+          m=List {
+            2541:2560:Match {
+              modifier=2560:2560:Modifier {
+                text="+"
+              }
+              name=2541:2549:Id {
+                text="termMatch"
+              }
+              token=2551:2559:MatchToken {
+                alt=(null)
+                ref=2551:2559:RuleRef {
+                  id=2551:2559:Id {
+                    text="TermMatch"
+                  }
+                }
+                str=(null)
+              }
+            }
+          }
+        }
+        lst2=List {
+        }
+      }
+      body=(null)
+      name=2531:2538:Id {
+        text="TermList"
+      }
+    }
+    2563:2627:NonTerminalDef {
+      alt=2574:2626:AltList {
+        lst=2574:2626:MatchList {
+          m=List {
+            2574:2585:Match {
+              modifier=2585:2585:Modifier {
+                text="?"
+              }
+              name=(null)
+              token=2574:2584:MatchToken {
+                alt=2575:2583:AltList {
+                  lst=2575:2583:MatchList {
+                    m=List {
+                      2575:2583:Match {
+                        modifier=(null)
+                        name=2575:2577:Id {
+                          text="inv"
+                        }
+                        token=2579:2583:MatchToken {
+                          alt=(null)
+                          ref=2579:2583:RuleRef {
+                            id=2579:2583:Id {
+                              text="Tilde"
+                            }
+                          }
+                          str=(null)
+                        }
+                      }
+                    }
+                  }
+                  lst2=List {
+                  }
+                }
+                ref=(null)
+                str=(null)
+              }
+            }
+            2587:2596:Match {
+              modifier=(null)
+              name=2587:2587:Id {
+                text="t"
+              }
+              token=2589:2596:MatchToken {
+                alt=(null)
+                ref=2589:2596:RuleRef {
+                  id=2589:2596:Id {
+                    text="Terminal"
+                  }
+                }
+                str=(null)
+              }
+            }
+            2598:2615:Match {
+              modifier=2615:2615:Modifier {
+                text="?"
+              }
+              name=2598:2605:Id {
+                text="modifier"
+              }
+              token=2607:2614:MatchToken {
+                alt=(null)
+                ref=2607:2614:RuleRef {
+                  id=2607:2614:Id {
+                    text="Modifier"
+                  }
+                }
+                str=(null)
+              }
+            }
+            2617:2626:Match {
+              modifier=2626:2626:Modifier {
+                text="*"
+              }
+              name=2617:2620:Id {
+                text="code"
+              }
+              token=2622:2625:MatchToken {
+                alt=(null)
+                ref=2622:2625:RuleRef {
+                  id=2622:2625:Id {
+                    text="Code"
+                  }
+                }
+                str=(null)
+              }
+            }
+          }
+        }
+        lst2=List {
+        }
+      }
+      body=(null)
+      name=2563:2571:Id {
+        text="TermMatch"
+      }
+    }
+    2672:2780:OptionDef {
+      alts=2689:2700:RuleRef {
+        id=2689:2700:Id {
+          text="TerminalList"
+        }
+      }
+      alts2=List {
+        2708:2718:RuleRef {
+          id=2708:2718:Id {
+            text="FragmentRef"
+          }
+        }
+        2726:2738:RuleRef {
+          id=2726:2738:Id {
+            text="TerminalRange"
+          }
+        }
+        2747:2761:RuleRef {
+          id=2747:2761:Id {
+            text="TerminalLiteral"
+          }
+        }
+        2769:2779:RuleRef {
+          id=2769:2779:Id {
+            text="TerminalDot"
+          }
+        }
+      }
+      body=(null)
+      name=2679:2686:Id {
+        text="Terminal"
+      }
+    }
+    2783:2820:NonTerminalDef {
+      alt=2797:2819:AltList {
+        lst=2797:2819:MatchList {
+          m=List {
+            2797:2799:Match {
+              modifier=(null)
+              name=(null)
+              token=2797:2799:MatchToken {
+                alt=(null)
+                ref=(null)
+                str=2797:2799:Str {
+                  text="'('"
+                }
+              }
+            }
+            2801:2815:Match {
+              modifier=(null)
+              name=2801:2807:Id {
+                text="pattern"
+              }
+              token=2809:2815:MatchToken {
+                alt=(null)
+                ref=2809:2815:RuleRef {
+                  id=2809:2815:Id {
+                    text="Pattern"
+                  }
+                }
+                str=(null)
+              }
+            }
+            2817:2819:Match {
+              modifier=(null)
+              name=(null)
+              token=2817:2819:MatchToken {
+                alt=(null)
+                ref=(null)
+                str=2817:2819:Str {
+                  text="')'"
+                }
+              }
+            }
+          }
+        }
+        lst2=List {
+        }
+      }
+      body=(null)
+      name=2783:2794:Id {
+        text="TerminalList"
+      }
+    }
+    2865:2880:NonTerminalDef {
+      alt=2878:2879:AltList {
+        lst=2878:2879:MatchList {
+          m=List {
+            2878:2879:Match {
+              modifier=(null)
+              name=(null)
+              token=2878:2879:MatchToken {
+                alt=(null)
+                ref=2878:2879:RuleRef {
+                  id=2878:2879:Id {
+                    text="Id"
+                  }
+                }
+                str=(null)
+              }
+            }
+          }
+        }
+        lst2=List {
+        }
+      }
+      body=(null)
+      name=2865:2875:Id {
+        text="FragmentRef"
+      }
+    }
+    2882:2919:NonTerminalDef {
+      alt=2897:2918:AltList {
+        lst=2897:2918:MatchList {
+          m=List {
+            2897:2905:Match {
+              modifier=(null)
+              name=2897:2901:Id {
+                text="start"
+              }
+              token=2903:2905:MatchToken {
+                alt=(null)
+                ref=2903:2905:RuleRef {
+                  id=2903:2905:Id {
+                    text="Str"
+                  }
+                }
+                str=(null)
+              }
+            }
+            2907:2910:Match {
+              modifier=(null)
+              name=(null)
+              token=2907:2910:MatchToken {
+                alt=(null)
+                ref=(null)
+                str=2907:2910:Str {
+                  text="'..'"
+                }
+              }
+            }
+            2912:2918:Match {
+              modifier=(null)
+              name=2912:2914:Id {
+                text="end"
+              }
+              token=2916:2918:MatchToken {
+                alt=(null)
+                ref=2916:2918:RuleRef {
+                  id=2916:2918:Id {
+                    text="Str"
+                  }
+                }
+                str=(null)
+              }
+            }
+          }
+        }
+        lst2=List {
+        }
+      }
+      body=(null)
+      name=2882:2894:Id {
+        text="TerminalRange"
+      }
+    }
+    2921:2945:NonTerminalDef {
+      alt=2938:2944:AltList {
+        lst=2938:2944:MatchList {
+          m=List {
+            2938:2944:Match {
+              modifier=(null)
+              name=2938:2940:Id {
+                text="str"
+              }
+              token=2942:2944:MatchToken {
+                alt=(null)
+                ref=2942:2944:RuleRef {
+                  id=2942:2944:Id {
+                    text="Str"
+                  }
+                }
+                str=(null)
+              }
+            }
+          }
+        }
+        lst2=List {
+        }
+      }
+      body=(null)
+      name=2921:2935:Id {
+        text="TerminalLiteral"
+      }
+    }
+    2947:2963:NonTerminalDef {
+      alt=2960:2962:AltList {
+        lst=2960:2962:MatchList {
+          m=List {
+            2960:2962:Match {
+              modifier=(null)
+              name=(null)
+              token=2960:2962:MatchToken {
+                alt=(null)
+                ref=(null)
+                str=2960:2962:Str {
+                  text="'.'"
+                }
+              }
+            }
+          }
+        }
+        lst2=List {
+        }
+      }
+      body=(null)
+      name=2947:2957:Id {
+        text="TerminalDot"
+      }
+    }
+    2966:3008:FragmentDef {
+      name=2975:2980:Id {
+        text="Letter"
+      }
+      pattern=2983:3007:Pattern {
+        lst=2983:2990:TermList {
+          termMatch=List {
+            2983:2990:TermMatch {
+              code=List {
+              }
+              inv=(null)
+              modifier=(null)
+              t=2983:2990:TerminalRange {
+                end=2988:2990:Str {
+                  text="'z'"
+                }
+                start=2983:2985:Str {
+                  text="'a'"
+                }
+              }
+            }
+          }
+        }
+        lst2=List {
+          2994:3001:TermList {
+            termMatch=List {
+              2994:3001:TermMatch {
+                code=List {
+                }
+                inv=(null)
+                modifier=(null)
+                t=2994:3001:TerminalRange {
+                  end=2999:3001:Str {
+                    text="'Z'"
+                  }
+                  start=2994:2996:Str {
+                    text="'A'"
+                  }
+                }
+              }
+            }
+          }
+          3005:3007:TermList {
+            termMatch=List {
+              3005:3007:TermMatch {
+                code=List {
+                }
+                inv=(null)
+                modifier=(null)
+                t=3005:3007:TerminalLiteral {
+                  str=3005:3007:Str {
+                    text="'_'"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    3010:3029:TerminalDef {
+      body=(null)
+      name=3019:3023:Id {
+        text="Tilde"
+      }
+      params=(null)
+      pattern=3026:3028:Pattern {
+        lst=3026:3028:TermList {
+          termMatch=List {
+            3026:3028:TermMatch {
+              code=List {
+              }
+              inv=(null)
+              modifier=(null)
+              t=3026:3028:TerminalLiteral {
+                str=3026:3028:Str {
+                  text="'~'"
+                }
+              }
+            }
+          }
+        }
+        lst2=List {
+        }
+      }
+    }
+    3104:3144:TerminalDef {
+      body=(null)
+      name=3113:3114:Id {
+        text="Id"
+      }
+      params=(null)
+      pattern=3117:3143:Pattern {
+        lst=3117:3143:TermList {
+          termMatch=List {
+            3117:3122:TermMatch {
+              code=List {
+              }
+              inv=(null)
+              modifier=(null)
+              t=3117:3122:FragmentRef {
+                id=3117:3122:Id {
+                  text="Letter"
+                }
+              }
+            }
+            3124:3143:TermMatch {
+              code=List {
+              }
+              inv=(null)
+              modifier=3143:3143:Modifier {
+                text="*"
+              }
+              t=3124:3142:TerminalList {
+                pattern=3125:3141:Pattern {
+                  lst=3125:3130:TermList {
+                    termMatch=List {
+                      3125:3130:TermMatch {
+                        code=List {
+                        }
+                        inv=(null)
+                        modifier=(null)
+                        t=3125:3130:FragmentRef {
+                          id=3125:3130:Id {
+                            text="Letter"
+                          }
+                        }
+                      }
+                    }
+                  }
+                  lst2=List {
+                    3134:3141:TermList {
+                      termMatch=List {
+                        3134:3141:TermMatch {
+                          code=List {
+                          }
+                          inv=(null)
+                          modifier=(null)
+                          t=3134:3141:TerminalRange {
+                            end=3139:3141:Str {
+                              text="'9'"
+                            }
+                            start=3134:3136:Str {
+                              text="'0'"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        lst2=List {
+        }
+      }
+    }
+    3146:3206:FragmentDef {
+      name=3155:3169:Id {
+        text="SingleQuotedStr"
+      }
+      pattern=3172:3205:Pattern {
+        lst=3172:3205:TermList {
+          termMatch=List {
+            3172:3175:TermMatch {
+              code=List {
+              }
+              inv=(null)
+              modifier=(null)
+              t=3172:3175:TerminalLiteral {
+                str=3172:3175:Str {
+                  text="'\''"
+                }
+              }
+            }
+            3177:3200:TermMatch {
+              code=List {
+              }
+              inv=(null)
+              modifier=3200:3200:Modifier {
+                text="*"
+              }
+              t=3177:3199:TerminalList {
+                pattern=3178:3198:Pattern {
+                  lst=3178:3189:TermList {
+                    termMatch=List {
+                      3178:3189:TermMatch {
+                        code=List {
+                        }
+                        inv=3178:3178:Tilde {
+                          text="~"
+                        }
+                        modifier=(null)
+                        t=3179:3189:TerminalList {
+                          pattern=3180:3188:Pattern {
+                            lst=3180:3183:TermList {
+                              termMatch=List {
+                                3180:3183:TermMatch {
+                                  code=List {
+                                  }
+                                  inv=(null)
+                                  modifier=(null)
+                                  t=3180:3183:TerminalLiteral {
+                                    str=3180:3183:Str {
+                                      text="'\''"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                            lst2=List {
+                              3185:3188:TermList {
+                                termMatch=List {
+                                  3185:3188:TermMatch {
+                                    code=List {
+                                    }
+                                    inv=(null)
+                                    modifier=(null)
+                                    t=3185:3188:TerminalLiteral {
+                                      str=3185:3188:Str {
+                                        text="'\\'"
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                  lst2=List {
+                    3193:3198:TermList {
+                      termMatch=List {
+                        3193:3196:TermMatch {
+                          code=List {
+                          }
+                          inv=(null)
+                          modifier=(null)
+                          t=3193:3196:TerminalLiteral {
+                            str=3193:3196:Str {
+                              text="'\\'"
+                            }
+                          }
+                        }
+                        3198:3198:TermMatch {
+                          code=List {
+                          }
+                          inv=(null)
+                          modifier=(null)
+                          t=3198:3198:TerminalDot {
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            3202:3205:TermMatch {
+              code=List {
+              }
+              inv=(null)
+              modifier=(null)
+              t=3202:3205:TerminalLiteral {
+                str=3202:3205:Str {
+                  text="'\''"
+                }
+              }
+            }
+          }
+        }
+        lst2=List {
+        }
+      }
+    }
+    3208:3265:FragmentDef {
+      name=3217:3231:Id {
+        text="DoubleQuotedStr"
+      }
+      pattern=3234:3264:Pattern {
+        lst=3234:3264:TermList {
+          termMatch=List {
+            3234:3236:TermMatch {
+              code=List {
+              }
+              inv=(null)
+              modifier=(null)
+              t=3234:3236:TerminalLiteral {
+                str=3234:3236:Str {
+                  text="'"'"
+                }
+              }
+            }
+            3238:3260:TermMatch {
+              code=List {
+              }
+              inv=(null)
+              modifier=3260:3260:Modifier {
+                text="*"
+              }
+              t=3238:3259:TerminalList {
+                pattern=3239:3258:Pattern {
+                  lst=3239:3249:TermList {
+                    termMatch=List {
+                      3239:3249:TermMatch {
+                        code=List {
+                        }
+                        inv=3239:3239:Tilde {
+                          text="~"
+                        }
+                        modifier=(null)
+                        t=3240:3249:TerminalList {
+                          pattern=3241:3248:Pattern {
+                            lst=3241:3243:TermList {
+                              termMatch=List {
+                                3241:3243:TermMatch {
+                                  code=List {
+                                  }
+                                  inv=(null)
+                                  modifier=(null)
+                                  t=3241:3243:TerminalLiteral {
+                                    str=3241:3243:Str {
+                                      text="'"'"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                            lst2=List {
+                              3245:3248:TermList {
+                                termMatch=List {
+                                  3245:3248:TermMatch {
+                                    code=List {
+                                    }
+                                    inv=(null)
+                                    modifier=(null)
+                                    t=3245:3248:TerminalLiteral {
+                                      str=3245:3248:Str {
+                                        text="'\\'"
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                  lst2=List {
+                    3253:3258:TermList {
+                      termMatch=List {
+                        3253:3256:TermMatch {
+                          code=List {
+                          }
+                          inv=(null)
+                          modifier=(null)
+                          t=3253:3256:TerminalLiteral {
+                            str=3253:3256:Str {
+                              text="'\\'"
+                            }
+                          }
+                        }
+                        3258:3258:TermMatch {
+                          code=List {
+                          }
+                          inv=(null)
+                          modifier=(null)
+                          t=3258:3258:TerminalDot {
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            3262:3264:TermMatch {
+              code=List {
+              }
+              inv=(null)
+              modifier=(null)
+              t=3262:3264:TerminalLiteral {
+                str=3262:3264:Str {
+                  text="'"'"
+                }
+              }
+            }
+          }
+        }
+        lst2=List {
+        }
+      }
+    }
+    3329:3376:TerminalDef {
+      body=(null)
+      name=3338:3340:Id {
+        text="Str"
+      }
+      params=(null)
+      pattern=3343:3375:Pattern {
+        lst=3343:3357:TermList {
+          termMatch=List {
+            3343:3357:TermMatch {
+              code=List {
+              }
+              inv=(null)
+              modifier=(null)
+              t=3343:3357:FragmentRef {
+                id=3343:3357:Id {
+                  text="SingleQuotedStr"
+                }
+              }
+            }
+          }
+        }
+        lst2=List {
+          3361:3375:TermList {
+            termMatch=List {
+              3361:3375:TermMatch {
+                code=List {
+                }
+                inv=(null)
+                modifier=(null)
+                t=3361:3375:FragmentRef {
+                  id=3361:3375:Id {
+                    text="DoubleQuotedStr"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    3465:3508:TerminalDef {
+      body=(null)
+      name=3474:3477:Id {
+        text="Code"
+      }
+      params=(null)
+      pattern=3480:3507:Pattern {
+        lst=3480:3507:TermList {
+          termMatch=List {
+            3480:3482:TermMatch {
+              code=List {
+              }
+              inv=(null)
+              modifier=(null)
+              t=3480:3482:TerminalLiteral {
+                str=3480:3482:Str {
+                  text="'{'"
+                }
+              }
+            }
+            3484:3503:TermMatch {
+              code=List {
+              }
+              inv=(null)
+              modifier=3503:3503:Modifier {
+                text="*"
+              }
+              t=3484:3502:TerminalList {
+                pattern=3485:3501:Pattern {
+                  lst=3485:3494:TermList {
+                    termMatch=List {
+                      3485:3494:TermMatch {
+                        code=List {
+                        }
+                        inv=3485:3485:Tilde {
+                          text="~"
+                        }
+                        modifier=(null)
+                        t=3486:3494:TerminalList {
+                          pattern=3487:3493:Pattern {
+                            lst=3487:3489:TermList {
+                              termMatch=List {
+                                3487:3489:TermMatch {
+                                  code=List {
+                                  }
+                                  inv=(null)
+                                  modifier=(null)
+                                  t=3487:3489:TerminalLiteral {
+                                    str=3487:3489:Str {
+                                      text="'{'"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                            lst2=List {
+                              3491:3493:TermList {
+                                termMatch=List {
+                                  3491:3493:TermMatch {
+                                    code=List {
+                                    }
+                                    inv=(null)
+                                    modifier=(null)
+                                    t=3491:3493:TerminalLiteral {
+                                      str=3491:3493:Str {
+                                        text="'}'"
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                  lst2=List {
+                    3498:3501:TermList {
+                      termMatch=List {
+                        3498:3501:TermMatch {
+                          code=List {
+                          }
+                          inv=(null)
+                          modifier=(null)
+                          t=3498:3501:FragmentRef {
+                            id=3498:3501:Id {
+                              text="Code"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            3505:3507:TermMatch {
+              code=List {
+              }
+              inv=(null)
+              modifier=(null)
+              t=3505:3507:TerminalLiteral {
+                str=3505:3507:Str {
+                  text="'}'"
+                }
+              }
+            }
+          }
+        }
+        lst2=List {
+        }
+      }
+    }
+    3585:3630:TerminalDef {
+      body=(null)
+      name=3601:3609:Id {
+        text="SlComment"
+      }
+      params=(null)
+      pattern=3612:3629:Pattern {
+        lst=3612:3629:TermList {
+          termMatch=List {
+            3612:3615:TermMatch {
+              code=List {
+              }
+              inv=(null)
+              modifier=(null)
+              t=3612:3615:TerminalLiteral {
+                str=3612:3615:Str {
+                  text="'//'"
+                }
+              }
+            }
+            3617:3629:TermMatch {
+              code=List {
+              }
+              inv=3617:3617:Tilde {
+                text="~"
+              }
+              modifier=3629:3629:Modifier {
+                text="*"
+              }
+              t=3618:3628:TerminalList {
+                pattern=3619:3627:Pattern {
+                  lst=3619:3622:TermList {
+                    termMatch=List {
+                      3619:3622:TermMatch {
+                        code=List {
+                        }
+                        inv=(null)
+                        modifier=(null)
+                        t=3619:3622:TerminalLiteral {
+                          str=3619:3622:Str {
+                            text="'\r'"
+                          }
+                        }
+                      }
+                    }
+                  }
+                  lst2=List {
+                    3624:3627:TermList {
+                      termMatch=List {
+                        3624:3627:TermMatch {
+                          code=List {
+                          }
+                          inv=(null)
+                          modifier=(null)
+                          t=3624:3627:TerminalLiteral {
+                            str=3624:3627:Str {
+                              text="'\n'"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        lst2=List {
+        }
+      }
+    }
+    3690:3778:TerminalDef {
+      body=(null)
+      name=3706:3714:Id {
+        text="MlComment"
+      }
+      params=(null)
+      pattern=3721:3777:Pattern {
+        lst=3721:3777:TermList {
+          termMatch=List {
+            3721:3724:TermMatch {
+              code=List {
+              }
+              inv=(null)
+              modifier=(null)
+              t=3721:3724:TerminalLiteral {
+                str=3721:3724:Str {
+                  text="'/*'"
+                }
+              }
+            }
+            3726:3772:TermMatch {
+              code=List {
+              }
+              inv=(null)
+              modifier=3772:3772:Modifier {
+                text="*"
+              }
+              t=3726:3771:TerminalList {
+                pattern=3727:3770:Pattern {
+                  lst=3727:3735:TermList {
+                    termMatch=List {
+                      3727:3735:TermMatch {
+                        code=List {
+                        }
+                        inv=(null)
+                        modifier=(null)
+                        t=3727:3735:FragmentRef {
+                          id=3727:3735:Id {
+                            text="MlComment"
+                          }
+                        }
+                      }
+                    }
+                  }
+                  lst2=List {
+                    3739:3748:TermList {
+                      termMatch=List {
+                        3739:3748:TermMatch {
+                          code=List {
+                          }
+                          inv=3739:3739:Tilde {
+                            text="~"
+                          }
+                          modifier=(null)
+                          t=3740:3748:TerminalList {
+                            pattern=3741:3747:Pattern {
+                              lst=3741:3743:TermList {
+                                termMatch=List {
+                                  3741:3743:TermMatch {
+                                    code=List {
+                                    }
+                                    inv=(null)
+                                    modifier=(null)
+                                    t=3741:3743:TerminalLiteral {
+                                      str=3741:3743:Str {
+                                        text="'*'"
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                              lst2=List {
+                                3745:3747:TermList {
+                                  termMatch=List {
+                                    3745:3747:TermMatch {
+                                      code=List {
+                                      }
+                                      inv=(null)
+                                      modifier=(null)
+                                      t=3745:3747:TerminalLiteral {
+                                        str=3745:3747:Str {
+                                          text="'/'"
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                    3752:3759:TermList {
+                      termMatch=List {
+                        3752:3754:TermMatch {
+                          code=List {
+                          }
+                          inv=(null)
+                          modifier=(null)
+                          t=3752:3754:TerminalLiteral {
+                            str=3752:3754:Str {
+                              text="'/'"
+                            }
+                          }
+                        }
+                        3756:3759:TermMatch {
+                          code=List {
+                          }
+                          inv=3756:3756:Tilde {
+                            text="~"
+                          }
+                          modifier=(null)
+                          t=3757:3759:TerminalLiteral {
+                            str=3757:3759:Str {
+                              text="'*'"
+                            }
+                          }
+                        }
+                      }
+                    }
+                    3763:3770:TermList {
+                      termMatch=List {
+                        3763:3765:TermMatch {
+                          code=List {
+                          }
+                          inv=(null)
+                          modifier=(null)
+                          t=3763:3765:TerminalLiteral {
+                            str=3763:3765:Str {
+                              text="'*'"
+                            }
+                          }
+                        }
+                        3767:3770:TermMatch {
+                          code=List {
+                          }
+                          inv=3767:3767:Tilde {
+                            text="~"
+                          }
+                          modifier=(null)
+                          t=3768:3770:TerminalLiteral {
+                            str=3768:3770:Str {
+                              text="'/'"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            3774:3777:TermMatch {
+              code=List {
+              }
+              inv=(null)
+              modifier=(null)
+              t=3774:3777:TerminalLiteral {
+                str=3774:3777:Str {
+                  text="'*/'"
+                }
+              }
+            }
+          }
+        }
+        lst2=List {
+        }
+      }
+    }
+    3780:3821:TerminalDef {
+      body=(null)
+      name=3796:3797:Id {
+        text="WS"
+      }
+      params=(null)
+      pattern=3800:3820:Pattern {
+        lst=3800:3820:TermList {
+          termMatch=List {
+            3800:3820:TermMatch {
+              code=List {
+              }
+              inv=(null)
+              modifier=3820:3820:Modifier {
+                text="+"
+              }
+              t=3800:3819:TerminalList {
+                pattern=3801:3818:Pattern {
+                  lst=3801:3803:TermList {
+                    termMatch=List {
+                      3801:3803:TermMatch {
+                        code=List {
+                        }
+                        inv=(null)
+                        modifier=(null)
+                        t=3801:3803:TerminalLiteral {
+                          str=3801:3803:Str {
+                            text="' '"
+                          }
+                        }
+                      }
+                    }
+                  }
+                  lst2=List {
+                    3805:3808:TermList {
+                      termMatch=List {
+                        3805:3808:TermMatch {
+                          code=List {
+                          }
+                          inv=(null)
+                          modifier=(null)
+                          t=3805:3808:TerminalLiteral {
+                            str=3805:3808:Str {
+                              text="'\t'"
+                            }
+                          }
+                        }
+                      }
+                    }
+                    3810:3813:TermList {
+                      termMatch=List {
+                        3810:3813:TermMatch {
+                          code=List {
+                          }
+                          inv=(null)
+                          modifier=(null)
+                          t=3810:3813:TerminalLiteral {
+                            str=3810:3813:Str {
+                              text="'\n'"
+                            }
+                          }
+                        }
+                      }
+                    }
+                    3815:3818:TermList {
+                      termMatch=List {
+                        3815:3818:TermMatch {
+                          code=List {
+                          }
+                          inv=(null)
+                          modifier=(null)
+                          t=3815:3818:TerminalLiteral {
+                            str=3815:3818:Str {
+                              text="'\r'"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        lst2=List {
+        }
+      }
+    }
+  }
+}
