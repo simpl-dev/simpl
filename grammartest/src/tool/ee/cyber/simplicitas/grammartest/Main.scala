@@ -1,5 +1,7 @@
 package ee.cyber.simplicitas.grammartest
 
+import java.io.File
+import ee.cyber.simplicitas.GenericGrammar
 import java.io.FileWriter
 
 import ee.cyber.simplicitas.GeneratorBase
@@ -11,13 +13,31 @@ object Main {
     def main(args: Array[String]) {
         val testDir = args(0)
 
-        val grammar = new SimplGrammar()
-        grammar.parseFile(testDir + "/simpl/test1.in")
-        val dumped = dumpNode(grammar.tree)
-        println(dumped)
-        
-        writeFile(testDir + "/simpl/test1.out", dumped)
-        // TODO: compare dumped node with given input.
+        val grammars = new File(testDir).listFiles
+        for (grDir <- grammars) {
+            runGrammar(grDir.getName, grDir)
+        }
+    }
+
+    def runGrammar(name: String, dir: File) {
+        val className = "ee.cyber.simplicitas.grammartest." + name +
+                "." + name.capitalize + "Grammar"
+        val constructor = Class.forName(className).getConstructor(null)
+
+        for (testFile <- dir.listFiles if testFile.getName.endsWith(".in")) {
+            println("Running grammar " + name + " for file " + testFile.getName)
+
+            val grammar = constructor.newInstance(null)
+                    .asInstanceOf[GenericGrammar]
+            grammar.parseFile(testFile.getAbsolutePath)
+            val dumped = dumpNode(grammar.tree)
+            println(dumped)
+
+            // TODO: compare dumped node with given input.
+            writeFile(
+                    testFile.getAbsolutePath.replaceAll(".in", ".out"),
+                    dumped)
+        }
     }
 
     def writeFile(file: String, contents: String) {

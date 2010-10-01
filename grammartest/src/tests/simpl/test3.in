@@ -1,0 +1,16 @@
+grammar ee.cyber.simplicitas.grammartest.expr.Expr;
+
+Expr: Plus;
+
+Plus: left=Mul "+" right=Mul;
+
+Mul: left=IdExpr "*" right=IdExpr;
+IdExpr: id==Id;
+
+// Just to create a keyword.
+// Foo: "foo";
+
+terminal Id: ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')*;
+fragment ML_COMMENT: '/*' (~'*' | '*' ~'/')* '*/';
+fragment SL_COMMENT: '//' ~('\n'|'\r')*;
+hidden terminal WS: (' '|'\t'|'\r'|'\n'|SL_COMMENT|ML_COMMENT)+;
