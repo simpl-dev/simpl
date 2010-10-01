@@ -1,0 +1,5 @@
+group SimplGenerator;
+
+program() ::= <<
+generated <id>
+>>

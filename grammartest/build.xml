@@ -1,10 +1,10 @@
 <!-- ex: se sts=4 sw=4 expandtab: -->
-<project name="example-bean" basedir=".">
+<project name="example-bean" default="run-test" basedir=".">
     <property file="${basedir}/ant.properties"/>
     <property name="simpl.version" value="1.0.1"/>
 
     <property name="target" value="${basedir}/target"/>
-    <property name="tool-jar" value="${target}/spamdetector-rule-tool.jar"/>
+    <property name="tool-jar" value="${target}/grammartest-tool.jar"/>
     
     <available file="${maven.repo.local}/simplicitas/mvn-ant/${simpl.version}/mvn-ant-${simpl.version}.xml"
         property="include_file"
@@ -27,7 +27,7 @@
         <!-- generate grammar -->
         <taskdef name="grammar" classpathref="tool-deps"
                  classname="ee.cyber.simplicitas.parse.GrammarTask"/>
-        <grammar src="${basedir}/src/tool/Simpl.spl"
+        <grammar src="${basedir}/src/tool/ee/cyber/simplicitas/grammartest/Simpl.spl"
                  destdir="${target}/gen/ee/cyber/simplicitas/grammartest"/>
 
         <!-- compile sources (together with the generated grammar) -->
@@ -45,25 +45,20 @@
         </jar>
     </target>
 
-    <target name="run-test" depends="tool">
-        <echo message="TODO"/>
-    </target>
-
-    <target name="tool-run" depends="tool-deps">
-        <!-- test run -->
-        <java classname="ee.cyber.simplicitas.grammartest.SimplMain" fork="true">
-            <classpath>
-                <path refid="tool-deps"/>
-                <path location="${tool-jar}"/>
-            </classpath>
-            <arg line="--dest target/test sample.bean"/>
-        </java>
+    <target name="run-test" depends="tool-deps">
+        <java classname="ee.cyber.simplicitas.grammartest.Main" fork="true">
+			<classpath>
+				<path refid="tool-deps"/>
+				<path location="${tool-jar}"/>
+			</classpath>
+			<arg line="${basedir}/src/tests"/>
+		</java>
     </target>
 
     <target name="clean">
         <delete dir="${target}"/>
     </target>
 
-    <target name="build" depends="run-test"/>
+    <target name="build" depends="tool"/>
     <target name="rebuild" depends="clean,build"/>
 </project>
