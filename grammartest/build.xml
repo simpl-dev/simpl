@@ -1,0 +1,69 @@
+<!-- ex: se sts=4 sw=4 expandtab: -->
+<project name="example-bean" basedir=".">
+    <property file="${basedir}/ant.properties"/>
+    <property name="simpl.version" value="1.0.1"/>
+
+    <property name="target" value="${basedir}/target"/>
+    <property name="tool-jar" value="${target}/spamdetector-rule-tool.jar"/>
+    
+    <available file="${maven.repo.local}/simplicitas/mvn-ant/${simpl.version}/mvn-ant-${simpl.version}.xml"
+        property="include_file"
+        value="file://${maven.repo.local}/simplicitas/mvn-ant/${simpl.version}/mvn-ant-${simpl.version}.xml"/>
+    <property name="include_file"
+        value="${maven.repo.remote}/simplicitas/mvn-ant/${simpl.version}/mvn-ant-${simpl.version}.xml"/>
+    <import>
+        <url url="${include_file}"/>
+    </import>
+
+    <target name="tool-deps" depends="copy-mvn-ant,init-dep,require-antlr,require-scala">
+        <antcall target="require">
+            <param name="artifact" value="simplicitas-tool/${simpl.version}"/>
+        </antcall>
+        <loadfile srcfile="${target}/deps" property="tool-deps"/>
+        <path id="tool-deps" path="${tool-deps}"/>
+    </target>
+
+    <target name="tool" depends="tool-deps">
+        <!-- generate grammar -->
+        <taskdef name="grammar" classpathref="tool-deps"
+                 classname="ee.cyber.simplicitas.parse.GrammarTask"/>
+        <grammar src="${basedir}/src/tool/Simpl.spl"
+                 destdir="${target}/gen/ee/cyber/simplicitas/grammartest"/>
+
+        <!-- compile sources (together with the generated grammar) -->
+        <mkdir dir="${target}/classes"/>
+        <scalac destdir="${target}/classes" classpathref="tool-deps">
+            <src location="${target}/gen"/>
+            <src location="${basedir}/src/tool"/>
+        </scalac>
+        <javac destdir="${target}/classes" srcdir="${target}/gen" source="1.4"
+               includeantruntime="false" classpathref="tool-deps" encoding="UTF-8"/>
+
+        <!-- create tool jar -->
+        <jar destfile="${tool-jar}" basedir="${target}/classes">
+            <fileset dir="${basedir}/src/tool" includes="*.stg"/>
+        </jar>
+    </target>
+
+    <target name="run-test" depends="tool">
+        <echo message="TODO"/>
+    </target>
+
+    <target name="tool-run" depends="tool-deps">
+        <!-- test run -->
+        <java classname="ee.cyber.simplicitas.grammartest.SimplMain" fork="true">
+            <classpath>
+                <path refid="tool-deps"/>
+                <path location="${tool-jar}"/>
+            </classpath>
+            <arg line="--dest target/test sample.bean"/>
+        </java>
+    </target>
+
+    <target name="clean">
+        <delete dir="${target}"/>
+    </target>
+
+    <target name="build" depends="run-test"/>
+    <target name="rebuild" depends="clean,build"/>
+</project>
