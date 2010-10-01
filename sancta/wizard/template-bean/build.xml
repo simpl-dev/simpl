@@ -4,7 +4,7 @@
 	<property name="simpl.version" value="1.0.1"/>
 
     <property name="target" value="${basedir}/target"/>
-    <property name="tool-jar" value="${target}/spamdetector-rule-tool.jar"/>
+    <property name="tool-jar" value="${target}/#{name}-tool.jar"/>
     
     <available file="${maven.repo.local}/simplicitas/mvn-ant/${simpl.version}/mvn-ant-${simpl.version}.xml"
         property="include_file"
