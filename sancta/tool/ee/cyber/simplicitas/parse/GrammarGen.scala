@@ -359,10 +359,10 @@ class GrammarGen(posMap: Any => List[Int]) {
         g += "\n" + rules(name).antlrName + " returns [" + name +
             " r]\n@init {SourceLocation _start=null;int _end=-1;" +
             "int _endLine=-1;int _endColumn=-1;"
-        val init_p = g.size
+        val init_idx = g.size
         g += ""
         g += "}\n@after {$r = new " + name + "("
-        val p = g.size
+        val after_idx = g.size
         g += ""
         g += ");$r.setLocation(_start,_end==-1?(_start==null?0:_start.endIndex()):_end," +
             "_endLine==-1?(_start==null?0:_start.endLine()):_endLine," +
@@ -382,8 +382,8 @@ class GrammarGen(posMap: Any => List[Int]) {
                 p.tmp
             }
         }
-        g(p) = join(param map getParam)
-        g(init_p) = init.toString
+        g(after_idx) = join(param map getParam)
+        g(init_idx) = init.toString
         rules(name).hdr = "case class " + name
         rules(name).param = param map caseParam
         for (p <- param) {
