@@ -142,7 +142,11 @@ class GrammarGen(posMap: Any => List[Int]) {
 
     def simpleTerm(name: String, _id: String) {
         println("simpleTerm(" + name + ", " + _id + ")")
-        val id = trKeyword(_id)        
+
+        // Check if it is literal. If not, then id = _id.
+        val id = trKeyword(_id)
+
+        // If this is some literal string...
         if (name == null && (_id startsWith "'")) {
             g += " "
             val term =
@@ -161,19 +165,34 @@ class GrammarGen(posMap: Any => List[Int]) {
             }
             return
         }
+
+        // Name of the variable that will be used to refer to this element.
+        // If not explicitly given, then use name of the called rule.
         val tagName = if (name == null) uncapitalize(id); else name
-        println("tmpName, multi = " + multi + ", firstInChain = " + firstInChain)
+        println("tmpName, multi = " + multi +
+                ", firstInChain = " + firstInChain  +
+                ", currentOption = " + currentOption)
         val tmpName =
             if (multi == RepeatType.List || firstInChain) newId
             else null
 
+        // Check whether this can be used as identifier name.
         NamingService.validateASTAttribute(tagName) match {
             case Some(errorMsg) => error(_id, errorMsg)
             case _ =>
         }
+
         val np = NodeParam(tagName, id, "", multi == RepeatType.List,
                 tmpName, currentOption)
+
+        // Check if name of the node conflicts with some other name in
+        // the same branch. For example:
+        // x=foo y=bar x=baz is a conflict.
+        // y=bar (x=foo | x=baz) is not because both x's are in different
+        // branches.
         param find (_.name == tagName) match {
+            // This rule already has parameter with this name.
+            // Check if there are conflicts.
             case Some(other) =>
                 if ((other.option zip currentOption) exists
                         ((a: Tuple2[Int, Int]) => a._1 == a._2))
@@ -183,12 +202,16 @@ class GrammarGen(posMap: Any => List[Int]) {
                           " was " + other.node + ", but redefined as " + id)
                 else
                     np.varName = other.varName
+            // Parameter is unique (so far). Just add it to list.
             case _ =>
                 println("varName")
                 np.varName = newId
                 param += np
         }
+
         if (tmpName ne null) {
+            // TODO: report error, if rules(id) does not contain anything
+            // this means, the rule was not found.
             g += "\n(" + np.varName + "=" + rules(id).antlrName + "{"
             // must be firstInChain
             if (multi == RepeatType.None || multi == RepeatType.Optional) {
@@ -228,7 +251,7 @@ class GrammarGen(posMap: Any => List[Int]) {
             t
         case ("(" :: alt) :: t =>
             if (name ne null)
-                error(name, "The following pattern cannot be given a name")
+                error(name, "Complex patterns pattern cannot be given a name")
             g += "("
             currentOption = currentOption ++ List(0)
             altList(matchName, alt)
@@ -240,14 +263,21 @@ class GrammarGen(posMap: Any => List[Int]) {
             Nil
     }
 
+    /** Check whether current element will comes with modifier, such as
+      * ?, + or *. If so, do some bookkeeping to checking whether
+      * two variable names conflict or not. In any case, call the
+      * argument <code>f</code> with the current element as argument. */
     def matchModifier(f: List[Any] => List[Any], tree: List[Any]): List[Any] = {
-        def after(v: List[Any], block: String): List[Any] = {
+        def after(v: List[Any], modifier: String): List[Any] = {
             val oldMulti = multi
             val oldFirst = firstInChain
-            if (block != "?")
+
+            if (modifier == "*" || modifier == "+")
                 multi = RepeatType.List
+
             val result = f(v)
-            if (block != "+") {
+
+            if (modifier == "*" || modifier == "?") {
                 firstInChain = oldFirst
                 multi = 
                     if (oldMulti == RepeatType.List)
@@ -257,7 +287,7 @@ class GrammarGen(posMap: Any => List[Int]) {
             } else {
                 multi = oldMulti
             }
-            g += block
+            g += modifier
             result
         }
 
@@ -271,6 +301,9 @@ class GrammarGen(posMap: Any => List[Int]) {
 
     val simple_null = simple(null)_
 
+    /** Takes as input list of terms. If the list starts with
+      * (= ...) element, then assumes that this will become the name of
+      * the next term. Otherwise, the name will be null. */
     def matchName(tree: List[Any]): List[Any]  = tree match {
         case List("=", name: String) :: t => 
             matchModifier(simple(name), t)
@@ -278,6 +311,14 @@ class GrammarGen(posMap: Any => List[Int]) {
             matchModifier(simple_null, t)
     }
 
+    /** Returns copy of the argument where last element is replaced
+      * with its increment. For example, List(1, 2, 3) becomes List(1, 2, 4).
+      */
+    def incrementLastElement(lst: List[Int]) =
+        (lst dropRight 1) ++ List(lst.last + 1)
+
+    /** Processes list of alternatives. The tree contains list of alternatives,
+      * each wrapped in a list starting with NODE. */
     def altList(doMatch: List[Any] => List[Any], tree: List[Any]) {
         var first = true
         var startingFirst = firstInChain
@@ -285,8 +326,7 @@ class GrammarGen(posMap: Any => List[Int]) {
             firstInChain = startingFirst
             if (!first) {
                 g += "|"
-                currentOption = (currentOption dropRight 1) ++
-                    List(currentOption.last + 1)
+                currentOption = incrementLastElement(currentOption)
             }
             var i = matches
             while (!i.isEmpty) {
