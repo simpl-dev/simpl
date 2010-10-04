@@ -1,19 +1,24 @@
 package ee.cyber.simplicitas.grammartest
 
+import java.io.FileInputStream
+import java.io.BufferedInputStream
+import org.junit.Assert
 import java.io.File
-import ee.cyber.simplicitas.GenericGrammar
 import java.io.FileWriter
 
-import ee.cyber.simplicitas.GeneratorBase
-import ee.cyber.simplicitas.grammartest.simpl.SimplGrammar
+import ee.cyber.simplicitas.GenericGrammar
 
 import Dump._
 
-object Main {
-    def main(args: Array[String]) {
-        val testDir = args(0)
+object Main extends Assert {
+    var inputDir: String = null
+    var outputDir: String = null
 
-        val grammars = new File(testDir).listFiles
+    def main(args: Array[String]) {
+        inputDir  = args(0)
+        outputDir  = args(1)
+
+        val grammars = new File(inputDir).listFiles
         for (grDir <- grammars) {
             runGrammar(grDir.getName, grDir)
         }
@@ -24,6 +29,8 @@ object Main {
                 "." + name.capitalize + "Grammar"
         val constructor = Class.forName(className).getConstructor()
 
+        new File(outputDir + "/" + name).mkdirs()
+
         for (testFile <- dir.listFiles if testFile.getName.endsWith(".in")) {
             println("Running grammar " + name + " for file " + testFile.getName)
 
@@ -31,12 +38,14 @@ object Main {
                     .asInstanceOf[GenericGrammar]
             grammar.parseFile(testFile.getAbsolutePath)
             val dumped = dumpNode(grammar.tree)
-            println(dumped)
 
-            // TODO: compare dumped node with given input.
-            writeFile(
-                    testFile.getAbsolutePath.replaceAll(".in", ".out"),
-                    dumped)
+            // Write file to target dir so that it can later be examined
+            // if things go wrong.
+            val outFile = testFile.getName.replaceAll(".in", ".out")
+            writeFile(outputDir + "/" + name + "/" + outFile, dumped)
+
+            Assert.assertEquals(dumped,
+                    readFile(inputDir + "/" + name + "/" + outFile))
         }
     }
 
@@ -48,5 +57,17 @@ object Main {
         } finally {
           writer.close()
         }
+    }
+
+    def readFile(filePath: String) = {
+        val buffer = new Array[Byte](new File(filePath).length().intValue)
+        var f: BufferedInputStream = null
+        try {
+            f = new BufferedInputStream(new FileInputStream(filePath))
+            f.read(buffer)
+        } finally {
+            f.close()
+        }
+        new String(buffer);
     }
 }

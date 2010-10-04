@@ -2,6 +2,7 @@
 <project name="example-bean" default="run-test" basedir=".">
     <property file="${basedir}/ant.properties"/>
     <property name="simpl.version" value="1.0.1"/>
+    <property name="junit.version" value="4.8.1"/>
 
     <property name="target" value="${basedir}/target"/>
     <property name="tool-jar" value="${target}/grammartest-tool.jar"/>
@@ -16,6 +17,10 @@
     </import>
 
     <target name="tool-deps" depends="copy-mvn-ant,init-dep,require-antlr,require-scala">
+        <antcall target="require">
+            <param name="group" value="junit"/>
+            <param name="artifact" value="junit/${junit.version}"/>
+        </antcall>
         <antcall target="require">
             <param name="artifact" value="simplicitas-tool/${simpl.version}"/>
         </antcall>
@@ -53,12 +58,12 @@
 
     <target name="run-test" depends="tool-deps">
         <java classname="ee.cyber.simplicitas.grammartest.Main" fork="true">
-			<classpath>
-				<path refid="tool-deps"/>
-				<path location="${tool-jar}"/>
-			</classpath>
-			<arg line="${basedir}/src/tests"/>
-		</java>
+            <classpath>
+                <path refid="tool-deps"/>
+                <path location="${tool-jar}"/>
+            </classpath>
+            <arg line="${basedir}/src/tests ${basedir}/target/test"/>
+        </java>
     </target>
 
     <target name="clean">
