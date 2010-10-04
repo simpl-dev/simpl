@@ -194,7 +194,7 @@ class GrammarGen(posMap: Any => List[Int]) {
             // This rule already has parameter with this name.
             // Check if there are conflicts.
             case Some(other) =>
-                if ((other.option zip currentOption) exists
+                if ((other.option zip currentOption) forall
                         ((a: Tuple2[Int, Int]) => a._1 == a._2))
                     error(_id, "multiple tokens named '" + tagName + "'")
                 else if (other.node != id)
