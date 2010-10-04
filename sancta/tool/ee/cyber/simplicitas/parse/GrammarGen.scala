@@ -296,11 +296,7 @@ class GrammarGen(posMap: Any => List[Int]) {
         }
     }
 
-    def join(i: Iterable[String]) =
-        if (i isEmpty)
-            ""
-        else
-            i reduceLeft (_ + ", " + _)
+    def join(i: Iterable[String]) = i.mkString(", ")
 
     // stupid lowlevel replace...
     def replaceAll(src: String, needle: String, replacement: String): String = {
