@@ -340,24 +340,6 @@ class GrammarGen(posMap: Any => List[Int]) {
 
     def join(i: Iterable[String]) = i.mkString(", ")
 
-    // stupid lowlevel replace...
-    def replaceAll(src: String, needle: String, replacement: String): String = {
-        val buf = new StringBuilder()
-        var end = 0
- 
-        while (true) {
-            val pos = src.indexOf(needle, end)
-            if (pos < 0) {
-                buf append src.substring(end)
-                return buf toString
-            }
-            buf append src.substring(end, pos)
-            buf append replacement
-            end = pos + needle.length
-        }
-        ""
-    }
-
     def nodeValue(p: NodeParam) = {
         val name = "$" + p.varName
 
