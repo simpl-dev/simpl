@@ -84,8 +84,9 @@ class GrammarGen(posMap: Any => List[Int]) {
             })
 
     def endHook(tag: String, embrace: Boolean, id: String) = {
-        println("endHook(" + tag + ", " + id + ")")
+        println("endHook(" + tag + ", " + embrace + ", " + id + ")")
         val p = g.size - 1
+        println("g(p) = \"" + g(p) + "\"")
         var t = tag;
         if (t == "") {
             t = newId
@@ -202,7 +203,8 @@ class GrammarGen(posMap: Any => List[Int]) {
                           " was " + other.node + ", but redefined as " + id)
                 else
                     np.varName = other.varName
-            // Parameter is unique (so far). Just add it to list.
+            // Parameter is unique (so far). Generate variable name for it
+            // and add to the list.
             case _ =>
                 println("varName")
                 np.varName = newId
@@ -251,7 +253,7 @@ class GrammarGen(posMap: Any => List[Int]) {
             t
         case ("(" :: alt) :: t =>
             if (name ne null)
-                error(name, "Complex patterns pattern cannot be given a name")
+                error(name, "Complex pattern cannot be given a name")
             g += "("
             currentOption = currentOption ++ List(0)
             altList(matchName, alt)
