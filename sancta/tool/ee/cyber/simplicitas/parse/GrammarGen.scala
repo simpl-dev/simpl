@@ -12,9 +12,17 @@ case class ConstructorParam(name: String, vtype: String, code: String,
 
 /** Represents class that is generated for each rule. */
 class RuleClass(val antlrName: String) {
-    var hdr = ""
-    var param: Seq[ConstructorParam] = Nil
+    /** This will be either "trait" or "case class" depending on
+      * the type of the rule. */
+    var classType = ""
+
+    /** Constructor parameters. */
+    var parameters: Seq[ConstructorParam] = Nil
+
+    /** What classes will we extend? */
     val extend = new ArrayBuffer[String]()
+
+    /** Class body, if user uses the { ... } construct. */
     var body = ""
 }
 
@@ -61,38 +69,40 @@ class GrammarGen(posMap: Any => List[Int]) {
         def addTerminalDefinition(ruleName: String) {
             val termClass = new RuleClass(ruleName)
             termClass.extend += "TerminalNode"
-            termClass.hdr = "case class " + ruleName
-            termClass.param = List(ConstructorParam("text", "String", "$_", ""))
+            termClass.classType = "case class " + ruleName
+            termClass.parameters = List(ConstructorParam("text", "String", "$_", ""))
     
             // Add the terminal to symbol tables.
             terminals += ruleName
             rules(ruleName) = termClass
         }
 
+        def addNonTerminal(name: String, header: String) {
+            val ruleClass = new RuleClass(uncapitalize(name) + "_")
+            ruleClass.classType = header + " " + name
+            rules(name) = ruleClass
+        }
+
         val ruleName = tree match {
-            case "terminal" :: "hidden" :: (name: String) :: alt =>
+            case "terminal" :: "hidden" :: (name: String) :: _ =>
                 checkName(true, "Terminal", name, tree)
                 addTerminalDefinition(name)
                 name
-            case "terminal" :: (name: String) :: alt =>
+            case "terminal" :: (name: String) :: _ =>
                 checkName(true, "Terminal", name, tree)
                 addTerminalDefinition(name)
                 name
-            case "fragment" :: (name: String) :: alt =>
+            case "fragment" :: (name: String) :: _ =>
                 checkName(true, "Fragment", name, tree)
                 // Fragments do not get separate class named after them.
                 null
             case "option" :: (name: String) :: _ =>
                 checkName(false, "Option", name, tree) 
-                val r = new RuleClass(uncapitalize(name) + "_")
-                r.hdr = "trait " + name
-                rules(name) = r
+                addNonTerminal(name, "trait")
                 name
             case ":" :: (name: String) :: _ =>
                 checkName(false, "Rule", name, tree)
-                val r = new RuleClass(uncapitalize(name) + "_")
-                r.hdr = "case class " + name
-                rules(name) = r
+                addNonTerminal(name, "case class")
                 name
             case _ => 
                 null
@@ -148,11 +158,19 @@ class GrammarGen(posMap: Any => List[Int]) {
             rules
     }
 
+    // Getter methods that are called from Generator.
     
-    
-    def getGrammarName = "foo"
+    def getGrammarName = grammarName
+
     def getTreeSource = grammarClass
-    def getGrammarSource = "foo"
+
+    def getGrammarSource = {
+        val buffer = new StringBuilder()
+        g.foreach(buffer.append(_))
+        buffer.toString
+    }
+
+    // Assemble actual source files from various bits and pieces.
 
     def grammarClass = {
         val treeSrc = new StringBuilder()
@@ -164,10 +182,10 @@ class GrammarGen(posMap: Any => List[Int]) {
                           "{ErrorHandler}\n\n")
 
         for (r <- rules.values) {
-            treeSrc append r.hdr
-            if (!r.param.isEmpty)
+            treeSrc append r.classType
+            if (!r.parameters.isEmpty)
                 treeSrc append ("(" + join(
-                    r.param map (t => t.mod + t.name + ": " + t.vtype)) + ")")
+                    r.parameters map (t => t.mod + t.name + ": " + t.vtype)) + ")")
             treeSrc append " extends "
             r.extend.toList match {
                 case Nil =>
@@ -178,9 +196,9 @@ class GrammarGen(posMap: Any => List[Int]) {
                         treeSrc append (" with " + join(t))
             }
             treeSrc append " {"
-            if (r.hdr startsWith "case ")
+            if (r.classType startsWith "case ")
                 treeSrc append ("\n  def childrenNames = Array(" +
-                    join(r.param map ('"' + _.name + '"')) + ");\n")
+                    join(r.parameters map ('"' + _.name + '"')) + ");\n")
             treeSrc append (r.body + "}\n")
         }
         treeSrc append ("\nobject " + grammarName +
