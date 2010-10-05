@@ -5,37 +5,17 @@ package ee.cyber.simplicitas.parse
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
 
-class GrammarException(msg: String) extends Exception(msg)
-
-case class ConstructorParam(name: String, vtype: String, code: String,
-        mod: String)
-
-/** Represents class that is generated for each rule. */
-class RuleClass(val antlrName: String) {
-    /** This will be either "trait" or "case class" depending on
-      * the type of the rule. */
-    var classType = ""
-
-    /** Constructor parameters. */
-    var parameters: Seq[ConstructorParam] = Nil
-
-    /** What classes will we extend? */
-    val extend = new ArrayBuffer[String]()
-
-    /** Class body, if user uses the { ... } construct. */
-    var body = ""
-}
-
 class GrammarGen(posMap: Any => List[Int]) {
-    /** Set of used terminal identifiers. */
-    private val terminals = collection.mutable.Set.empty[String]
-
-    /** Keywords supported by this language. Map is from keyword
-      * to identifier representing the corresponding lexer rule. */
-    private val keywords = new HashMap[String, String]()
-
-    /** Rules in this language, indexed by rule name. */
-    private val rules = new HashMap[String, RuleClass]()
+    object symbols extends SymbolTable {
+        val terminals = collection.mutable.Set.empty[String]
+        val keywords = new HashMap[String, String]()
+        val rules = new HashMap[String, RuleClass]()
+    }
+    
+    import symbols._
+    import GrammarUtils._
+    
+    val error = GrammarUtils.error(posMap)_
 
     /** This will contain the resulting code. */
     private var g = new ArrayBuffer[String]()
@@ -51,7 +31,6 @@ class GrammarGen(posMap: Any => List[Int]) {
 
     /** Grammar-level options that are passed to ANTLR. */
     private var grammarOptions = ""
-
 
     /** Checks whether given name can safely be used as identifier, 
       * i.e., it does not clash with Scala keyword. */
@@ -113,6 +92,11 @@ class GrammarGen(posMap: Any => List[Int]) {
         }
     }
 
+    def generateRule(tree: Any) {
+        val ruleGen = new RuleGen(symbols, g, posMap)
+        ruleGen.generate(tree)
+    }
+
     def grammargen(tree: Object) {
         terminals += "EOF"
         tree match {
@@ -121,10 +105,10 @@ class GrammarGen(posMap: Any => List[Int]) {
 
                 val ruleList = matchGrammarOptions(rest)
 
-                ruleList foreach addToSymbolTable
+                ruleList.foreach(addToSymbolTable)
 
                 g += grammarHeader
-//                ruleList foreach rule
+                ruleList.foreach(generateRule)
         }
         for (kw <- keywords.keys)
             g += keywords(kw) + ": " + kw + ";\n"
@@ -276,24 +260,4 @@ class GrammarGen(posMap: Any => List[Int]) {
         }
     }
     """
-
-
-    // Following are small utility methods.
-
-    /** Report an error related to node. */
-    def error(node: Any, what: String) =
-        throw new GrammarException(posMap(node) match {
-                case List(line, col) =>
-                    line + ":" + col + ": " + what
-                case _ =>
-                    what
-            })
-
-    def uncapitalize(s: String): String =
-        if (s == "")
-            ""
-        else
-            (Character toLowerCase (s charAt 0)) + (s substring 1)
-
-    def join(i: Iterable[Any]) = i.mkString(", ")
 }
