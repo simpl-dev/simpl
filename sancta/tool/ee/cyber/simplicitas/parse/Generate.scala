@@ -82,9 +82,9 @@ class Generator {
         }
         val gen = new GrammarGen(getPos)
         gen.grammargen(gtree)
-        val grammarFile = gen.getGrammarName + ".g"
-        writeFile(gen.getGrammarName + ".scala", gen.getTreeSource)
-        writeFile(grammarFile, gen.getGrammarSource)
+        val grammarFile = gen.grammarName + ".g"
+        writeFile(gen.grammarName + ".scala", gen.treeSource)
+        writeFile(grammarFile, gen.grammarSource)
         if (runANTLR) {
             val tool = new org.antlr.Tool(Array(
                 "-o", outputDir, "-lib", outputDir,
