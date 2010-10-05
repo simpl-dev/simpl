@@ -3,7 +3,8 @@
 package ee.cyber.simplicitas.parse
 
 object NamingService {
-    def validateRuleName(name: String, typeName: String, isTerminal: Boolean): Option[String] =
+    def validateRuleName(name: String, typeName: String, 
+            isTerminal: Boolean): Option[String] =
         if (!isTerminal && !name.charAt(0).isLetter)
             Some(typeName + " name must start with a letter: \"" + 
                 name + "\"")

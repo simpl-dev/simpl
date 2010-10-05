@@ -531,12 +531,13 @@ class GrammarGen(posMap: Any => List[Int]) {
     /** Checks whether given name can safely be used as identifier, 
       * i.e., it does not clash with Scala keyword. */
     private def checkName(isTerminal: Boolean, typeName: String, name: String, 
-            tree: Any) =
+            tree: Any) {
         NamingService.validateRuleName(name, typeName, isTerminal) match {
             case Some(errorMsg) => 
                 error(tree, errorMsg)
             case _ =>
         }
+    }
 
     /** Parses given rule and adds it to global <code>rules</code> map.
       * XXX: for terminals, also generates the code. */
