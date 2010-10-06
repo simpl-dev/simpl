@@ -5,16 +5,25 @@ package ee.cyber.simplicitas.parse
 import scala.collection.mutable.ArrayBuffer
 
 /** Information about other rule that is called from current rule.
-  * Constructor parameters:
-  * - name ??
-  * - node -- type of the node.
-  * - var ??
-  * - isList -- whether the result of the rule call is list (use of + or *).
-  * - tmp ??
-  * - option ??
+  * @param name ???
+  * @param ruleName name of the rule that will be called
+  * @param varName Name of the variable used in the code.
+  * @param isList whether the result of the rule call is list (use of + or *).
+  * @param branch identifies alternative branch where this rule call belongs to.
+  * Branches are used to detect conflicting variable names.
   */
-case class NodeParam(name: String, node: String, var varName: String,
-                     isList: Boolean, tmp: String, option: List[Int])
+case class RuleParam(name: String, ruleName: String, var varName: String,
+                     isList: Boolean, branch: BranchIdentifier)
+
+object BranchIdentifier {
+    val empty = new BranchIdentifier(List(0))
+}
+
+class BranchIdentifier(branch: List[Int]) {
+    def nextBranch = 
+        new BranchIdentifier((branch dropRight 1) ++ List(branch.last + 1))
+    def extend = new BranchIdentifier(branch ++ List(0))
+}
 
 /** Code for generating code for a single grammar rule. */
 class RuleGen(symbols: SymbolTable, g: ArrayBuffer[String], 
@@ -96,8 +105,8 @@ class RuleGen(symbols: SymbolTable, g: ArrayBuffer[String],
 
             println("t(" + option + ")")
             val id = newId
-            val np = NodeParam(id, option, id, false, null, Nil)
-//            g += id + "=" + r.antlrName + "{$r=" + nodeValue(np) + ";}"
+            val np = RuleParam(id, option, id, false, BranchIdentifier.empty)
+            g += id + "=" + r.antlrName + "{$r=" + nodeValue(np) + ";}"
             first = false
         }
         g += ";\n"
@@ -116,4 +125,18 @@ class RuleGen(symbols: SymbolTable, g: ArrayBuffer[String],
             case _ =>
                 tree
         }
+
+    /** Returns code for getting the value of given node. */
+    def nodeValue(p: RuleParam) = {
+        val name = "$" + p.varName
+
+        if (terminals contains p.ruleName) {
+            val v = "(" + p.ruleName + ")setTokenPos(new " + p.ruleName + "(" +
+                name + ".getText()" + ")," + name + ")"
+
+            name + "==null?null:" + v
+        } else {
+            name + ".r"
+        }
+    }
 }
