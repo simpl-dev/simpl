@@ -40,7 +40,7 @@ class RuleGen(symbols: SymbolTable, g: ArrayBuffer[String],
     val error = GrammarUtils.error(posMap)_
 
     /** Identifies current branch in the options. */
-    var currentBranch: BranchIdentifier = null
+    var currentBranch: BranchIdentifier = BranchIdentifier.empty
 
     /** whether the currently analyzed branch contains
       * repetition (Foo+ or Foo*). */
@@ -88,10 +88,6 @@ class RuleGen(symbols: SymbolTable, g: ArrayBuffer[String],
       */
     def generateNormalRule(name: String, alt: List[Any]) {
         println("normal rule: " + name + ": " + alt)
-
-        // Initialize global variables.
-        currentBranch = BranchIdentifier.empty
-        isList = false
 
         g += "\n" + rules(name).antlrName + " returns [" + name +
             " r]\n@init {SourceLocation _start=null;int _end=-1;" +
@@ -237,11 +233,11 @@ class RuleGen(symbols: SymbolTable, g: ArrayBuffer[String],
       * TODO: does this feature have any use? */
     def matchTerminalAction(tree: List[Any]): List[Any] = tree match {
         case (s: String) :: t if s startsWith "{" =>
-            val r = matchModifier(terminal, t)
+            val r = matchModifier(matchTerminalPattern, t)
             g += s
             r
         case _ =>
-            matchModifier(terminal, tree)
+            matchModifier(matchTerminalPattern, tree)
     }
 
     /** Check whether current element will comes with modifier, such as
@@ -308,32 +304,39 @@ class RuleGen(symbols: SymbolTable, g: ArrayBuffer[String],
 //            t
         case Nil =>
             Nil
+        case _ => Nil
     }
 
-    def terminal(tree: List[Any]): List[Any] = tree match {
-//        case h :: t => h match {
-//            case s: String => s match {
-//                case "~" =>
-//                    g += " ~"
-//                    terminal(t)
-//                case _ =>
-//                    g += " "
-//                    g += s  // identifier
-//                    t
-//            }
-//            case l: List[Any] => l match {
-//                case "(" :: alt =>
-//                    g += "("
-//                    altList(termAction, alt)
-//                    g += ")"
-//                    t
-//                case ".." :: (from: String) :: (to: String) :: Nil =>
-//                    g += " " + from + ".." + to
-//                    t
-//                case _ => // Just to satisfy the compiler.
-//                    throw new IllegalArgumentException()
-//            }
-//        }
+    /** Matches and generates code for terminal pattern. */
+    def matchTerminalPattern(tree: List[Any]): List[Any] = tree match {
+        case h :: t => h match {
+            case s: String => s match {
+                // ~Foo
+                case "~" =>
+                    g += " ~"
+                    matchTerminalPattern(t)
+                // just identifier Foo
+                case _ =>
+                    g += " "
+                    g += s
+                    t
+            }
+            case l: List[Any] => l match {
+                // ( Foo )
+                case "(" :: alt =>
+                    g += "("
+                    matchAltList(matchTerminalAction, alt)
+                    g += ")"
+                    t
+                // Foo .. Bar
+                case ".." :: (from: String) :: (to: String) :: Nil =>
+                    g += " " + from + ".." + to
+                    t
+                // Just to satisfy the compiler.
+                case _ =>
+                    throw new IllegalArgumentException()
+            }
+        }
         case Nil => Nil
     }
 }
