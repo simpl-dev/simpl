@@ -4,6 +4,11 @@ package ee.cyber.simplicitas.parse
 
 import scala.collection.mutable.ArrayBuffer
 
+/*
+ * TODO: explain general logic of matchFoo style methods.
+ * TODO: explain how branch detection works.
+ */
+
 /** Information about other rule that is called from current rule.
   * @param name ???
   * @param ruleName name of the rule that will be called
@@ -77,6 +82,7 @@ class RuleGen(symbols: SymbolTable, g: ArrayBuffer[String],
 
         g += ruleName + ':'
         matchAltList(matchTerminalAction, matchCodeBlock(alt, ruleName))
+
         if (isHidden) {
             g += "{$channel = HIDDEN;}"
         }
@@ -102,9 +108,9 @@ class RuleGen(symbols: SymbolTable, g: ArrayBuffer[String],
         g += "}\n@after {$r = new " + name + "("
 
         // The following string will be modified later to include 
-        // post-processing.
+        // code for all the constructor parameters for this node.
         g += ""
-        val after_idx = g.size - 1
+        val params_idx = g.size - 1
 
         g += ");$r.setLocation(_start,_end==-1?(_start==null?0:_start.endIndex()):_end," +
             "_endLine==-1?(_start==null?0:_start.endLine()):_endLine," +
@@ -113,19 +119,25 @@ class RuleGen(symbols: SymbolTable, g: ArrayBuffer[String],
         matchAltList(matchName, matchCodeBlock(alt, name))
 
         g += ";\n"
-        val init = new StringBuilder()
-        def getParam(p: RuleParam): String = {
-            println("getParam(" + p + ")")
-            if (p.isList) {
-                init append ("ArrayList " + p.listVar + "=new ArrayList();")
-                "scalaList(" + p.listVar + ")"
-            } else {
-                return nodeValue(p)
-            }
-        }
 
-        g(after_idx) = join(params.map(getParam))
+        // Now that we know all the constructor parameters for this
+        // rule, fill in the temporary variables for list parameters.
+        val init = new StringBuilder()
+        for (p <- params if p.isList) {
+            init.append("ArrayList " + p.listVar + "=new ArrayList();")
+        }
         g(init_idx) = init.toString
+
+        // Fill in the code for constructor parameters when creating
+        // object to contain results of this rule.
+        g(params_idx) = join(params.map(
+                p => if (p.isList) {
+                    "scalaList(" + p.listVar + ")"
+                    } else {
+                        nodeValue(p)
+                    }))
+
+        // Fill in the info needed for generating the Scala class.
         rules(name).classType = "case class " + name
         rules(name).parameters = 
             for (p <- params) yield
@@ -133,8 +145,10 @@ class RuleGen(symbols: SymbolTable, g: ArrayBuffer[String],
                         if (p.isList) "List[" + p.ruleName + "]" 
                         else p.ruleName,
                         "", "var ")
+
+        // Quick last check for invalid rule calls.
         for (p <- params) {
-            if (!(rules contains p.ruleName)) {
+            if (!(rules.contains(p.ruleName))) {
                 error(p.ruleName, "Undefined rule " + p.ruleName
                         + " referenced")
             }
@@ -194,7 +208,7 @@ class RuleGen(symbols: SymbolTable, g: ArrayBuffer[String],
                 tree
         }
 
-    /** Returns code for getting the value of given node. */
+    /** Returns code for getting the value of given rule call. */
     def nodeValue(p: RuleParam) = {
         val name = "$" + p.varName
 
@@ -275,36 +289,147 @@ class RuleGen(symbols: SymbolTable, g: ArrayBuffer[String],
     }
 
     /** Processes the unnamed rule call. */
-    val simple_null = simple(null)_
+    val unnamedPattern = matchNonTermPattern(null)_
 
     /** Takes as input list of terms. If the list starts with
       * (= ...) element, then assumes that this will become the name of
       * the next term. Otherwise, the name will be null. */
     def matchName(tree: List[Any]): List[Any]  = tree match {
         case List("=", name: String) :: t => 
-            matchModifier(simple(name), t)
+            matchModifier(matchNonTermPattern(name), t)
         case t => 
-            matchModifier(simple_null, t)
+            matchModifier(unnamedPattern, t)
     }
 
-    def simple(name: String)(tree: List[Any]): List[Any] = tree match {
-//        case (id: String) :: t =>
-//            simpleTerm(name, id)
-//            firstInChain = false
-//            t
-//        case ("(" :: alt) :: t =>
-//            if (name ne null)
-//                error(name, "Complex pattern cannot be given a name")
-//            g += "("
-//            currentOption = currentOption ++ List(0)
-//            altList(matchName, alt)
-//            currentOption = currentOption dropRight 1
-//            g += ")"
-//            firstInChain = false
-//            t
-        case Nil =>
-            Nil
-        case _ => Nil
+    def matchNonTermPattern(name: String)(tree: List[Any]): List[Any] =
+        tree match {
+            // Just rule call in the form name=Rule
+            case (id: String) :: t =>
+                matchRuleCall(name, id)
+                t
+            // More complex pattern that can contain alternatives.
+            case ("(" :: alt) :: t =>
+                // Sanity check
+                if (name ne null)
+                    error(name, "Complex pattern cannot be named")
+
+                // Match the pattern inside parentheses.
+                // The surrounding code ensures that this new pattern
+                // is assumed to be in a different branch.
+                g += "("
+                val oldBranch = currentBranch
+                currentBranch = currentBranch.extend
+                matchAltList(matchName, alt)
+                currentBranch = oldBranch
+                g += ")"
+                t
+            case Nil =>
+                Nil
+        }
+
+    def matchRuleCall(name: String, _id: String) {
+        println("simpleTerm(" + name + ", " + _id + ")")
+//
+//        // Check if it is literal. If not, then id = _id.
+//        val id = trKeyword(_id)
+//
+//        // If this is some literal string...
+//        if (name == null && (_id startsWith "'")) {
+//            g += " "
+//            val term =
+//            if (firstInChain) {
+//                println("firstInChain")
+//                val tag = newId
+//                g += "(" + tag + "=" + id + "{"
+//                if (multi != RepeatType.None)
+//                    g += "if(_start==null)"
+//                g += "_start=new TokenLocation($" + tag + ");"
+//                endHook(tag, false, null)
+//                g += "})"
+//            } else {
+//                g += id
+//                endHook("", true, null)
+//            }
+//            return
+//        }
+//
+//        // Name of the variable that will be used to refer to this element.
+//        // If not explicitly given, then use name of the called rule.
+//        val tagName = if (name == null) uncapitalize(id); else name
+//        println("tmpName, multi = " + multi +
+//                ", firstInChain = " + firstInChain  +
+//                ", currentOption = " + currentOption)
+//        val tmpName =
+//            if (multi == RepeatType.List || firstInChain) newId
+//            else null
+//
+//        // Check whether this can be used as identifier name.
+//        NamingService.validateASTAttribute(tagName) match {
+//            case Some(errorMsg) => error(_id, errorMsg)
+//            case _ =>
+//        }
+//
+//        val np = NodeParam(tagName, id, "", multi == RepeatType.List,
+//                tmpName, currentOption)
+//
+//        // Check if name of the node conflicts with some other name in
+//        // the same branch. For example:
+//        // x=foo y=bar x=baz is a conflict.
+//        // y=bar (x=foo | x=baz) is not because both x's are in different
+//        // branches.
+//        param find (_.name == tagName) match {
+//            // This rule already has parameter with this name.
+//            // Check if there are conflicts.
+//            case Some(other) =>
+//                if ((other.option zip currentOption) forall
+//                        ((a: Tuple2[Int, Int]) => a._1 == a._2))
+//                    error(_id, "multiple tokens named '" + tagName + "'")
+//                else if (other.node != id)
+//                    error(_id, "token type conflict: " + tagName +
+//                          " was " + other.node + ", but redefined as " + id)
+//                else
+//                    np.varName = other.varName
+//            // Parameter is unique (so far). Generate variable name for it
+//            // and add to the list.
+//            case _ =>
+//                println("varName")
+//                np.varName = newId
+//                param += np
+//        }
+//
+//        if (tmpName ne null) {
+//            // TODO: report error, if rules(id) does not contain anything
+//            // this means, the rule was not found.
+//            g += "\n(" + np.varName + "=" + rules(id).antlrName + "{"
+//            // must be firstInChain
+//            if (multi == RepeatType.None || multi == RepeatType.Optional) {
+//                if (multi == RepeatType.None) {
+//                    g += "_start=" + tmpName + "=" + nodeValue(np)
+//                } else if (multi == RepeatType.Optional ) {
+//                    g += tmpName + "=" + nodeValue(np) +
+//                        ";if(_start==null)_start=" + tmpName
+//                }
+//            } else if (!firstInChain) {  // only multi
+//                g += tmpName + ".add(" + nodeValue(np) + ")"
+//            } else { // both multi and firstinchain
+//                var iv = ""
+//                if (terminals contains id) {
+//                    println("iv")
+//                    iv = newId
+//                    g += "CommonNode " + iv + "=" + nodeValue(np) + ";"
+//                } else {
+//                    iv = "$" + np.varName + ".r"
+//                }
+//                g += tmpName + ".add(" + iv + ");if(_start==null)_start=" + iv
+//            }
+//            g += ";"
+//            endHook(np.varName, false, id)
+//            g += "})"
+//        } else {
+//            g += " "
+//            g += np.varName + "=" + rules(id).antlrName
+//            endHook(np.varName, true, id)
+//        }
     }
 
     /** Matches and generates code for terminal pattern. */
