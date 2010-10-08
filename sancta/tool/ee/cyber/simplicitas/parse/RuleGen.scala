@@ -408,9 +408,9 @@ class RuleGen(symbols: SymbolTable, termCode: ArrayBuffer[String],
             val varName = newId
             g += "("
             g += varName + "=" + patternVar
-            g += ") {"
+            g += " {"
             endHook(varName, null)
-            g += "}"
+            g += "})"
 
             return
         }
@@ -482,9 +482,9 @@ class RuleGen(symbols: SymbolTable, termCode: ArrayBuffer[String],
         } else {
             g += "("
             g += np.varName + "=" + rules(patternVar).antlrName
-            g += ") {"
+            g += " {"
             endHook(np.varName, patternVar)
-            g+= "}"
+            g+= "})"
         }
     }
 
