@@ -39,9 +39,16 @@ class BranchIdentifier(val branch: List[Int]) {
     override def toString = branch.toString
 }
 
-/** Code for generating code for a single grammar rule. */
-class RuleGen(symbols: SymbolTable, g: ArrayBuffer[String], 
-        posMap: Any => List[Int]) {
+/** Code for generating code for a single grammar rule.
+  * @param symbols information about the rules in the grammar.
+  * @param termCode buffer that will contain ANTLR code for terminal rules.
+  * @param nonTermCode buffer that will contain ANTLR code for non-terminal
+  * rules.
+  * @param posMap function that will return node's position in the
+  * input program.
+  */
+class RuleGen(symbols: SymbolTable, termCode: ArrayBuffer[String], 
+        nonTermCode: ArrayBuffer[String], posMap: Any => List[Int]) {
     import symbols._
     import GrammarUtils._
     
@@ -57,19 +64,29 @@ class RuleGen(symbols: SymbolTable, g: ArrayBuffer[String],
     /** Collection of rules called from this rule. */
     private val params = new ArrayBuffer[RuleParam]()
 
+    /** Temporary buffer that will point to either <code>termCode</code>
+      * or <code>nonTermCode</code>. This allows using the same methods
+      * to generate code for terminals and non-terminals. */
+    private var g: ArrayBuffer[String] = null
+
     /** Generates code for rule given as AST. */
     def generate(tree: Any) {
         println("generate: " + tree)
         tree match {
             case "terminal" :: "hidden" :: (name: String) :: alt =>
+                g = termCode
                 generateTerminal(name, alt, false, true)
             case "terminal" :: (name: String) :: alt =>
+                g = termCode
                 generateTerminal(name, alt, false, false)
             case "fragment" :: (name: String) :: alt =>
+                g = termCode
                 generateTerminal(name, alt, true, false)
             case ":" :: (name: String) :: alt =>
+                g = nonTermCode
                 generateNormalRule(name, alt)
             case "option" :: (name: String) :: alt =>
+                g = nonTermCode
                 generateOptionRule(name, alt)
             case _ =>
                 ()

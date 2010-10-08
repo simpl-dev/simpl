@@ -17,14 +17,20 @@ class GrammarGen(posMap: Any => List[Int]) {
     
     val error = GrammarUtils.error(posMap)_
 
-    /** This will contain the resulting code. */
-    private var g = new ArrayBuffer[String]()
+    // See the getGrammarSource method for details about how these two
+    // code buffers are used and why there two instead of one.
+
+    /** This will contain ANTLR code for terminal rules. */
+    private val termCode = new ArrayBuffer[String]()
+
+    /** This will contain ANTLR code for non-terminal rules. */
+    private val nonTermCode = new ArrayBuffer[String]()
 
     /** Name of the grammar. */
-    private var grammarName = "";
+    private var grammarName = ""
 
     /** Java package for grammar */
-    private var grammarPackage = "";
+    private var grammarPackage = ""
 
     /** First rule in the grammar. This will become the start symbol. */
     private var firstRule: String = null
@@ -93,7 +99,7 @@ class GrammarGen(posMap: Any => List[Int]) {
     }
 
     def generateRule(tree: Any) {
-        val ruleGen = new RuleGen(symbols, g, posMap)
+        val ruleGen = new RuleGen(symbols, termCode, nonTermCode, posMap)
         ruleGen.generate(tree)
     }
 
@@ -107,14 +113,9 @@ class GrammarGen(posMap: Any => List[Int]) {
 
                 ruleList.foreach(addToSymbolTable)
 
-                g += grammarHeader
                 ruleList.foreach(generateRule)
         }
-        for (kw <- keywords.keys)
-            g += keywords(kw) + ": " + kw + ";\n"
-//        println("terms = " + terms)
-//        g ++= terms
-        grammarClass
+//        grammarClass
     }
 
     /** Parses the full name of the grammar. Fills grammarName and
@@ -148,9 +149,24 @@ class GrammarGen(posMap: Any => List[Int]) {
 
     def getTreeSource = grammarClass
 
+    /** Compose the code for the ANTLR grammar. */
     def getGrammarSource = {
         val buffer = new StringBuilder()
-        g.foreach(buffer.append(_))
+
+        // Generic grammar header.
+        buffer.append(grammarHeader)
+
+        // Code for non-terminals.
+        nonTermCode.foreach(buffer.append(_))
+
+        // Terminal rules for all the keywords.
+        for (kw <- keywords.keys)
+            buffer.append(keywords(kw) + ": " + kw + ";\n")
+
+        // Terminal rules for user-defined terminals. NB! these must come
+        // last otherwise they shadow the keyword rules.
+        termCode.foreach(buffer.append(_))
+
         buffer.toString
     }
 
