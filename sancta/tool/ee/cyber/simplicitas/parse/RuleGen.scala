@@ -387,7 +387,7 @@ class RuleGen(symbols: SymbolTable, g: ArrayBuffer[String],
 
         // If this is unnamed literal string...
         if (name == null && (pattern.startsWith("'"))) {
-            g += " "
+            g += "\n    "
             val varName = newId
             g += varName + "=" + patternVar
 //            endHook(varName, true, null)  TODO
@@ -440,38 +440,54 @@ class RuleGen(symbols: SymbolTable, g: ArrayBuffer[String],
                 params += np
         }
 
-//        if (tmpName ne null) {
-//            // TODO: report error, if rules(id) does not contain anything
-//            // this means, the rule was not found.
-//            g += "\n(" + np.varName + "=" + rules(id).antlrName + "{"
-//            // must be firstInChain
-//            if (multi == RepeatType.None || multi == RepeatType.Optional) {
-//                if (multi == RepeatType.None) {
-//                    g += "_start=" + tmpName + "=" + nodeValue(np)
-//                } else if (multi == RepeatType.Optional ) {
-//                    g += tmpName + "=" + nodeValue(np) +
-//                        ";if(_start==null)_start=" + tmpName
-//                }
-//            } else if (!firstInChain) {  // only multi
-//                g += tmpName + ".add(" + nodeValue(np) + ")"
-//            } else { // both multi and firstinchain
-//                var iv = ""
-//                if (terminals contains id) {
-//                    println("iv")
-//                    iv = newId
-//                    g += "CommonNode " + iv + "=" + nodeValue(np) + ";"
-//                } else {
-//                    iv = "$" + np.varName + ".r"
-//                }
-//                g += tmpName + ".add(" + iv + ");if(_start==null)_start=" + iv
-//            }
-//            g += ";"
-//            endHook(np.varName, false, id)
-//            g += "})"
+        g += "\n    "
+        if (np.isList) {
+            // TODO: report error, if rules(id) does not contain anything
+            // this means, the rule was not found.
+            g += "(" + np.varName + "=" + rules(patternVar).antlrName + "{"
+
+            var iv = ""
+            if (terminals contains patternVar) {
+                println("iv")
+                iv = newId
+                g += "CommonNode " + iv + "=" + nodeValue(np) + ";"
+            } else {
+                iv = "$" + np.varName + ".r"
+            }
+            g += listVar + ".add(" + iv + ");if(_start==null)_start=" + iv
+
+            g += ";"
+            endHook(np.varName, false, patternVar)
+            g += "})"
+        } else {
+            g += np.varName + "=" + rules(patternVar).antlrName
+            endHook(np.varName, true, patternVar)
+        }
+    }
+
+    def endHook(tag: String, embrace: Boolean, id: String) = {
+        println("endHook(" + tag + ", " + embrace + ", " + id + ")")
+//        val p = g.size - 1
+//        println("g(p) = \"" + g(p) + "\"")
+//        var t = tag;
+//        if (t == "") {
+//            t = newId
+//            g(p) = t + "=" + g(p)
+//        }
+//        val code = 
+//            if (id == null || (terminals contains id))
+//                "if($" + t + "!=null){if (_start == null) _start = new TokenLocation(" + t + ");" +
+//                "TokenLocation _tl = new TokenLocation(" + t + ");" +
+//                "if(_start.startIndex()<=_tl.endIndex()){_end=_tl.endIndex();" +
+//                "_endLine=_tl.endLine();_endColumn=_tl.endColumn();}}"
+//            else
+//                "if($" + t + ".r!=null && _start.startIndex()<=$" + t + ".r.endIndex())" +
+//                "{_end=$" + t + ".r.endIndex();" +
+//                "_endLine=$" + t + ".r.endLine();_endColumn=$" + t + ".r.endColumn();}"
+//        if (embrace) {
+//            g(p) = "(" + g(p) + "{" + code + "})"
 //        } else {
-//            g += " "
-//            g += np.varName + "=" + rules(id).antlrName
-//            endHook(np.varName, true, id)
+//            g(p) = g(p) + code
 //        }
     }
 
