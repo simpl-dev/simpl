@@ -10,7 +10,7 @@ import scala.collection.mutable.ArrayBuffer
  */
 
 /** Information about other rule that is called from current rule.
-  * @param name ???
+  * @param name name of the rule call in the grammar.
   * @param ruleName name of the rule that will be called
   * @param varName Name of the variable used in the code.
   * @param listVar name of the temporary variable used to collect
@@ -28,10 +28,13 @@ object BranchIdentifier {
     val empty = new BranchIdentifier(List(0))
 }
 
-class BranchIdentifier(branch: List[Int]) {
+class BranchIdentifier(val branch: List[Int]) {
     def nextBranch = 
         new BranchIdentifier((branch dropRight 1) ++ List(branch.last + 1))
     def extend = new BranchIdentifier(branch ++ List(0))
+    def conflictsWith(other: BranchIdentifier) =
+        (other.branch.zip(branch)) forall
+                        ((a: Tuple2[Int, Int]) => a._1 == a._2)
 
     override def toString = branch.toString
 }
@@ -246,7 +249,7 @@ class RuleGen(symbols: SymbolTable, g: ArrayBuffer[String],
       * and generates code for it.
       * TODO: does this feature have any use? */
     def matchTerminalAction(tree: List[Any]): List[Any] = tree match {
-        case (s: String) :: t if s startsWith "{" =>
+        case (s: String) :: t if s.startsWith("{") =>
             val r = matchModifier(matchTerminalPattern, t)
             g += s
             r
@@ -254,7 +257,7 @@ class RuleGen(symbols: SymbolTable, g: ArrayBuffer[String],
             matchModifier(matchTerminalPattern, tree)
     }
 
-    /** Check whether current element will comes with modifier, such as
+    /** Check whether current element comes with modifier, such as
       * ?, + or *. If so, do some bookkeeping to checking whether
       * two variable names conflict or not. In any case, call the
       * argument <code>f</code> with the current element as argument. */
@@ -327,76 +330,116 @@ class RuleGen(symbols: SymbolTable, g: ArrayBuffer[String],
                 Nil
         }
 
-    def matchRuleCall(name: String, _id: String) {
-        println("simpleTerm(" + name + ", " + _id + ")")
-//
-//        // Check if it is literal. If not, then id = _id.
-//        val id = trKeyword(_id)
-//
-//        // If this is some literal string...
-//        if (name == null && (_id startsWith "'")) {
-//            g += " "
-//            val term =
-//            if (firstInChain) {
-//                println("firstInChain")
-//                val tag = newId
-//                g += "(" + tag + "=" + id + "{"
-//                if (multi != RepeatType.None)
-//                    g += "if(_start==null)"
-//                g += "_start=new TokenLocation($" + tag + ");"
-//                endHook(tag, false, null)
-//                g += "})"
-//            } else {
-//                g += id
-//                endHook("", true, null)
-//            }
-//            return
-//        }
-//
-//        // Name of the variable that will be used to refer to this element.
-//        // If not explicitly given, then use name of the called rule.
-//        val tagName = if (name == null) uncapitalize(id); else name
-//        println("tmpName, multi = " + multi +
-//                ", firstInChain = " + firstInChain  +
-//                ", currentOption = " + currentOption)
-//        val tmpName =
-//            if (multi == RepeatType.List || firstInChain) newId
-//            else null
-//
-//        // Check whether this can be used as identifier name.
-//        NamingService.validateASTAttribute(tagName) match {
-//            case Some(errorMsg) => error(_id, errorMsg)
-//            case _ =>
-//        }
-//
-//        val np = NodeParam(tagName, id, "", multi == RepeatType.List,
-//                tmpName, currentOption)
-//
-//        // Check if name of the node conflicts with some other name in
-//        // the same branch. For example:
-//        // x=foo y=bar x=baz is a conflict.
-//        // y=bar (x=foo | x=baz) is not because both x's are in different
-//        // branches.
-//        param find (_.name == tagName) match {
-//            // This rule already has parameter with this name.
-//            // Check if there are conflicts.
-//            case Some(other) =>
-//                if ((other.option zip currentOption) forall
-//                        ((a: Tuple2[Int, Int]) => a._1 == a._2))
-//                    error(_id, "multiple tokens named '" + tagName + "'")
-//                else if (other.node != id)
-//                    error(_id, "token type conflict: " + tagName +
-//                          " was " + other.node + ", but redefined as " + id)
-//                else
-//                    np.varName = other.varName
-//            // Parameter is unique (so far). Generate variable name for it
-//            // and add to the list.
-//            case _ =>
-//                println("varName")
-//                np.varName = newId
-//                param += np
-//        }
-//
+    /** Turns string 'foo' into Foo. */
+    def makeKwIdentifier(s: String) = {
+        val buf = new StringBuilder()
+        for (i <- 1 to s.length - 1) {
+            val ch = s.charAt(i)
+            if (Character.isJavaIdentifierPart(ch))
+                buf.append(if (i > 1) ch
+                        else Character.toUpperCase(ch))
+        }
+        buf.toString
+    }
+
+    /** Checks whether given pattern represents literal string.
+      * If yes, then adds the literal to list of known terminals and
+      * keywords. Returns variable referring to that pattern.
+      * If the pattern is rule call, does nothing 
+     */
+    def getPatternVar(pattern: String): String = {
+        println("trKeyword(" + pattern + ")")
+
+        // If not literal, do nothing.
+        if (!(pattern startsWith "'"))
+            return pattern
+
+        // If known keyword, return the ID.
+        if (keywords contains pattern)
+            return keywords(pattern)
+
+        // This literal is not in symbol table. Create identifier for it
+        // and add to tables.
+        var id = makeKwIdentifier(pattern)
+
+        // Make it a valid Java identifier
+        if (id != "" && !(Character isJavaIdentifierStart (id charAt 0)))
+            id = "X_" + id
+
+        // If it conflicts with existing rules, just create new variable.
+        if (id == "" || (rules contains id) || (terminals contains id)) {
+            println("trKeyword: newId")
+            id = newId
+        }
+
+        // Add to tables.
+        keywords(pattern) = id
+        terminals += id
+
+        id
+    }
+
+    def matchRuleCall(name: String, pattern: String) {
+        println("simpleTerm(" + name + ", " + pattern + ")")
+
+        // Check if it is literal. If not, then patternVar = pattern.
+        val patternVar = getPatternVar(pattern)
+
+        // If this is unnamed literal string...
+        if (name == null && (pattern.startsWith("'"))) {
+            g += " "
+            val varName = newId
+            g += varName + "=" + patternVar
+//            endHook(varName, true, null)  TODO
+
+            return
+        }
+
+        // It was not unnamed literal.
+
+        // Name of the variable that will be used to refer to this element.
+        // If not explicitly given, then use name of the called rule.
+        val varName = if (name == null) uncapitalize(patternVar) else name
+
+        println("listVar, isList = " + isList +
+                ", currentBranch = " + currentBranch)
+        val listVar = if (isList) newId else null
+
+        // Check whether this can be used as identifier name.
+        NamingService.validateASTAttribute(varName) match {
+            case Some(errorMsg) => error(pattern, errorMsg)
+            case _ =>
+        }
+
+        val np = RuleParam(varName, patternVar, "", listVar, currentBranch)
+
+        // Check if name of the node conflicts with some other name in
+        // the same branch. For example:
+        // x=foo y=bar x=baz is a conflict.
+        // y=bar (x=foo | x=baz) is not because both x's are in different
+        // branches.
+        params find (_.name == varName) match {
+            // This rule already has parameter with this name.
+            // Check if there are conflicts.
+            case Some(other) =>
+                if (currentBranch.conflictsWith(other.branch)) {
+                    error(pattern, "multiple tokens named '" + varName + "'")
+                } else if (other.ruleName != patternVar) {
+                    error(pattern, "token type conflict: " + varName +
+                          " was " + other.ruleName + ", but redefined as " +
+                          patternVar)
+                } else {
+                    println("Using existing variable name: " + other.varName)
+                    np.varName = other.varName
+                }
+            // Parameter is unique (so far). Generate variable name for it
+            // and add to the list.
+            case _ =>
+                println("varName")
+                np.varName = newId
+                params += np
+        }
+
 //        if (tmpName ne null) {
 //            // TODO: report error, if rules(id) does not contain anything
 //            // this means, the rule was not found.
