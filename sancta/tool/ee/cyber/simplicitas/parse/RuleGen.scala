@@ -134,7 +134,7 @@ class RuleGen(symbols: SymbolTable, termCode: ArrayBuffer[String],
 
         g += ");$r.setLocation(_start,_end==-1?(_start==null?0:_start.endIndex()):_end," +
             "_endLine==-1?(_start==null?0:_start.endLine()):_endLine," +
-            "_endColumn==-1?(_start==null?0:_start.endColumn()):_endColumn);}:\n"
+            "_endColumn==-1?(_start==null?0:_start.endColumn()):_endColumn);}:"
 
         matchAltList(matchName, matchCodeBlock(alt, name))
 
@@ -181,7 +181,7 @@ class RuleGen(symbols: SymbolTable, termCode: ArrayBuffer[String],
     def generateOptionRule(name: String, alt: List[Any]) {
         println("option rule " + name + ": " + alt)
 
-        g += "\n" + rules(name).antlrName + " returns [" + name + " r]:\n"
+        g += "\n" + rules(name).antlrName + " returns [" + name + " r]:\n    "
 
         val optionList = matchCodeBlock(alt, name)
         var first = true
@@ -191,7 +191,7 @@ class RuleGen(symbols: SymbolTable, termCode: ArrayBuffer[String],
             val option = t.toString
 
             if (!first) {
-                g += " | "
+                g += "\n    | "
             }
 
             if (!(rules.contains(option))) {
