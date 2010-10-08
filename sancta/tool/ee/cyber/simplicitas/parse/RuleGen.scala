@@ -492,8 +492,9 @@ class RuleGen(symbols: SymbolTable, termCode: ArrayBuffer[String],
         println("endHook(" + varName + ", " + ", " + patternVar + ")")
 
         if (patternVar == null || (terminals contains patternVar)) {
-            g += "if($" + varName + "!=null){if (_start == null) _start = new TokenLocation(" + varName + ");" +
-                "TokenLocation _tl = new TokenLocation(" + varName + ");" +
+            g += "if($" + varName + "!=null){" +
+                "TokenLocation _tl = new TokenLocation(" + varName + "); " +
+                "if (_start == null) _start = _tl; " +
                 "if(_start.startIndex()<=_tl.endIndex()){_end=_tl.endIndex();" +
                 "_endLine=_tl.endLine();_endColumn=_tl.endColumn();}}"
         } else {
