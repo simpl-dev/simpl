@@ -389,8 +389,11 @@ class RuleGen(symbols: SymbolTable, g: ArrayBuffer[String],
         if (name == null && (pattern.startsWith("'"))) {
             g += "\n    "
             val varName = newId
+            g += "("
             g += varName + "=" + patternVar
-//            endHook(varName, true, null)  TODO
+            g += ") {"
+            endHook(varName, null)
+            g += "}"
 
             return
         }
@@ -457,38 +460,30 @@ class RuleGen(symbols: SymbolTable, g: ArrayBuffer[String],
             g += listVar + ".add(" + iv + ");if(_start==null)_start=" + iv
 
             g += ";"
-            endHook(np.varName, false, patternVar)
+            endHook(np.varName, patternVar)
             g += "})"
         } else {
+            g += "("
             g += np.varName + "=" + rules(patternVar).antlrName
-            endHook(np.varName, true, patternVar)
+            g += ") {"
+            endHook(np.varName, patternVar)
+            g+= "}"
         }
     }
 
-    def endHook(tag: String, embrace: Boolean, id: String) = {
-        println("endHook(" + tag + ", " + embrace + ", " + id + ")")
-//        val p = g.size - 1
-//        println("g(p) = \"" + g(p) + "\"")
-//        var t = tag;
-//        if (t == "") {
-//            t = newId
-//            g(p) = t + "=" + g(p)
-//        }
-//        val code = 
-//            if (id == null || (terminals contains id))
-//                "if($" + t + "!=null){if (_start == null) _start = new TokenLocation(" + t + ");" +
-//                "TokenLocation _tl = new TokenLocation(" + t + ");" +
-//                "if(_start.startIndex()<=_tl.endIndex()){_end=_tl.endIndex();" +
-//                "_endLine=_tl.endLine();_endColumn=_tl.endColumn();}}"
-//            else
-//                "if($" + t + ".r!=null && _start.startIndex()<=$" + t + ".r.endIndex())" +
-//                "{_end=$" + t + ".r.endIndex();" +
-//                "_endLine=$" + t + ".r.endLine();_endColumn=$" + t + ".r.endColumn();}"
-//        if (embrace) {
-//            g(p) = "(" + g(p) + "{" + code + "})"
-//        } else {
-//            g(p) = g(p) + code
-//        }
+    def endHook(varName: String, patternVar: String) = {
+        println("endHook(" + varName + ", " + ", " + patternVar + ")")
+
+        if (patternVar == null || (terminals contains patternVar)) {
+            g += "if($" + varName + "!=null){if (_start == null) _start = new TokenLocation(" + varName + ");" +
+                "TokenLocation _tl = new TokenLocation(" + varName + ");" +
+                "if(_start.startIndex()<=_tl.endIndex()){_end=_tl.endIndex();" +
+                "_endLine=_tl.endLine();_endColumn=_tl.endColumn();}}"
+        } else {
+            g += "if($" + varName + ".r!=null && _start.startIndex()<=$" + varName + ".r.endIndex())" +
+                "{_end=$" + varName + ".r.endIndex();" +
+                "_endLine=$" + varName + ".r.endLine();_endColumn=$" + varName + ".r.endColumn();}"
+        }
     }
 
     /** Matches and generates code for terminal pattern. */
