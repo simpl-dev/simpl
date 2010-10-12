@@ -48,7 +48,8 @@
             <src location="${basedir}/src/tool"/>
         </scalac>
         <javac destdir="${target}/classes" srcdir="${target}/gen" source="1.4"
-               includeantruntime="false" classpathref="tool-deps" encoding="UTF-8"/>
+               includeantruntime="false" classpathref="tool-deps" encoding="UTF-8"
+               debug="true"/>
 
         <!-- create tool jar -->
         <jar destfile="${tool-jar}" basedir="${target}/classes">

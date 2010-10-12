@@ -498,7 +498,8 @@ class RuleGen(symbols: SymbolTable, termCode: ArrayBuffer[String],
                 "if(_start.startIndex()<=_tl.endIndex()){_end=_tl.endIndex();" +
                 "_endLine=_tl.endLine();_endColumn=_tl.endColumn();}}"
         } else {
-            g += "if($" + varName + ".r!=null && _start.startIndex()<=$" + varName + ".r.endIndex())" +
+            g += "if (_start == null) _start = $" + varName + ".r; " +
+                "if($" + varName + ".r!=null && _start.startIndex()<=$" + varName + ".r.endIndex())" +
                 "{_end=$" + varName + ".r.endIndex();" +
                 "_endLine=$" + varName + ".r.endLine();_endColumn=$" + varName + ".r.endColumn();}"
         }
