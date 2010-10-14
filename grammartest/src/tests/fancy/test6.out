@@ -1,0 +1,9 @@
+0:8:Foo4 {
+  a=5:8:Id {
+    text="foof"
+  }
+  x=List {
+  }
+  y=List {
+  }
+}

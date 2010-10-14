@@ -1,9 +1,6 @@
-0:5:Program {
-  foo=(null)
-  foo2=0:5:Foo2 {
-    bar=(null)
-    foo=5:5:Id {
-      text="a"
-    }
+0:5:Foo2 {
+  bar=(null)
+  foo=5:5:Id {
+    text="a"
   }
 }

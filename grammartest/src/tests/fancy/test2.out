@@ -1,15 +1,12 @@
-0:6:Program {
-  foo=0:6:Foo {
-    bar=6:6:Bar {
-      id=6:6:Id {
-        text="b"
-      }
-    }
-    foo=4:4:Bar {
-      id=4:4:Id {
-        text="a"
-      }
+0:6:Foo {
+  bar=6:6:Bar {
+    id=6:6:Id {
+      text="b"
     }
   }
-  foo2=(null)
+  foo=4:4:Bar {
+    id=4:4:Id {
+      text="a"
+    }
+  }
 }

@@ -1,0 +1,21 @@
+0:16:Foo4 {
+  a=5:8:Id {
+    text="foof"
+  }
+  x=List {
+    10:10:Id {
+      text="a"
+    }
+    14:14:Id {
+      text="c"
+    }
+  }
+  y=List {
+    12:12:Id {
+      text="b"
+    }
+    16:16:Id {
+      text="d"
+    }
+  }
+}

@@ -37,6 +37,10 @@ object Main extends Assert {
             val grammar = constructor.newInstance()
                     .asInstanceOf[GenericGrammar]
             grammar.parseFile(testFile.getAbsolutePath)
+            if (!grammar.errors.isEmpty) {
+                grammar.errors.foreach(println)
+//                Assert.fail("Parse errors found")
+            }
             val dumped = dumpNode(grammar.tree)
 
             // Write file to target dir so that it can later be examined

@@ -1,12 +1,17 @@
 grammar ee.cyber.simplicitas.grammartest.fancy.Fancy;
 
-Program: Foo | Foo2;
+option Program: Foo | Foo2 | Foo4;
 
 Foo: "foo" (foo=Bar | foo=Bar bar=Bar);
 Foo2: "foo2" (foo=Id | foo=Id bar=Id);
 
 // Will give compilation error as it should.
 // Foo3: "foo3" (foo=Id | foo=Bar bar=Bar);
+
+// Also gives compilation error.
+// Foo3: "foo3" foo=Id (bar=Id | (baz=Id (q=Id | bar=Bar))+);
+
+Foo4: "foo4" a=Id (x=Id y=Id)*;
 
 Bar: Id;
 
