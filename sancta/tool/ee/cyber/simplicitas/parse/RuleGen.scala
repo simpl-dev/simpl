@@ -4,9 +4,52 @@ package ee.cyber.simplicitas.parse
 
 import scala.collection.mutable.ArrayBuffer
 
-/*
- * TODO: explain general logic of matchFoo style methods.
- * TODO: explain how branch detection works.
+/* The code in this file is responsible for generating Scala class and
+ * ANTLR rules for a single rule. Some notes about how it is organized.
+ *
+ * There are many methods in the style of:
+ * def matchFoo(tree: List[Any], ...): List[Any]
+ *
+ * In general, these methods take as input AST disguised as list.
+ * They try to find Foo from the beginning of the list, do some actions
+ * based on found data, and return the rest of the list (i.e., everything
+ * after Foo).
+ *
+ *
+ * The code tries to ensure that there are no name clashes for rule calls
+ * in different branches. For example, this is legal rule:
+ * Foo: x=Bar y=Baz | x=Bar z=Bag;
+ *
+ * Although the variable x is present in both options, it has the same type
+ * and can therefore safely be used. This is incorrect:
+ * Foo: x=Bar y=Baz | x=Baz z=Bag;
+ *
+ * Now x is type Bar in one branch and Baz in another.
+ *
+ * The important point is to determine which uses of variable would clash
+ * (variable is used two times in the same branch). For example, consider
+ * the following rule (for brevity, here assignments are not used for
+ * sub-rule calls):
+ *
+ * Foo: A ((B C) | (D (E | F)?));
+ *
+ * In this case, A would clash with all the other rule calls, but B and E,
+ * for example, do not clash. However, D and F clash. To determine, which
+ * subrule calls clash, each branch in the rule is assigned an identifier.
+ * If the same variable us used several times in a rule, then the identifiers
+ * are compared to see whether the uses of this variable clash.
+ *
+ * Rule identifers are lists of integers that represents path to a sub-rule
+ * call. For example, identifiers for the previous rule, are:
+ * A: [0]
+ * B: [0, 0]
+ * C: [0, 0]
+ * D: [0, 1]
+ * E: [0, 1, 0]
+ * F: [0, 1, 1]
+ *
+ * Two sub-rule calls with identifiers I1 and I2 clash if I1 is prefix of
+ * I2 or vice versa.
  */
 
 /** Information about other rule that is called from current rule.
@@ -25,13 +68,21 @@ case class RuleParam(name: String, ruleName: String, var varName: String,
 }
 
 object BranchIdentifier {
+    /** The initial value for branch identifiers. */
     val empty = new BranchIdentifier(List(0))
 }
 
+/** Represents branch identifiers. See the comment at the beginning of the file
+  * for details. */
 class BranchIdentifier(val branch: List[Int]) {
+    /** Returns identifier for the sibling branch. */
     def nextBranch = 
         new BranchIdentifier((branch dropRight 1) ++ List(branch.last + 1))
+
+    /** Adds one level to the branch identifier. */
     def extend = new BranchIdentifier(branch ++ List(0))
+
+    /** Returns true, if this branch conflicts with other branch. */
     def conflictsWith(other: BranchIdentifier) =
         (other.branch.zip(branch)) forall
                         ((a: Tuple2[Int, Int]) => a._1 == a._2)
