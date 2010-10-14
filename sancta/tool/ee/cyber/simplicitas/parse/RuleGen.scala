@@ -417,13 +417,15 @@ class RuleGen(symbols: SymbolTable, termCode: ArrayBuffer[String],
 
         // It was not unnamed literal.
 
+        // Check for invalid references.
+        if (!rules.contains(patternVar)) {
+            error(pattern, "Reference to unknown rule: " + pattern)
+            return
+        }
+
         // Name of the variable that will be used to refer to this element.
         // If not explicitly given, then use name of the called rule.
         val varName = if (name == null) uncapitalize(patternVar) else name
-
-        println("listVar, isList = " + isList +
-                ", currentBranch = " + currentBranch)
-        val listVar = if (isList) newId else null
 
         // Check whether this can be used as identifier name.
         NamingService.validateASTAttribute(varName) match {
@@ -431,6 +433,9 @@ class RuleGen(symbols: SymbolTable, termCode: ArrayBuffer[String],
             case _ =>
         }
 
+        // listVar is used for collecting values of the items, if the item
+        // is a list.
+        val listVar = if (isList) newId else null
         val np = RuleParam(varName, patternVar, "", listVar, currentBranch)
 
         // Check if name of the node conflicts with some other name in
@@ -462,8 +467,6 @@ class RuleGen(symbols: SymbolTable, termCode: ArrayBuffer[String],
 
         g += "\n    "
         if (np.isList) {
-            // TODO: report error, if rules(id) does not contain anything
-            // this means, the rule was not found.
             g += "(" + np.varName + "=" + rules(patternVar).antlrName + "{"
 
             var iv = ""
