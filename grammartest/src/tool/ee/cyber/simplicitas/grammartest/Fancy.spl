@@ -1,0 +1,16 @@
+grammar ee.cyber.simplicitas.grammartest.fancy.Fancy;
+
+Program: Foo | Foo2;
+
+Foo: "foo" (foo=Bar | foo=Bar bar=Bar);
+Foo2: "foo2" (foo=Id | foo=Id bar=Id);
+
+// Will give compilation error as it should.
+// Foo3: "foo3" (foo=Id | foo=Bar bar=Bar);
+
+Bar: Id;
+
+terminal Id: ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')*;
+fragment ML_COMMENT: '/*' (~'*' | '*' ~'/')* '*/';
+fragment SL_COMMENT: '//' ~('\n'|'\r')*;
+hidden terminal WS: (' '|'\t'|'\r'|'\n'|SL_COMMENT|ML_COMMENT)+;

@@ -468,7 +468,6 @@ class RuleGen(symbols: SymbolTable, termCode: ArrayBuffer[String],
 
             var iv = ""
             if (terminals contains patternVar) {
-                println("iv")
                 iv = newId
                 g += "CommonNode " + iv + "=" + nodeValue(np) + ";"
             } else {

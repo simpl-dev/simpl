@@ -1,0 +1,11 @@
+0:4:Program {
+  foo=0:4:Foo {
+    bar=(null)
+    foo=4:4:Bar {
+      id=4:4:Id {
+        text="a"
+      }
+    }
+  }
+  foo2=(null)
+}
