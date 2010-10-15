@@ -42,6 +42,20 @@ class RuleClass(val antlrName: String) {
     var body = ""
 }
 
+object RuleClass {
+    /** Creates RuleClass object corresponding to terminal rule with
+      * given name. */
+    def terminalRule(name: String) = {
+        val termClass = new RuleClass(name)
+        termClass.extend += "TerminalNode"
+        termClass.classType = "case class " + name
+        termClass.parameters =
+            List(ConstructorParam("text", "String", "$_", ""))
+
+        termClass
+    }
+}
+
 case class ConstructorParam(name: String, vtype: String, code: String,
         mod: String)
 

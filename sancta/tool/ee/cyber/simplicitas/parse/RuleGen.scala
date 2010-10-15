@@ -415,8 +415,8 @@ class RuleGen(symbols: SymbolTable, termCode: ArrayBuffer[String],
       * keywords. Returns variable referring to that pattern.
       * If the pattern is rule call, does nothing 
      */
-    def getPatternVar(pattern: String): String = {
-        println("trKeyword(" + pattern + ")")
+    def getPatternVar(pattern: String, createTerminalClass: Boolean): String = {
+        println("getPatternVar(" + pattern + ")")
 
         // If not literal, do nothing.
         if (!(pattern startsWith "'"))
@@ -436,22 +436,28 @@ class RuleGen(symbols: SymbolTable, termCode: ArrayBuffer[String],
 
         // If it conflicts with existing rules, just create new variable.
         if (id == "" || (rules contains id) || (terminals contains id)) {
-            println("trKeyword: newId")
+            println("getPatternVar: newId")
             id = newId
         }
 
         // Add to tables.
         keywords(pattern) = id
         terminals += id
+        if (createTerminalClass) {
+            rules(id) = RuleClass.terminalRule(id)
+        }
 
         id
     }
 
     def matchRuleCall(name: String, pattern: String) {
-        println("simpleTerm(" + name + ", " + pattern + ")")
+        println("matchRuleCall(" + name + ", " + pattern + ")")
 
         // Check if it is literal. If not, then patternVar = pattern.
-        val patternVar = getPatternVar(pattern)
+        // If the name is not null and it is keyword, we should create
+        // a case class for it. If it is just unnamed literal, then the class
+        // is not necessary.
+        val patternVar = getPatternVar(pattern, name ne null)
 
         // If this is unnamed literal string...
         if (name == null && (pattern.startsWith("'"))) {

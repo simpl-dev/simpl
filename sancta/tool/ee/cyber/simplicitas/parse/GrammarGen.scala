@@ -52,14 +52,9 @@ class GrammarGen(posMap: Any => List[Int]) {
     def addToSymbolTable(tree: Any) = {
         /** Adds terminal rule to symbol table. */
         def addTerminalDefinition(ruleName: String) {
-            val termClass = new RuleClass(ruleName)
-            termClass.extend += "TerminalNode"
-            termClass.classType = "case class " + ruleName
-            termClass.parameters = List(ConstructorParam("text", "String", "$_", ""))
-    
             // Add the terminal to symbol tables.
             terminals += ruleName
-            rules(ruleName) = termClass
+            rules(ruleName) = RuleClass.terminalRule(ruleName)
         }
 
         def addNonTerminal(name: String, header: String) {
