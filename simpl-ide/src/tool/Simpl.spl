@@ -67,7 +67,7 @@ MatchToken: '(' alt=AltList ')' | ref=RuleRef | Str;
 // terminals
 Pattern: lst=TermList ('|' lst2=TermList)*;
 TermList: termMatch=TermMatch+;
-TermMatch: (inv=Tilde)? t=Terminal modifier=Modifier? code=Code*;
+TermMatch: (inv='~')? t=Terminal modifier=Modifier? code=Code*;
 
 /** Things that can pass as terminals. */
 option Terminal: TerminalList
@@ -84,7 +84,7 @@ TerminalLiteral: str=Str;
 TerminalDot: '.';
 
 fragment Letter: 'a'..'z' | 'A'..'Z' | '_';
-terminal Tilde: '~';
+// terminal Tilde: '~';
 /** Identifiers can contain Latin characters, numbers and underscore. */
 terminal Id: Letter (Letter | '0'..'9')*;
 fragment SingleQuotedStr: '\'' (~('\''|'\\') | '\\' .)* '\'';

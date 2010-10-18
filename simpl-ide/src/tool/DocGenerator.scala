@@ -172,7 +172,7 @@ class DocGenerator(destDir: String)
         addWs()
 	}
   
-	def addTilde(t: Tilde) {
+	def addTilde(t: LiteralNode) {
 		appendToDoc(t.text)
 	}
   
