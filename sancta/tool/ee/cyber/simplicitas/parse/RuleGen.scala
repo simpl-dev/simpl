@@ -105,8 +105,8 @@ class BranchIdentifier(val branch: List[Int]) {
   * @param posMap function that will return node's position in the
   * input program.
   */
-class RuleGen(symbols: SymbolTable, termCode: ArrayBuffer[String], 
-        nonTermCode: ArrayBuffer[String], posMap: Any => List[Int]) {
+class RuleGen(symbols: SymbolTable, termCode: ArrayBuffer[Any], 
+        nonTermCode: ArrayBuffer[Any], posMap: Any => List[Int]) {
     import symbols._
     import GrammarUtils._
     
@@ -125,7 +125,7 @@ class RuleGen(symbols: SymbolTable, termCode: ArrayBuffer[String],
     /** Temporary buffer that will point to either <code>termCode</code>
       * or <code>nonTermCode</code>. This allows using the same methods
       * to generate code for terminals and non-terminals. */
-    private var g: ArrayBuffer[String] = null
+    private var g: ArrayBuffer[Any] = null
 
     /** Generates code for rule given as AST. */
     def generate(tree: Any) {
@@ -142,7 +142,10 @@ class RuleGen(symbols: SymbolTable, termCode: ArrayBuffer[String],
                 generateTerminal(name, alt, true, false)
             case ":" :: (name: String) :: alt =>
                 g = nonTermCode
-                generateNormalRule(name, alt)
+                generateNormalRule(name, alt, false)
+            case "wrapper" :: (name: String) :: alt =>
+                g = nonTermCode
+                generateNormalRule(name, alt, true)
             case "option" :: (name: String) :: alt =>
                 g = nonTermCode
                 generateOptionRule(name, alt)
@@ -170,25 +173,28 @@ class RuleGen(symbols: SymbolTable, termCode: ArrayBuffer[String],
     /** Generates code for standard rule in the form:
       * Foo: Bar Baz | Bab;
       */
-    def generateNormalRule(name: String, alt: List[Any]) {
+    def generateNormalRule(name: String, alt: List[Any], isWrapper: Boolean) {
         println("normal rule: " + name + ": " + alt)
 
-        g += "\n" + rules(name).antlrName + " returns [" + name +
-            " r]\n@init {SourceLocation _start=null;int _end=-1;" +
+        val returnType = LazyString(name)
+        
+        g += "\n" + rules(name).antlrName + " returns [";
+        g += returnType
+        g += " r]\n@init {SourceLocation _start=null;int _end=-1;" +
             "int _endLine=-1;int _endColumn=-1;"
 
         // The following string will be modified later to include
         // initialization of temporary variables. These variables will
         // be determined by call to altList.
-        g += ""
-        val init_idx = g.size - 1
+        val initVars = LazyString()
+        g += initVars
 
         g += "}\n@after {$r = new " + name + "("
 
         // The following string will be modified later to include 
         // code for all the constructor parameters for this node.
-        g += ""
-        val params_idx = g.size - 1
+        val constructorParams = LazyString()
+        g += constructorParams
 
         g += ");$r.setLocation(_start,_end==-1?(_start==null?0:_start.endIndex()):_end," +
             "_endLine==-1?(_start==null?0:_start.endLine()):_endLine," +
@@ -204,16 +210,17 @@ class RuleGen(symbols: SymbolTable, termCode: ArrayBuffer[String],
         for (p <- params if p.isList) {
             init.append("ArrayList " + p.listVar + "=new ArrayList();")
         }
-        g(init_idx) = init.toString
+        initVars.set(init.toString)
 
         // Fill in the code for constructor parameters when creating
         // object to contain results of this rule.
-        g(params_idx) = join(params.map(
+        constructorParams.set(
+            join(params.map(
                 p => if (p.isList) {
                     "scalaList(" + p.listVar + ")"
                     } else {
                         nodeValue(p)
-                    }))
+                    })))
 
         // Fill in the info needed for generating the Scala class.
         rules(name).classType = "case class " + name

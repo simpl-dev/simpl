@@ -21,10 +21,10 @@ class GrammarGen(posMap: Any => List[Int]) {
     // code buffers are used and why there two instead of one.
 
     /** This will contain ANTLR code for terminal rules. */
-    private val termCode = new ArrayBuffer[String]()
+    private val termCode = new ArrayBuffer[Any]()
 
     /** This will contain ANTLR code for non-terminal rules. */
-    private val nonTermCode = new ArrayBuffer[String]()
+    private val nonTermCode = new ArrayBuffer[Any]()
 
     /** Name of the grammar. */
     private var grammarName = ""
@@ -57,9 +57,13 @@ class GrammarGen(posMap: Any => List[Int]) {
             rules(ruleName) = RuleClass.terminalRule(ruleName)
         }
 
-        def addNonTerminal(name: String, header: String) {
-            val ruleClass = new RuleClass(uncapitalize(name) + "_")
+        def addNonTerminal(name: String, header: String,
+                generateCode: Boolean) {
+            var ruleClass = new RuleClass(uncapitalize(name) + "_")
             ruleClass.classType = header + " " + name
+            if (!generateCode) {
+                ruleClass = ruleClass.withoutCodegen
+            }
             rules(name) = ruleClass
         }
 
@@ -78,11 +82,15 @@ class GrammarGen(posMap: Any => List[Int]) {
                 null
             case "option" :: (name: String) :: _ =>
                 checkName(false, "Option", name, tree) 
-                addNonTerminal(name, "trait")
+                addNonTerminal(name, "trait", true)
                 name
             case ":" :: (name: String) :: _ =>
                 checkName(false, "Rule", name, tree)
-                addNonTerminal(name, "case class")
+                addNonTerminal(name, "case class", true)
+                name
+            case "wrapper" :: (name: String) :: _ =>
+                checkName(false, "Rule", name, tree)
+                addNonTerminal(name, "case class", false)
                 name
             case _ => 
                 null
