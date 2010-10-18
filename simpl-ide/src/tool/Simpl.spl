@@ -84,7 +84,6 @@ TerminalLiteral: str=Str;
 TerminalDot: '.';
 
 fragment Letter: 'a'..'z' | 'A'..'Z' | '_';
-// terminal Tilde: '~';
 /** Identifiers can contain Latin characters, numbers and underscore. */
 terminal Id: Letter (Letter | '0'..'9')*;
 fragment SingleQuotedStr: '\'' (~('\''|'\\') | '\\' .)* '\'';
