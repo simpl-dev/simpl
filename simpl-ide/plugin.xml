@@ -73,9 +73,9 @@
                 class="ee.cyber.simplicitas.ide.SimplGenerateAction"
                 enablesFor="1"
                 id="ee.cyber.simplicitas.ide.SimplGenerateAction"
-                label="Generate"
+                label="Generate grammar documentation"
                 menubarPath="additions"
-                tooltip="Generate">
+                tooltip="Generate grammar documentation">
           </action>
        </objectContribution>
     </extension>
