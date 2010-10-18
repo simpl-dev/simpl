@@ -1,6 +1,6 @@
 grammar ee.cyber.simplicitas.test.FowlerStates;
 
-options (backtrack=false;)
+options (backtrack=true;)
 
 Program: Definition+;
 
@@ -31,6 +31,21 @@ State: 'state'
      'end';
 
 Transition: event=Id Id f='=>' state=Id;
+
+// Expression evaluation example.
+option Expr: Plus | Minus;
+
+Plus: a=Mul ("+" b=Mul)*;
+Minus: a=Mul ("-" b=Mul)*;
+
+option Mul: Times | Divide;
+
+Times: a=Prim ("*" b=Prim)*;
+Divide: a=Prim ("/" b=Prim)*;
+
+option Prim: Paren | Id;
+
+Paren: "(" Expr ")";
 
 terminal Id: ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')*;
 fragment STR_BODY: ~('\\'|'"') | '\\' .;

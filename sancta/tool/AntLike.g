@@ -33,7 +33,8 @@ ruleDef:
       ('hidden'?) 'terminal'^ ID body? ':'! termAltList ';'!
     | 'fragment'^ ID ':'! termAltList ';'!
     | 'option'^ ID body? ':'! ID ('|'! ID)* ';'!
-    | ID body? ':'^ altList ';'!;
+    | ID body? ':'^ altList ';'!
+    | 'wrapper'^ ID body? ':'! altList ';'!;
 
 body        : CODE -> ^(BODY CODE);
 altList     : matchList ('|'! matchList)*;
