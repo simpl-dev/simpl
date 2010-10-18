@@ -92,17 +92,26 @@ object GrammarUtils {
     def join(i: Iterable[Any]) = i.mkString(", ")
 }
 
+/** Cells whose contents can be changed later. */
 class MutableCell[T](init: T) {
     private var elem: T =  init
 
+    /** Set new value for cell. */
     def set(newVal: T) {
         elem = newVal
     }
+    
+    /** Get the contents. */
     def apply() = elem
+
     override def toString = String.valueOf(elem)
 }
 
+/** Constructor for mutable strings. */
 object LazyString {
-    def apply() = new MutableCell[String](null)
+    /** Create empty string */
+    def apply() = new MutableCell[String]("")
+
+    /** Create string with value. */
     def apply(initVal: String) = new MutableCell[String](initVal)
 }
