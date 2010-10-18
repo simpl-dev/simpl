@@ -30,7 +30,7 @@ State: 'state'
      transitions=Transition*
      'end';
 
-Transition: event=Id Id '=>' state=Id;
+Transition: event=Id Id f='=>' state=Id;
 
 terminal Id: ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')*;
 fragment STR_BODY: ~('\\'|'"') | '\\' .;

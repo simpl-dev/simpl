@@ -116,6 +116,9 @@
               event=353:362:Id {
                 text="drawOpened"
               }
+              f=396:397:LiteralNode {
+                text="=>"
+              }
               id=367:381:Id {
                 text="waitingForLight"
               }

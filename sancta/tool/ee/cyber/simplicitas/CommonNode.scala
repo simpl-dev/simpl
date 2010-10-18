@@ -207,6 +207,12 @@ abstract class TerminalNode extends CommonNode {
     override def children = Nil // No children on terminals
 }
 
+/** Generic node class for all the literals that assigned a value
+  * (for example, by construct foo="bar"). */
+case class LiteralNode(text: String) extends TerminalNode {
+    def childrenNames = Array("text");
+}
+
 /** Represents token in the DSL source file.
   * Additionally there is automatically generated kind method that
   * returns token kind (from parser). The boolean methods are somewhat

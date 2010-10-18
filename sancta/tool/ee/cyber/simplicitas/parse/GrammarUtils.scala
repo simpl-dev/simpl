@@ -40,6 +40,14 @@ class RuleClass(val antlrName: String) {
 
     /** Class body, if user uses the { ... } construct. */
     var body = ""
+
+    /** Should we generate class from this rule? */
+    var generateCode = true
+
+    def withoutCodegen = {
+        generateCode = false
+        this
+    }
 }
 
 object RuleClass {

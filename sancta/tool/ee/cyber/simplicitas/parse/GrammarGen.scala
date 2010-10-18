@@ -172,15 +172,16 @@ class GrammarGen(posMap: Any => List[Int]) {
 
         treeSrc append ("package " + grammarPackage + ";\n\n" +
                         "import ee.cyber.simplicitas." +
-                          "{CommonNode, CommonToken, TerminalNode}\n" +
+                          "{CommonNode, CommonToken, TerminalNode, LiteralNode}\n" +
                         "import ee.cyber.simplicitas.parse." +
                           "{ErrorHandler}\n\n")
 
-        for (r <- rules.values) {
+        for (r <- rules.values if r.generateCode) {
             treeSrc append r.classType
             if (!r.parameters.isEmpty)
-                treeSrc append ("(" + join(
-                    r.parameters map (t => t.mod + t.name + ": " + t.vtype)) + ")")
+                treeSrc append ("(" +
+                        join(r.parameters map (
+                                t => t.mod + t.name + ": " + t.vtype)) + ")")
             treeSrc append " extends "
             r.extend.toList match {
                 case Nil =>
@@ -246,6 +247,7 @@ class GrammarGen(posMap: Any => List[Int]) {
         "\n@header {\npackage " + grammarPackage +
         ";\n import java.util.ArrayList;\n" +
         " import ee.cyber.simplicitas.CommonNode;\n" +
+        " import ee.cyber.simplicitas.LiteralNode;\n" +
         " import ee.cyber.simplicitas.parse.ParserBase;\n" +
         " import ee.cyber.simplicitas.SourceLocation;\n" +
         " import ee.cyber.simplicitas.parse.TokenLocation;\n}\n" +

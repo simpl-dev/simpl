@@ -53,8 +53,8 @@ import scala.collection.mutable.ArrayBuffer
  */
 
 /** Information about other rule that is called from current rule.
-  * @param name name of the rule call in the grammar.
-  * @param ruleName name of the rule that will be called
+  * @param name variable name for rule in the grammar ("foo" in foo=Bar).
+  * @param ruleName name of the rule that will be called.
   * @param varName Name of the variable used in the code.
   * @param listVar name of the temporary variable used to collect
   * the list elements.
@@ -65,6 +65,13 @@ case class RuleParam(name: String, ruleName: String, var varName: String,
                      listVar: String, branch: BranchIdentifier) {
     /** whether the result of the rule call is list (use of + or *). */
     def isList = listVar ne null
+
+    /** What class will be used to represent this parameter in Scala code.
+      * In general, this class is named after grammar rule. But for parameters
+      * whose values are literal strings, we use LiteralNode class from
+      * standard library.
+      */
+    var scalaClass = ruleName
 }
 
 object BranchIdentifier {
@@ -213,8 +220,8 @@ class RuleGen(symbols: SymbolTable, termCode: ArrayBuffer[String],
         rules(name).parameters = 
             for (p <- params) yield
                 ConstructorParam(p.name, 
-                        if (p.isList) "List[" + p.ruleName + "]" 
-                        else p.ruleName,
+                        if (p.isList) "List[" + p.scalaClass + "]" 
+                        else p.scalaClass,
                         "", "var ")
 
         // Quick last check for invalid rule calls.
@@ -284,8 +291,8 @@ class RuleGen(symbols: SymbolTable, termCode: ArrayBuffer[String],
         val name = "$" + p.varName
 
         if (terminals contains p.ruleName) {
-            val v = "(" + p.ruleName + ")setTokenPos(new " + p.ruleName + "(" +
-                name + ".getText()" + ")," + name + ")"
+            val v = "(" + p.scalaClass + ")setTokenPos(new " + p.scalaClass +
+                "(" + name + ".getText()" + ")," + name + ")"
 
             name + "==null?null:" + v
         } else {
@@ -415,7 +422,7 @@ class RuleGen(symbols: SymbolTable, termCode: ArrayBuffer[String],
       * keywords. Returns variable referring to that pattern.
       * If the pattern is rule call, does nothing 
      */
-    def getPatternVar(pattern: String, createTerminalClass: Boolean): String = {
+    def getPatternVar(pattern: String, createLiteralClass: Boolean): String = {
         println("getPatternVar(" + pattern + ")")
 
         // If not literal, do nothing.
@@ -443,8 +450,8 @@ class RuleGen(symbols: SymbolTable, termCode: ArrayBuffer[String],
         // Add to tables.
         keywords(pattern) = id
         terminals += id
-        if (createTerminalClass) {
-            rules(id) = RuleClass.terminalRule(id)
+        if (createLiteralClass) {
+            rules(id) = RuleClass.terminalRule(id).withoutCodegen
         }
 
         id
@@ -458,9 +465,10 @@ class RuleGen(symbols: SymbolTable, termCode: ArrayBuffer[String],
         // a case class for it. If it is just unnamed literal, then the class
         // is not necessary.
         val patternVar = getPatternVar(pattern, name ne null)
+        val isLiteralPattern = pattern.startsWith("'")
 
         // If this is unnamed literal string...
-        if (name == null && (pattern.startsWith("'"))) {
+        if (name == null && isLiteralPattern) {
             g += "\n    "
             val varName = newId
             g += "("
@@ -494,6 +502,12 @@ class RuleGen(symbols: SymbolTable, termCode: ArrayBuffer[String],
         // is a list.
         val listVar = if (isList) newId else null
         val np = RuleParam(varName, patternVar, "", listVar, currentBranch)
+
+        // For patterns that are string literals, we do not generate separate
+        // class but instead use existing LiteralNode class.
+        if (isLiteralPattern) {
+            np.scalaClass = "LiteralNode"
+        }
 
         // Check if name of the node conflicts with some other name in
         // the same branch. For example:
@@ -533,7 +547,7 @@ class RuleGen(symbols: SymbolTable, termCode: ArrayBuffer[String],
             } else {
                 iv = "$" + np.varName + ".r"
             }
-            g += listVar + ".add(" + iv + ");if(_start==null)_start=" + iv
+            g += np.listVar + ".add(" + iv + ");if(_start==null)_start=" + iv
 
             g += ";"
             endHook(np.varName, patternVar)
