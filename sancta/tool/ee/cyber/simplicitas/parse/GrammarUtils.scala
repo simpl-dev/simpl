@@ -91,3 +91,18 @@ object GrammarUtils {
 
     def join(i: Iterable[Any]) = i.mkString(", ")
 }
+
+class MutableCell[T](init: T) {
+    private var elem: T =  init
+
+    def set(newVal: T) {
+        elem = newVal
+    }
+    def apply() = elem
+    override def toString = String.valueOf(elem)
+}
+
+object LazyString {
+    def apply() = new MutableCell[String](null)
+    def apply(initVal: String) = new MutableCell[String](initVal)
+}
