@@ -1,15 +1,44 @@
-2:8:Expr {
-  plus=2:8:Plus {
-    left=(null)
-    right=4:8:Mul {
-      left=4:4:IdExpr {
-        id=4:4:Id {
-          text="b"
+0:22:Plus {
+  a=0:0:Times {
+    a=0:0:Id {
+      text="a"
+    }
+    b=List {
+    }
+  }
+  b=List {
+    4:8:Times {
+      a=4:4:Id {
+        text="b"
+      }
+      b=List {
+        8:8:Id {
+          text="c"
         }
       }
-      right=8:8:IdExpr {
-        id=8:8:Id {
-          text="c"
+    }
+    13:22:Times {
+      a=13:17:Plus {
+        a=13:13:Times {
+          a=13:13:Id {
+            text="d"
+          }
+          b=List {
+          }
+        }
+        b=List {
+          17:17:Times {
+            a=17:17:Id {
+              text="e"
+            }
+            b=List {
+            }
+          }
+        }
+      }
+      b=List {
+        22:22:Id {
+          text="f"
         }
       }
     }

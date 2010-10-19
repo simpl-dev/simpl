@@ -35,14 +35,38 @@ class RuleClass(val antlrName: String) {
     /** Constructor parameters. */
     var parameters: Seq[ConstructorParam] = Nil
 
+    private val extendBuf = new ArrayBuffer[String]()
+
     /** What classes will we extend? */
-    val extend = new ArrayBuffer[String]()
+    def extendWith(name: String) {
+        if (!(extendBuf contains name)) {
+            extendBuf += name
+        }
+    }
+
+    def extendList: List[String] = {
+        val wrappedExtends = wrappedFrom.flatMap(_.extendList)
+        val withoutDuplicates = (extendBuf ++ wrappedExtends).toSet
+        // Remove myself from extends list to prevent construct
+        // class Foo extends Foo
+        (withoutDuplicates - antlrName).toList
+    }
 
     /** Class body, if user uses the { ... } construct. */
     var body = ""
 
     /** Should we generate class from this rule? */
     var generateCode = true
+
+    /** List if wrapper rules that call this rule. */
+    val wrappedFrom = new ArrayBuffer[RuleClass]()
+
+    def addWrappedFrom(rule: RuleClass) {
+        if (!(wrappedFrom contains rule)) {
+            println(antlrName + ".addWrappedFrom(" + rule.antlrName + ")")
+            wrappedFrom += rule
+        }
+    }
 
     def withoutCodegen = {
         generateCode = false
@@ -55,7 +79,7 @@ object RuleClass {
       * given name. */
     def terminalRule(name: String) = {
         val termClass = new RuleClass(name)
-        termClass.extend += "TerminalNode"
+        termClass.extendWith("TerminalNode")
         termClass.classType = "case class " + name
         termClass.parameters =
             List(ConstructorParam("text", "String", "$_", ""))

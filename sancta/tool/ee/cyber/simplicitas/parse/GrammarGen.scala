@@ -118,7 +118,8 @@ class GrammarGen(posMap: Any => List[Int]) {
 
                 ruleList.foreach(generateRule)
         }
-//        grammarClass
+
+        findWrapperCycles()
     }
 
     /** Parses the full name of the grammar. Fills grammarName and
@@ -144,6 +145,18 @@ class GrammarGen(posMap: Any => List[Int]) {
             rules
         case rules: List[Any] => 
             rules
+    }
+
+    /** Finds cycles between wrapper rules. For example:
+      * wrapper Foo: "foo" Bar;
+      * wrapper Bar: "bar" Foo;
+      */
+    def findWrapperCycles() {
+        // This is very simplictic algorithm which could be quite fine because
+        // normally there should be only couple of wrapper rules. If this
+        // becomes a bottleneck, we can use some fancy maths here.
+
+        // TODO
     }
 
     // Getter methods that are called from Generator.
@@ -191,7 +204,7 @@ class GrammarGen(posMap: Any => List[Int]) {
                         join(r.parameters map (
                                 t => t.mod + t.name + ": " + t.vtype)) + ")")
             treeSrc append " extends "
-            r.extend.toList match {
+            r.extendList match {
                 case Nil =>
                     treeSrc append "CommonNode"
                 case h :: t =>

@@ -1,11 +1,20 @@
 grammar ee.cyber.simplicitas.grammartest.expr.Expr;
 
-Expr: Plus;
+options (backtrack=true;)
 
-Plus: left=Mul "+" right=Mul;
+option Expr: Plus | Minus;
 
-Mul: left=IdExpr "*" right=IdExpr;
-IdExpr: id=Id;
+Plus: a=Mul ("+" b=Mul)*;
+Minus: a=Mul ("-" b=Mul)*;
+
+option Mul: Times | Divide;
+
+Times: a=Prim ("*" b=Prim)*;
+Divide: a=Prim ("/" b=Prim)*;
+
+option Prim: Paren | Id;
+
+wrapper Paren: "(" Expr ")";
 
 // Just to create a keyword.
 // Foo: "foo";

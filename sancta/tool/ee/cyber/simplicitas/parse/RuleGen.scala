@@ -174,7 +174,14 @@ class RuleGen(symbols: SymbolTable, termCode: ArrayBuffer[Any],
       * Foo: Bar Baz | Bab;
       */
     def generateNormalRule(name: String, alt: List[Any], isWrapper: Boolean) {
-        println("normal rule: " + name + ": " + alt)
+        def constructorParamValue(p: RuleParam) =
+            if (p.isList) {
+                "scalaList(" + p.listVar + ")"
+            } else {
+                nodeValue(p)
+            }
+
+        println("normal rule: " + name + ", " + isWrapper +": " + alt)
 
         val returnType = LazyString(name)
         
@@ -189,16 +196,14 @@ class RuleGen(symbols: SymbolTable, termCode: ArrayBuffer[Any],
         val initVars = LazyString()
         g += initVars
 
-        g += "}\n@after {$r = new " + name + "("
+        g += "}\n@after {$r = "
 
-        // The following string will be modified later to include 
-        // code for all the constructor parameters for this node.
-        val constructorParams = LazyString()
-        g += constructorParams
+        // This string will be modified later to include code for
+        // creating value for the result variable.
+        val resultCode = LazyString()
+        g += resultCode
 
-        g += ");$r.setLocation(_start,_end==-1?(_start==null?0:_start.endIndex()):_end," +
-            "_endLine==-1?(_start==null?0:_start.endLine()):_endLine," +
-            "_endColumn==-1?(_start==null?0:_start.endColumn()):_endColumn);}:"
+        g += "}:"
 
         matchAltList(matchName, matchCodeBlock(alt, name))
 
@@ -212,24 +217,42 @@ class RuleGen(symbols: SymbolTable, termCode: ArrayBuffer[Any],
         }
         initVars.set(init.toString)
 
-        // Fill in the code for constructor parameters when creating
-        // object to contain results of this rule.
-        constructorParams.set(
-            join(params.map(
-                p => if (p.isList) {
-                    "scalaList(" + p.listVar + ")"
-                    } else {
-                        nodeValue(p)
-                    })))
+        if (isWrapper) {
+            if (params.size != 1) {
+                error(alt, "Wrapper rule must contain exactly one rule call")
+                return
+            }
+            
+            val myParam = params(0)
 
-        // Fill in the info needed for generating the Scala class.
-        rules(name).classType = "case class " + name
-        rules(name).parameters = 
-            for (p <- params) yield
-                ConstructorParam(p.name, 
-                        if (p.isList) "List[" + p.scalaClass + "]" 
-                        else p.scalaClass,
-                        "", "var ")
+            returnType.set(myParam.scalaClass)
+            resultCode.set(constructorParamValue(myParam) + ";")
+
+            // Fill in the info needed for generating the Scala class.
+            rules(name).generateCode = false
+            rules(myParam.ruleName).addWrappedFrom(rules(name))
+        } else {
+            val buf = new StringBuilder()
+
+            buf.append("new " + name + "(")
+            buf.append(join(params.map(constructorParamValue)))
+
+            buf.append(
+                ");$r.setLocation(_start,_end==-1?(_start==null?0:_start.endIndex()):_end," +
+                "_endLine==-1?(_start==null?0:_start.endLine()):_endLine," +
+                "_endColumn==-1?(_start==null?0:_start.endColumn()):_endColumn);")
+
+            resultCode.set(buf.toString)
+
+            // Fill in the info needed for generating the Scala class.
+            rules(name).classType = "case class " + name
+            rules(name).parameters = 
+                for (p <- params) yield
+                    ConstructorParam(p.name, 
+                            if (p.isList) "List[" + p.scalaClass + "]" 
+                            else p.scalaClass,
+                            "", "var ")
+        }
 
         // Quick last check for invalid rule calls.
         for (p <- params) {
@@ -266,9 +289,7 @@ class RuleGen(symbols: SymbolTable, termCode: ArrayBuffer[Any],
             // Make the rule called from this option extend class
             // corresponding to this rule.
             val r = rules(option)
-            if (!(r.extend contains name)) {
-                r.extend += name
-            }
+            r.extendWith(name)
 
             println("t(" + option + ")")
             val id = newId
