@@ -55,7 +55,7 @@ OptionDef: 'option' name=Id body=Code? ':'
     alts=RuleRef ('|' alts2=RuleRef)* ';';
 
 /** Defines non-terminal rule. */
-NonTerminalDef: name=Id body=Code? ':' alt=AltList ';';
+NonTerminalDef: "wrapper"? name=Id body=Code? ':' alt=AltList ';';
 
 /** List of alternatives, separated by pipe character. */
 AltList: lst=MatchList ('|' lst2=MatchList)*;
