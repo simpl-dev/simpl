@@ -233,7 +233,7 @@ class RuleGen(symbols: SymbolTable, termCode: ArrayBuffer[Any],
             rules(myParam.ruleName).addWrappedFrom(rules(name))
             rules(name).parameters = 
                 List(ConstructorParam(myParam.name, 
-                    Delayed {getConstructorParamType(myParam.ruleName)}, ""))
+                    Delayed {getConstructorParamType(myParam)}, ""))
         } else {
             val buf = new StringBuilder()
 
@@ -252,7 +252,7 @@ class RuleGen(symbols: SymbolTable, termCode: ArrayBuffer[Any],
             rules(name).parameters = 
                 for (p <- params) yield
                     ConstructorParam(p.name,
-                            Delayed {getConstructorParamType(p.ruleName)}, 
+                            Delayed {getConstructorParamType(p)}, 
                             "var ")
         }
 
@@ -265,26 +265,27 @@ class RuleGen(symbols: SymbolTable, termCode: ArrayBuffer[Any],
         }
     }
 
-    def getConstructorParamType(ruleName: String) = {
-        
-        
+    def getConstructorParamType(param: RuleParam): String = {
         def forRule(r: RuleClass): String = {
             if (r.wrappedRule ne null) {
-                forRule(r.wrappedRule)
+                // Since this is wrapper rule, it must have exactly
+                // one parameter.
+                val wrapperParam = r.parameters(0)
+                wrapperParam.vtype.toString
             } else {
                 r.antlrName 
             }
         }
 
-        DelayedString {
-            if (rules.contains(param.ruleName) && 
-                    (rules(param.ruleName).wrappedRule ne null)) {
-                forRule(rules(param.ruleName))
-            } else {
-                if (param.isList) "List[" + param.scalaClass + "]" 
-                else param.scalaClass
-            }
-        }
+        def withList(name: String, isList: Boolean) =
+            if (isList) "List[" + name + "]"
+            else name
+
+        if (rules.contains(param.ruleName))
+            withList(forRule(rules(param.ruleName)),
+                    param.isList)
+        else
+            withList(param.scalaClass, param.isList)
     }
 
     /** Generates code for option rule:
