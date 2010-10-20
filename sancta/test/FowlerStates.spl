@@ -47,6 +47,17 @@ option Prim: Paren | Id;
 
 wrapper Paren: "(" Expr ")";
 
+// Wrapper tests.
+Wa: Wb Wc;
+
+wrapper Wb: STRING+;
+
+wrapper Wc: Wd;
+wrapper Wd: We+;
+wrapper We: Wf;
+wrapper Wf: Wg+;
+wrapper Wg: Id;
+
 terminal Id: ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')*;
 fragment STR_BODY: ~('\\'|'"') | '\\' .;
 terminal STRING {var doh = 0}:

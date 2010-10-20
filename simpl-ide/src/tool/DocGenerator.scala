@@ -178,8 +178,8 @@ class DocGenerator(destDir: String)
   
 	def addTerminal(terminal: Terminal) {
 		terminal match {
-        	case t:TerminalList =>
-        		addTerminalList(t)
+		    case t:Pattern =>
+		        addTerminalPattern(t)
         	case t:FragmentRef =>
         		addFragmentRef(t)
         	case t:TerminalRange =>
@@ -192,9 +192,9 @@ class DocGenerator(destDir: String)
 		}    
 	}
 
-	def addTerminalList(tList: TerminalList) {
+	def addTerminalPattern(pattern: Pattern) {
 		appendToDoc(openingBracket)
-		addPattern(tList.pattern)
+		addPattern(pattern)
 		appendToDoc(closinBracket)
 	}
   

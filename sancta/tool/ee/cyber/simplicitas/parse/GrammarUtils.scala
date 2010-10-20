@@ -66,7 +66,11 @@ class RuleClass(val antlrName: String) {
             println(antlrName + ".addWrappedFrom(" + rule.antlrName + ")")
             wrappedFrom += rule
         }
+        // Make the wrapper point to us.
+        rule.wrappedRule = this
     }
+
+    var wrappedRule: RuleClass = null
 
     def withoutCodegen = {
         generateCode = false
@@ -82,14 +86,19 @@ object RuleClass {
         termClass.extendWith("TerminalNode")
         termClass.classType = "case class " + name
         termClass.parameters =
-            List(ConstructorParam("text", "String", "$_", ""))
+            List(ConstructorParam("text", "String", ""))
 
         termClass
     }
 }
 
-case class ConstructorParam(name: String, vtype: String, code: String,
-        mod: String)
+/** Represents constructor parameter for Scala class representing this rule.
+  * @param name name of the parameter
+  * @param vtype type of the parameter. Can be delayed object which means
+  * that you must call toString method to get the actual type value.
+  * @param mod additional modifier for parameters, such as "var"
+  */
+case class ConstructorParam(name: String, vtype: Any, mod: String)
 
 class GrammarException(msg: String) extends Exception(msg)
 
@@ -138,4 +147,15 @@ object LazyString {
 
     /** Create string with value. */
     def apply(initVal: String) = new MutableCell[String](initVal)
+}
+
+class Delayed[T](block: => T) {
+    private lazy val value: T = block
+
+    def apply() = value
+    override def toString = String.valueOf(value)
+}
+
+object Delayed {
+    def apply(block: => String) = new Delayed(block)
 }

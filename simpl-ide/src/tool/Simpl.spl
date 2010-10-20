@@ -66,7 +66,7 @@ MatchToken: '(' alt=AltList ')' | ref=RuleRef | Str;
 
 // terminals
 Pattern: lst=TermList ('|' lst2=TermList)*;
-TermList: termMatch=TermMatch+;
+wrapper TermList: termMatch=TermMatch+;
 TermMatch: (inv='~')? t=Terminal modifier=Modifier? code=Code*;
 
 /** Things that can pass as terminals. */
@@ -76,7 +76,7 @@ option Terminal: TerminalList
     | TerminalLiteral
     | TerminalDot;
 
-TerminalList: '(' pattern=Pattern ')';
+wrapper TerminalList: '(' pattern=Pattern ')';
 /** FragmentRef can point to fragments. */
 FragmentRef: Id;
 TerminalRange: start=Str '..' end=Str;

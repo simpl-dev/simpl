@@ -225,12 +225,15 @@ class RuleGen(symbols: SymbolTable, termCode: ArrayBuffer[Any],
             
             val myParam = params(0)
 
-            returnType.set(myParam.scalaClass)
+            returnType.set(if (myParam.isList) "List" else myParam.scalaClass)
             resultCode.set(constructorParamValue(myParam) + ";")
 
             // Fill in the info needed for generating the Scala class.
             rules(name).generateCode = false
             rules(myParam.ruleName).addWrappedFrom(rules(name))
+            rules(name).parameters = 
+                List(ConstructorParam(myParam.name, 
+                    Delayed {getConstructorParamType(myParam.ruleName)}, ""))
         } else {
             val buf = new StringBuilder()
 
@@ -248,10 +251,9 @@ class RuleGen(symbols: SymbolTable, termCode: ArrayBuffer[Any],
             rules(name).classType = "case class " + name
             rules(name).parameters = 
                 for (p <- params) yield
-                    ConstructorParam(p.name, 
-                            if (p.isList) "List[" + p.scalaClass + "]" 
-                            else p.scalaClass,
-                            "", "var ")
+                    ConstructorParam(p.name,
+                            Delayed {getConstructorParamType(p.ruleName)}, 
+                            "var ")
         }
 
         // Quick last check for invalid rule calls.
@@ -259,6 +261,28 @@ class RuleGen(symbols: SymbolTable, termCode: ArrayBuffer[Any],
             if (!(rules.contains(p.ruleName))) {
                 error(p.ruleName, "Undefined rule " + p.ruleName
                         + " referenced")
+            }
+        }
+    }
+
+    def getConstructorParamType(ruleName: String) = {
+        
+        
+        def forRule(r: RuleClass): String = {
+            if (r.wrappedRule ne null) {
+                forRule(r.wrappedRule)
+            } else {
+                r.antlrName 
+            }
+        }
+
+        DelayedString {
+            if (rules.contains(param.ruleName) && 
+                    (rules(param.ruleName).wrappedRule ne null)) {
+                forRule(rules(param.ruleName))
+            } else {
+                if (param.isList) "List[" + param.scalaClass + "]" 
+                else param.scalaClass
             }
         }
     }
