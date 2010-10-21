@@ -170,6 +170,12 @@ class RuleGen(symbols: SymbolTable, termCode: ArrayBuffer[Any],
         g += ";\n"
     }
 
+    /** Code that sets the location data of the rule result $r. */
+    val setLocationCode =
+            "$r.setLocation(_start,_end==-1?(_start==null?0:_start.endIndex()):_end," +
+            "_endLine==-1?(_start==null?0:_start.endLine()):_endLine," +
+            "_endColumn==-1?(_start==null?0:_start.endColumn()):_endColumn);"
+
     /** Generates code for standard rule in the form:
       * Foo: Bar Baz | Bab;
       */
@@ -181,9 +187,13 @@ class RuleGen(symbols: SymbolTable, termCode: ArrayBuffer[Any],
                 nodeValue(p)
             }
 
+        val getConstructorParamType = getParamType(
+            (name: String, isList: Boolean) =>
+                if (isList) "List[" + name + "]" else name)_
+
         println("normal rule: " + name + ", " + isWrapper +": " + alt)
 
-        val returnType = LazyString(name)
+        val returnType = new MutableCell[Any](name)
         
         g += "\n" + rules(name).antlrName + " returns [";
         g += returnType
@@ -225,11 +235,17 @@ class RuleGen(symbols: SymbolTable, termCode: ArrayBuffer[Any],
             
             val myParam = params(0)
 
-            returnType.set(if (myParam.isList) "List" else myParam.scalaClass)
-            resultCode.set(constructorParamValue(myParam) + ";")
+            returnType.set(Delayed {getReturnType(myParam)})
+            if (myParam.isList)
+                resultCode.set(
+                        "new ListWrapper(" + constructorParamValue(myParam) +
+                        ");" + setLocationCode)
+            else
+                resultCode.set(constructorParamValue(myParam) + ";")
 
             // Fill in the info needed for generating the Scala class.
             rules(name).generateCode = false
+            rules(name).returnType = returnType()
             rules(myParam.ruleName).addWrappedFrom(rules(name))
             rules(name).parameters = 
                 List(ConstructorParam(myParam.name, 
@@ -241,14 +257,13 @@ class RuleGen(symbols: SymbolTable, termCode: ArrayBuffer[Any],
             buf.append(join(params.map(constructorParamValue)))
 
             buf.append(
-                ");$r.setLocation(_start,_end==-1?(_start==null?0:_start.endIndex()):_end," +
-                "_endLine==-1?(_start==null?0:_start.endLine()):_endLine," +
-                "_endColumn==-1?(_start==null?0:_start.endColumn()):_endColumn);")
+                ");" + setLocationCode)
 
             resultCode.set(buf.toString)
 
             // Fill in the info needed for generating the Scala class.
             rules(name).classType = "case class " + name
+            rules(name).returnType = name
             rules(name).parameters = 
                 for (p <- params) yield
                     ConstructorParam(p.name,
@@ -265,11 +280,20 @@ class RuleGen(symbols: SymbolTable, termCode: ArrayBuffer[Any],
         }
     }
 
-    def getConstructorParamType(param: RuleParam): String = {
-        def withList(name: String, isList: Boolean) =
-            if (isList) "List[" + name + "]"
-            else name
+    def getReturnType(param: RuleParam): String = {
+        def withList(name: Any, isList: Boolean) =
+            if (isList) "ListWrapper" else name.toString
 
+        if (rules.contains(param.ruleName)) {
+            val r = rules(param.ruleName)
+            withList(r.returnType, param.isList)
+        } else {
+            withList(param.scalaClass, param.isList)
+        }
+    }
+
+    def getParamType(withList: (String, Boolean) => String)
+            (param: RuleParam): String = {
         if (rules.contains(param.ruleName)) {
             val r = rules(param.ruleName)
             val ruleType =

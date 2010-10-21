@@ -3,12 +3,34 @@
 package ee.cyber.simplicitas.parse
 
 import collection.mutable.ArrayBuffer
-import ee.cyber.simplicitas.CommonNode
+import ee.cyber.simplicitas.{CommonNode, SourceLocation}
 import org.antlr.runtime.{Token, TokenStream, RecognizerSharedState,
                           RecognitionException}
 
 class ParserBase(input: TokenStream, state: RecognizerSharedState)
         extends org.antlr.runtime.Parser(input, state) {
+    class ListWrapper(val wrapped: java.util.List[Object]) extends SourceLocation {
+        // TODO: this is currently copypaste of CommonNode.
+        var startIndex = 0
+        var endIndex = 0
+        var startLine = 0
+        var endLine = 0
+        var startColumn = 0
+        var endColumn = 0
+    
+        def setLocation(start: SourceLocation, endIndex: Int, endLine: Int,
+                endColumn: Int) {
+            if (start ne null) {
+                startIndex = start.startIndex
+                startLine = start.startLine
+                startColumn = start.startColumn
+            }
+            this.endIndex = endIndex
+            this.endLine = endLine
+            this.endColumn = endColumn
+        }
+    }
+
     def setTokenPos(node: CommonNode, token: Token): CommonNode = {
         val t = new TokenLocation(token)
         node.startIndex = t.startIndex

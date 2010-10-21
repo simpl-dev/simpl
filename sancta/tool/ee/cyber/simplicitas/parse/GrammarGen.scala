@@ -61,6 +61,7 @@ class GrammarGen(posMap: Any => List[Int]) {
                 generateCode: Boolean) {
             var ruleClass = new RuleClass(uncapitalize(name) + "_")
             ruleClass.classType = header + " " + name
+            ruleClass.returnType = name
             if (!generateCode) {
                 ruleClass = ruleClass.withoutCodegen
             }

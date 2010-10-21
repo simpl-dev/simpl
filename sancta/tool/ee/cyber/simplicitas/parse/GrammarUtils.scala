@@ -35,6 +35,12 @@ class RuleClass(val antlrName: String) {
     /** Constructor parameters. */
     var parameters: Seq[ConstructorParam] = Nil
 
+    /** Return type of the rule. Can be different from Scala class
+      * because of wrapper rules and the fact that ANTLR does not support
+      * parameterized types. Often, this can be a lazy value and, therefore,
+      * you should use toString method to get actual value. */
+    var returnType: Any = ""
+
     private val extendBuf = new ArrayBuffer[String]()
 
     /** What classes will we extend? */
@@ -85,6 +91,7 @@ object RuleClass {
         val termClass = new RuleClass(name)
         termClass.extendWith("TerminalNode")
         termClass.classType = "case class " + name
+        termClass.returnType = name
         termClass.parameters =
             List(ConstructorParam("text", "String", ""))
 
