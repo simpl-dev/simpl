@@ -266,26 +266,25 @@ class RuleGen(symbols: SymbolTable, termCode: ArrayBuffer[Any],
     }
 
     def getConstructorParamType(param: RuleParam): String = {
-        def forRule(r: RuleClass): String = {
-            if (r.wrappedRule ne null) {
-                // Since this is wrapper rule, it must have exactly
-                // one parameter.
-                val wrapperParam = r.parameters(0)
-                wrapperParam.vtype.toString
-            } else {
-                r.antlrName 
-            }
-        }
-
         def withList(name: String, isList: Boolean) =
             if (isList) "List[" + name + "]"
             else name
 
-        if (rules.contains(param.ruleName))
-            withList(forRule(rules(param.ruleName)),
-                    param.isList)
-        else
+        if (rules.contains(param.ruleName)) {
+            val r = rules(param.ruleName)
+            val ruleType =
+                if (r.wrappedRule ne null) {
+                    // Since this is wrapper rule, it must have exactly
+                    // one parameter.
+                    val wrapperParam = r.parameters(0)
+                    wrapperParam.vtype.toString
+                } else {
+                    param.scalaClass 
+                }
+            withList(ruleType, param.isList)
+        } else {
             withList(param.scalaClass, param.isList)
+        }
     }
 
     /** Generates code for option rule:
