@@ -237,6 +237,12 @@ class RuleGen(symbols: SymbolTable, termCode: ArrayBuffer[Any],
 
             returnType.set(Delayed {getReturnType(myParam)})
             if (myParam.isList)
+                // Here we are trying to handle the situation where wrapper
+                // rule creates a list of stuff. In that case we would like
+                // to create a data item that is both a list and that
+                // can store a location data. Location is needed in the caller
+                // rule to determine start and end of the rule in the source
+                // file.
                 resultCode.set(
                         "new ListWrapper(" + constructorParamValue(myParam) +
                         ");" + setLocationCode)
@@ -280,6 +286,9 @@ class RuleGen(symbols: SymbolTable, termCode: ArrayBuffer[Any],
         }
     }
 
+    /** getReturnType differs from getParamType because the return types
+      * of ANTLR rules cannot contain type parameters. Hence, instead of
+      * List[List[Foo]] the return type is just List. */
     def getReturnType(param: RuleParam): String = {
         def withList(name: Any, isList: Boolean) =
             if (isList) "ListWrapper" else name.toString
