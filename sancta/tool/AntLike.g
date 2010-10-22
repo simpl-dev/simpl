@@ -32,10 +32,11 @@ dottedId    : ID ('.' ID)*;
 ruleDef:
       ('hidden'?) 'terminal'^ ID body? ':'! termAltList ';'!
     | 'fragment'^ ID ':'! termAltList ';'!
-    | 'option'^ ID body? ':'! ID ('|'! ID)* ';'!
-    | ID body? ':'^ altList ';'!;
+    | 'option'^ ID body? returnType? ':'! ID ('|'! ID)* ';'!
+    | ID body? returnType? ':'^ altList ';'!;
 
 body        : CODE -> ^(BODY CODE);
+returnType  : 'returns'^ dottedId? body?;
 altList     : matchList ('|'! matchList)*;
 matchList   : match+ -> ^(NODE match+);
 match       : name? token modifier? -> name? modifier? token;
