@@ -80,19 +80,23 @@ class Generator {
             val p = pm.get(node)
             if (p == null) Nil else List(p.getLine, p.getCharPositionInLine + 1)
         }
-        val gen = new GrammarGen(getPos)
+
+        val gen = new Gen2(getPos)
         gen.grammargen(gtree)
-        val grammarFile = gen.getGrammarName + ".g"
-        writeFile(gen.getGrammarName + ".scala", gen.getTreeSource)
-        writeFile(grammarFile, gen.getGrammarSource)
-        if (runANTLR) {
-            val tool = new org.antlr.Tool(Array(
-                "-o", outputDir, "-lib", outputDir,
-                outputDir + "/" + grammarFile))
-            tool.process
-            if (org.antlr.tool.ErrorManager.getNumErrors > 0)
-                throw new GrammarException("ANTLR failed")
-        }
+
+//        val gen = new GrammarGen(getPos)
+//        gen.grammargen(gtree)
+//        val grammarFile = gen.getGrammarName + ".g"
+//        writeFile(gen.getGrammarName + ".scala", gen.getTreeSource)
+//        writeFile(grammarFile, gen.getGrammarSource)
+//        if (runANTLR) {
+//            val tool = new org.antlr.Tool(Array(
+//                "-o", outputDir, "-lib", outputDir,
+//                outputDir + "/" + grammarFile))
+//            tool.process
+//            if (org.antlr.tool.ErrorManager.getNumErrors > 0)
+//                throw new GrammarException("ANTLR failed")
+//        }
     }
 }
 
