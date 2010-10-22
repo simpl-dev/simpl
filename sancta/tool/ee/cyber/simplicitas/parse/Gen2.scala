@@ -27,7 +27,7 @@ class NormalRule(name: String, tree: List[Any])
     extends NonterminalRule(name, tree) {
 }
 
-class RuleClass(val name: String) {
+class RClass(val name: String) {
     
 }
 
