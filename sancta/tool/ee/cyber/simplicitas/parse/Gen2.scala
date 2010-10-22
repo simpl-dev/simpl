@@ -1,6 +1,6 @@
 package ee.cyber.simplicitas.parse
 
-abstract class Rule(name: String, var tree: List[Any]) {
+abstract class Rule(val name: String, var tree: List[Any]) {
     var returnType: String = null;
     var returnCode: String = null;
 
@@ -28,7 +28,6 @@ class NormalRule(name: String, tree: List[Any])
 }
 
 class RClass(val name: String) {
-    
 }
 
 class Gen2(getPos: (Any) => List[Int]) {
@@ -41,8 +40,8 @@ class Gen2(getPos: (Any) => List[Int]) {
                 rest.foreach(addRule)
         }
 
-        rules.foreach(println)
         rules.values.foreach(analyze)
+        rules.foreach(println)
     }
 
     /** Adds rule to symbol table. */
@@ -62,6 +61,7 @@ class Gen2(getPos: (Any) => List[Int]) {
     }
 
     def analyze(rule: Rule) {
+        println("analyze(" + rule.name + ")")
         matchReturns(rule)
     }
 
@@ -79,6 +79,7 @@ class Gen2(getPos: (Any) => List[Int]) {
 
         rule.tree match {
             case ("returns" :: returnArgs) :: rest =>
+                println("matched returns!")
                 returnArgs.foreach(matchReturnArg)
                 rule.tree = rest
             case _ =>
