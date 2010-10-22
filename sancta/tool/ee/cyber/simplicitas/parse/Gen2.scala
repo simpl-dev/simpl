@@ -1,7 +1,8 @@
 package ee.cyber.simplicitas.parse
 
-abstract class Rule(name: String, tree: List[Any]) {
+abstract class Rule(name: String, var tree: List[Any]) {
     var returnType: String = null;
+    var returnCode: String = null;
 
     override def toString = name + " returns " + returnType + " {" + tree + "}"
 }
@@ -26,8 +27,13 @@ class NormalRule(name: String, tree: List[Any])
     extends NonterminalRule(name, tree) {
 }
 
+class RuleClass(val name: String) {
+    
+}
+
 class Gen2(getPos: (Any) => List[Int]) {
     val rules = scala.collection.mutable.Map[String, Rule]()
+    val classes = scala.collection.mutable.Map[String, RuleClass]()
 
     def grammargen(tree: Any) {
         tree match {
@@ -56,5 +62,27 @@ class Gen2(getPos: (Any) => List[Int]) {
     }
 
     def analyze(rule: Rule) {
+        matchReturns(rule)
+    }
+
+    def matchReturns(rule: Rule) {
+        def matchReturnArg(arg: Any) {
+            arg match {
+                case rt: String =>
+                    rule.returnType = rt
+                case List("BODY", body) =>
+                    rule.returnCode = body.toString
+                case _ =>
+                    println("Invalid return arg: " + arg)
+            }
+        }
+
+        rule.tree match {
+            case ("returns" :: returnArgs) :: rest =>
+                returnArgs.foreach(matchReturnArg)
+                rule.tree = rest
+            case _ =>
+                ()
+        }
     }
 }
