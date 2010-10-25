@@ -47,8 +47,8 @@ option Prim: Id | Paren;
 Paren returns Expr {expr}: "(" Expr ")";
 
 Funny: a=Id ((b=Id c=Id?)|(b=Id (d=Id e=Id)+));
-Funny2: Id STRING? foo="bar" (State+ foo=PlusExpr* | Command)+;
-Funny3: (x=Id x2=Id) (x=Id x2=Id)+;
+Funny2: Id STRING? foo="bar" (State+ foo2=PlusExpr* | Command)+;
+Funny3: (x=Id x2=Id) (x3=Id x4=Id)+;
 
 terminal Id: ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')*;
 fragment STR_BODY: ~('\\'|'"') | '\\' .;

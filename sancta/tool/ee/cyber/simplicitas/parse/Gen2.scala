@@ -1,12 +1,17 @@
 package ee.cyber.simplicitas.parse
 
+import scala.collection.mutable.ArrayBuffer
+
+import GrammarUtils._
+
 abstract class Rule(val name: String, var tree: List[Any]) {
     var returnType: String = null;
     var returnCode: String = null;
 
-    var params: Seq[RParam] = Nil
+    var params = new ArrayBuffer[RParam]
 
-    override def toString = name + " returns " + returnType + " {" + tree + "}"
+    override def toString = name + " returns " + returnType + " {" + tree +
+            "}\nParameters:\n" + params.map(_.toString).mkString("\n")
 
     def analyze() {
         println("analyze(" + name + ")")
@@ -99,33 +104,78 @@ class NormalRule(name: String, tree: List[Any])
     }
 
     def doMatch(modifier: Modifier.Val, ruleCall: Any) {
+        val oldList = isList
+        if ((modifier eq Modifier.Plus) || (modifier eq Modifier.Star)) {
+            isList = true
+        }
         ruleCall match {
             // Foo
-            case rule: String =>
-                doRuleCall(null, rule)
+            case pattern: String =>
+                doRuleCall(null, pattern)
             // foo=Bar
-            case List("=", name: String, rule: String) =>
-                doRuleCall(name, rule)
+            case List("=", name: String, pattern: String) =>
+                doRuleCall(name, pattern)
             // (foo)
             case "(" :: options => 
-                val oldList = isList
                 val oldBranch = currentBranch
 
                 currentBranch = currentBranch.extend
                 doOptionList(options)
 
                 currentBranch = oldBranch
-                isList = oldList
         }
+        isList = oldList
     }
 
-    def doRuleCall(name: String, rule: String) {
-        println("doRuleCall(" + name + ", " + rule + "), branch=" +
+    def doRuleCall(name: String, pattern: String) {
+        println("doRuleCall(" + name + ", " + pattern + "), branch=" +
                 currentBranch + ", list=" + isList)
+
+        // Literal call to "foo"
+        if ((name eq null) && pattern.startsWith("'")) {
+            return
+        }
+
+        val varName = if (name eq null) uncapitalize(pattern) else name
+
+        val param = new RParam(varName, pattern, currentBranch, isList)
+
+        checkParamNameConflicts(param)
+
+        params += param
+    }
+    
+        // Check if name of the node conflicts with some other name in
+        // the same branch. For example:
+        // x=foo y=bar x=baz is a conflict.
+        // y=bar (x=foo | x=baz) is not because both x's are in different
+        // branches.
+    def checkParamNameConflicts(np: RParam) {
+        println("checkParamNameConflicts(" + np.name + ", " + np.rule + ")")
+        val varName = np.name
+
+        params find (_.name == varName) match {
+            // This rule already has parameter with this name.
+            // Check if there are conflicts.
+            case Some(other) =>
+                if (currentBranch.conflictsWith(other.branch)) {
+                    throw new Exception("multiple tokens named '" + varName + "'")
+                } else if (other.rule != np.rule) {
+                    // TODO: better check for type conflict.
+                    throw new Exception("token type conflict: " + varName +
+                          " was " + other.rule + ", but redefined as " +
+                          np.rule)
+                }
+            case _ =>
+            ()
+        }
     }
 }
 
-class RParam() {
+class RParam(val name: String, val rule: String, val branch: BranchIdentifier,
+        val isList: Boolean) {
+    override def toString = name + ": " + rule +
+        (if (isList) ", LIST " else " ") + branch
 }
 
 class RClass(val name: String) {
