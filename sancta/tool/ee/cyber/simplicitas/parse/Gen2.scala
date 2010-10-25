@@ -83,9 +83,9 @@ class NormalRule(name: String, tree: List[Any])
     def collectParams() {
         doOptionList(tree)
     }
-    
+
     def doOptionList(lst: List[Any]) {
-        for ("NODE" :: matches <- tree) {
+        for ("NODE" :: matches <- lst) {
             for (m <- matches) {
                 m match {
                     case List("MATCH", modifier: String, ruleCall) =>
@@ -101,12 +101,27 @@ class NormalRule(name: String, tree: List[Any])
     def doMatch(modifier: Modifier.Val, ruleCall: Any) {
         ruleCall match {
             // Foo
-            case r: String =>
-                ()
+            case rule: String =>
+                doRuleCall(null, rule)
+            // foo=Bar
             case List("=", name: String, rule: String) =>
-                ()
-            case _ => ()
+                doRuleCall(name, rule)
+            // (foo)
+            case "(" :: options => 
+                val oldList = isList
+                val oldBranch = currentBranch
+
+                currentBranch = currentBranch.extend
+                doOptionList(options)
+
+                currentBranch = oldBranch
+                isList = oldList
         }
+    }
+
+    def doRuleCall(name: String, rule: String) {
+        println("doRuleCall(" + name + ", " + rule + "), branch=" +
+                currentBranch + ", list=" + isList)
     }
 }
 
