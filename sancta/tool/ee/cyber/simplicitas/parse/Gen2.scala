@@ -4,27 +4,113 @@ abstract class Rule(val name: String, var tree: List[Any]) {
     var returnType: String = null;
     var returnCode: String = null;
 
+    var params: Seq[RParam] = Nil
+
     override def toString = name + " returns " + returnType + " {" + tree + "}"
+
+    def analyze() {
+        println("analyze(" + name + ")")
+        matchReturns()
+        collectParams()
+    }
+
+    /** Analyzes the "returns foo {bar}" part. */
+    def matchReturns() {
+        def matchReturnArg(arg: Any) {
+            arg match {
+                case rt: String =>
+                    returnType = rt
+                case List("BODY", body) =>
+                    returnCode = body.toString
+                case _ =>
+                    println("Invalid return arg: " + arg)
+            }
+        }
+
+        tree match {
+            case ("returns" :: returnArgs) :: rest =>
+                println("matched returns!")
+                returnArgs.foreach(matchReturnArg)
+                tree = rest
+            case _ =>
+                ()
+        }
+    }
+
+    def collectParams(): Unit
 }
 
 class FragmentRule(name: String, tree: List[Any])
-    extends Rule(name, tree) {
+        extends Rule(name, tree) {
+    def collectParams() {}
 }
 
 class TerminalRule(name: String, hidden: Boolean, tree: List[Any])
-    extends Rule(name, tree) {
+        extends Rule(name, tree) {
+    def collectParams() {}
 }
 
 abstract class NonterminalRule(name: String, tree: List[Any])
-    extends Rule(name, tree) {
+        extends Rule(name, tree) {
 }
 
 class OptionRule(name: String, tree: List[Any])
-    extends NonterminalRule(name, tree) {
+        extends NonterminalRule(name, tree) {
+    /** Finds and records all the rule parameters. */
+    def collectParams() {
+        // TODO
+        println("TODO: collect option params: " + tree)
+    }
+}
+
+object Modifier extends Enumeration("?", "*", "+") {
+    type Val = Value
+
+    val Optional, Star, Plus = Value
 }
 
 class NormalRule(name: String, tree: List[Any])
     extends NonterminalRule(name, tree) {
+
+    /** Identifies current branch in the options. */
+    var currentBranch: BranchIdentifier = BranchIdentifier.empty
+
+    /** whether the currently analyzed branch contains
+      * repetition (Foo+ or Foo*). */
+    var isList = false
+
+    /** Finds and records all the rule parameters. */
+    def collectParams() {
+        doOptionList(tree)
+    }
+    
+    def doOptionList(lst: List[Any]) {
+        for ("NODE" :: matches <- tree) {
+            for (m <- matches) {
+                m match {
+                    case List("MATCH", modifier: String, ruleCall) =>
+                        doMatch(Modifier.withName(modifier), ruleCall)
+                    case List("MATCH", ruleCall) =>
+                        doMatch(null, ruleCall)
+                }
+            }
+            currentBranch = currentBranch.nextBranch
+        }
+    }
+
+    def doMatch(modifier: Modifier.Val, ruleCall: Any) {
+        ruleCall match {
+            // Foo
+            case r: String =>
+                ()
+            case List("=", name: String, rule: String) =>
+                ()
+            case _ => ()
+        }
+    }
+}
+
+class RParam() {
 }
 
 class RClass(val name: String) {
@@ -40,7 +126,7 @@ class Gen2(getPos: (Any) => List[Int]) {
                 rest.foreach(addRule)
         }
 
-        rules.values.foreach(analyze)
+        rules.values.foreach(_.analyze())
         rules.foreach(println)
     }
 
@@ -58,32 +144,5 @@ class Gen2(getPos: (Any) => List[Int]) {
             rules(name) = new NormalRule(name, rest)
         case _ =>
             println("Invalid rule: " + rule)
-    }
-
-    def analyze(rule: Rule) {
-        println("analyze(" + rule.name + ")")
-        matchReturns(rule)
-    }
-
-    def matchReturns(rule: Rule) {
-        def matchReturnArg(arg: Any) {
-            arg match {
-                case rt: String =>
-                    rule.returnType = rt
-                case List("BODY", body) =>
-                    rule.returnCode = body.toString
-                case _ =>
-                    println("Invalid return arg: " + arg)
-            }
-        }
-
-        rule.tree match {
-            case ("returns" :: returnArgs) :: rest =>
-                println("matched returns!")
-                returnArgs.foreach(matchReturnArg)
-                rule.tree = rest
-            case _ =>
-                ()
-        }
     }
 }

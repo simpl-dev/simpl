@@ -11,6 +11,7 @@ tokens {
     NODE;
     ARG;
     BODY;
+    MATCH;
 }
 
 @header {
@@ -39,10 +40,10 @@ body        : CODE -> ^(BODY CODE);
 returnType  : 'returns'^ dottedId? body?;
 altList     : matchList ('|'! matchList)*;
 matchList   : match+ -> ^(NODE match+);
-match       : name? token modifier? -> name? modifier? token;
+match       : token modifier? -> ^(MATCH modifier? token); 
 name        : ID '='^;
 modifier    : '?' | '*' | '+';
-token       : '('^ altList ')'! | ID | STR;
+token       : '('^ altList ')'! | (ID '='^)? ID | (ID '='^)? STR;
 
 // terminals
 //termParams  : '('! termParam (','! termParam)* ')'!;
