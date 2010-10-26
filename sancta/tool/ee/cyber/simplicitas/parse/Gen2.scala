@@ -119,7 +119,8 @@ class OptionRule(pName: String, pTree: List[Any])
             // will not be type correct.
             val calledRule = rules(opt.toString)
             if (calledRule.returnType ne null) {
-                actions.addBinding(actualReturnType, addExtend(calledRule.returnType))
+                actions.addBinding(actualReturnType,
+                        addExtend(calledRule.returnType))
             }
         }
     }
@@ -306,6 +307,8 @@ class Gen2(getPos: (Any) => List[Int]) {
             aSet.foreach(_(classes(r)))
         }
 
+        cleanupExtends()
+
         rules.foreach(println)
         println("Rulerefs:\n" + ruleRefs.mkString("\n"))
 
@@ -331,6 +334,35 @@ class Gen2(getPos: (Any) => List[Int]) {
     def findRuleRefs(rule: Rule) {
         for (p <- rule.params) {
             ruleRefs.addBinding(p.rule, p)
+        }
+    }
+
+    /** Cleans up the extends declarations:
+      * Detect cycles
+      * Remove "A extends A"
+      * If "A extends B with C" and "B extends C" => "A extends B"
+      */
+    def cleanupExtends() {
+        // TODO: detect cycles.
+
+        def reachableSet(items: collection.mutable.Set[String]):
+                collection.mutable.Set[String] = {
+            val newItems = items.flatMap(classes(_).extend)
+
+            if (newItems.forall(items.contains(_)))  // No new classes
+                items
+            else
+                reachableSet(items ++ newItems)
+        }
+
+        for (cl <- classes.values) {
+            cl.extend -= cl.name
+
+            for (ext <- cl.extend.toList) {
+                if (reachableSet(cl.extend - ext).contains(ext)) {
+                    cl.extend -= ext
+                }
+            }
         }
     }
 }
