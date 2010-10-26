@@ -20,6 +20,11 @@ trait STable {
     def rules: collection.mutable.Map[String, Rule]
     def classes: collection.mutable.Map[String, RClass]
     def actions: ActionSet
+
+    /** Map from kw contents to name of rule. */
+    def keywords: collection.mutable.Map[String, String]
+
+    def newId: String
 }
 
 abstract class Rule(val name: String, var tree: List[Any]) {
@@ -192,25 +197,43 @@ class NormalRule(pName: String, pTree: List[Any], symbols: STable)
         println("doRuleCall(" + name + ", " + pattern + "), branch=" +
                 currentBranch + ", list=" + isList)
 
-        // Literal call to "foo"
+        // Unnamed call to literal "foo"
         if ((name eq null) && pattern.startsWith("'")) {
             return
         }
 
+        var calledRuleName = pattern
+
+        // handle calls to named literals: foo="bar"
+        if (pattern.startsWith("'")) {
+            if (!keywords.contains(pattern)) {
+                // TODO: try to make better variable name.
+                calledRuleName = newId
+                // TODO: somehow tie this in with LiteralNode class
+                // so that there is no need to generate separate class
+                // for every literal call.
+                rules(calledRuleName) = new TerminalRule(calledRuleName, false,
+                        List(pattern), symbols)
+                keywords(pattern) = calledRuleName
+            } else {
+                calledRuleName = keywords(pattern)
+            }
+        }
+
         val varName = if (name eq null) uncapitalize(pattern) else name
 
-        val param = new RParam(varName, pattern, currentBranch, isList)
+        val param = new RParam(varName, calledRuleName, currentBranch, isList)
 
         checkParamNameConflicts(param)
 
         params += param
     }
     
-        // Check if name of the node conflicts with some other name in
-        // the same branch. For example:
-        // x=foo y=bar x=baz is a conflict.
-        // y=bar (x=foo | x=baz) is not because both x's are in different
-        // branches.
+    // Check if name of the node conflicts with some other name in
+    // the same branch. For example:
+    // x=foo y=bar x=baz is a conflict.
+    // y=bar (x=foo | x=baz) is not because both x's are in different
+    // branches.
     def checkParamNameConflicts(np: RParam) {
         println("checkParamNameConflicts(" + np.name + ", " + np.rule + ")")
         val varName = np.name
@@ -233,11 +256,19 @@ class NormalRule(pName: String, pTree: List[Any], symbols: STable)
     }
 
     def generateClasses() {
+        println("generateClasses(" + name + ")")
         val cl = new RClass(name, "case class")
         classes(name) = cl
 
         for (p <- params) {
-            cl.params += new RCParam(p.name, rules(p.rule).actualReturnType)
+            println("param: " + p)
+            if (!rules.contains(p.rule)) {
+                throw new Exception("Invalid rule reference: " + name + "." +
+                        p.name)
+            }
+            val ruleType = rules(p.rule).actualReturnType
+            cl.params += new RCParam(p.name,
+                    if (p.isList) "List[" + ruleType + "]" else ruleType)
         }
     }
 }
@@ -276,6 +307,11 @@ class Gen2(getPos: (Any) => List[Int]) {
         val rules = collection.mutable.Map[String, Rule]()
         val classes = collection.mutable.Map[String, RClass]()
         val actions = new ActionSet
+        val keywords = collection.mutable.Map[String, String]()
+
+        private var idVal = 0
+
+        def newId = {idVal += 1; "Z" + idVal}
     }
 
     import Symbols._
@@ -317,6 +353,7 @@ class Gen2(getPos: (Any) => List[Int]) {
         rules.foreach(println)
 
         println("Classes: \n" + classes.values.mkString("\n"))
+        println("Keywords: " + keywords)
     }
 
     /** Adds rule to symbol table. */

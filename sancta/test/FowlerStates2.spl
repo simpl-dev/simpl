@@ -35,7 +35,7 @@ Transition: event=Id Id f='=>' state=Id;
 option PlusExpr: Plus | Minus;
 
 Plus returns Expr: a=MulExpr ("+" b=PlusExpr)?;
-Minus returns Expr: a=MulExpr ("-" b=MinusExpr)?;
+Minus returns Expr: a=MulExpr ("-" b=PlusExpr)?;
 
 option MulExpr: Mul | Div;
 
@@ -44,7 +44,7 @@ Div returns Expr: a=Prim ("/" b=MulExpr)?;
 
 option Prim: Id | Paren;
 
-Paren returns Expr {expr}: "(" Expr ")";
+Paren returns Expr {expr}: "(" PlusExpr ")";
 
 Funny: a=Id ((b=Id c=Id?)|(b=Id (d=Id e=Id)+));
 Funny2: Id STRING? foo="bar" (State+ foo2=PlusExpr* | Command)+;
