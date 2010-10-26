@@ -182,8 +182,12 @@ class RClass(val name: String) {
 }
 
 class Gen2(getPos: (Any) => List[Int]) {
-    val rules = scala.collection.mutable.Map[String, Rule]()
-    val classes = scala.collection.mutable.Map[String, RuleClass]()
+    val rules = collection.mutable.Map[String, Rule]()
+    val classes = collection.mutable.Map[String, RuleClass]()
+    val ruleRefs = 
+            new collection.mutable.HashMap[String, collection.mutable.Set[RParam]]
+               with collection.mutable.MultiMap[String, RParam]
+            
 
     def grammargen(tree: Any) {
         tree match {
@@ -192,7 +196,9 @@ class Gen2(getPos: (Any) => List[Int]) {
         }
 
         rules.values.foreach(_.analyze())
+        rules.values.foreach(findRuleRefs(_))
         rules.foreach(println)
+        println("Rulerefs:\n" + ruleRefs)
     }
 
     /** Adds rule to symbol table. */
@@ -209,5 +215,11 @@ class Gen2(getPos: (Any) => List[Int]) {
             rules(name) = new NormalRule(name, rest)
         case _ =>
             println("Invalid rule: " + rule)
+    }
+
+    def findRuleRefs(rule: Rule) {
+        for (p <- rule.params) {
+            ruleRefs.addBinding(p.rule, p)
+        }
     }
 }
