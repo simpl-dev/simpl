@@ -30,7 +30,7 @@ State: 'state'
 
 Transition: event=Id Id f='=>' state=Id;
 
-option Expr: Plus | Minus | Mul | Div;
+// option Expr: Plus | Minus | Mul | Div;
 
 option PlusExpr returns Expr: Plus | Minus;
 

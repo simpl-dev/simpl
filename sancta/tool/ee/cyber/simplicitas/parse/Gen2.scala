@@ -4,18 +4,30 @@ import scala.collection.mutable.ArrayBuffer
 
 import GrammarUtils._
 
+object Actions {
+    type Action = (RClass) => Unit
+    class ActionSet extends
+        collection.mutable.HashMap[String, collection.mutable.Set[Action]]
+           with collection.mutable.MultiMap[String, Action]
+}
+
+import Actions._
+
 abstract class Rule(val name: String, var tree: List[Any]) {
-    var returnType: String = null;
-    var returnCode: String = null;
+    var returnType: String = null
+    var returnCode: String = null
+    var body: String = null
 
     var params = new ArrayBuffer[RParam]
 
-    override def toString = name + " returns " + returnType + " {" + tree +
+    override def toString = name + " returns " + 
+            (if (returnType eq null) name else returnType) + " {" + tree +
             "}\nParameters:\n" + params.map(_.toString).mkString("\n")
 
     def analyze() {
         println("analyze(" + name + ")")
         matchReturns()
+        matchBody()
         collectParams()
     }
 
@@ -42,29 +54,61 @@ abstract class Rule(val name: String, var tree: List[Any]) {
         }
     }
 
+    def matchBody() {
+        tree match {
+            case List("BODY", b: String) :: rest =>
+                body = b
+                tree = rest
+            case _ =>
+                ()
+        }
+    }
+
     def collectParams(): Unit
+
+    def generateClasses(rules: collection.mutable.Map[String, Rule],
+            classes: collection.mutable.Map[String, RClass],
+            actions: ActionSet): Unit
 }
 
-class FragmentRule(name: String, tree: List[Any])
-        extends Rule(name, tree) {
+class FragmentRule(pName: String, pTree: List[Any])
+        extends Rule(pName, pTree) {
     def collectParams() {}
+
+    def generateClasses(rules: collection.mutable.Map[String, Rule],
+            classes: collection.mutable.Map[String, RClass],
+            actions: ActionSet) = ()
 }
 
-class TerminalRule(name: String, hidden: Boolean, tree: List[Any])
-        extends Rule(name, tree) {
+class TerminalRule(pName: String, hidden: Boolean, pTree: List[Any])
+        extends Rule(pName, pTree) {
     def collectParams() {}
+    def generateClasses(rules: collection.mutable.Map[String, Rule],
+            classes: collection.mutable.Map[String, RClass],
+            actions: ActionSet) {
+        // TODO: make the class extend from TerminalNode
+        classes(name) = new RClass(name, "case class")
+    }
 }
 
-abstract class NonterminalRule(name: String, tree: List[Any])
-        extends Rule(name, tree) {
+abstract class NonterminalRule(pName: String, pTree: List[Any])
+        extends Rule(pName, pTree) {
 }
 
-class OptionRule(name: String, tree: List[Any])
-        extends NonterminalRule(name, tree) {
+class OptionRule(pName: String, pTree: List[Any])
+        extends NonterminalRule(pName, pTree) {
     /** Finds and records all the rule parameters. */
     def collectParams() {
-        // TODO
-        println("TODO: collect option params: " + tree)
+        // Nothing to do: tree already contains list of called rules.
+    }
+
+    def generateClasses(rules: collection.mutable.Map[String, Rule],
+            classes: collection.mutable.Map[String, RClass],
+            actions: ActionSet) {
+        classes(name) = new RClass(name, "trait")
+        for (opt <- tree) {
+            actions.addBinding(opt.toString, (rule) => rule.extend += name)
+        }
     }
 }
 
@@ -74,8 +118,8 @@ object Modifier extends Enumeration("?", "*", "+") {
     val Optional, Star, Plus = Value
 }
 
-class NormalRule(name: String, tree: List[Any])
-    extends NonterminalRule(name, tree) {
+class NormalRule(pName: String, pTree: List[Any])
+    extends NonterminalRule(pName, pTree) {
 
     /** Identifies current branch in the options. */
     var currentBranch: BranchIdentifier = BranchIdentifier.empty
@@ -170,20 +214,57 @@ class NormalRule(name: String, tree: List[Any])
             ()
         }
     }
+
+    def generateClasses(rules: collection.mutable.Map[String, Rule],
+            classes: collection.mutable.Map[String, RClass],
+            actions: ActionSet) {
+        val cl = new RClass(name, "case class")
+        classes(name) = cl
+
+        // Rule: if rule returns type that does not match any rule,
+        // then create new trait and make rule extend this trait.
+        if (returnType ne null) {
+            if (!rules.contains(returnType) && !classes.contains(returnType)) {
+                classes(returnType) = new RClass(returnType, "trait")
+            }
+            cl.extend += returnType
+        }
+    }
 }
 
+/** Rule parameter.
+  * @param name The name of the parameter.
+  * @param rule Name of the rule called.
+  * @param branch Identifies the branch
+  * @param isList Whether the parameter is used in + or * context.
+  */
 class RParam(val name: String, val rule: String, val branch: BranchIdentifier,
         val isList: Boolean) {
-    override def toString = name + ": " + rule +
+    /** The actual Scala type of the parameter. */
+    var paramType: String = null
+
+    override def toString = name + ": " + 
+        (if (paramType eq null) rule else paramType + "(" + rule + ")") +
         (if (isList) ", LIST " else " ") + branch
 }
 
-class RClass(val name: String) {
+class RClass(val name: String, val classType: String) {
+    val extend = new collection.mutable.HashSet[String]
+    val params = new ArrayBuffer[RCParam]
+
+    override def toString =
+        classType + " " + name + "(" + params.mkString(", ") + ")" +
+        (if (extend.isEmpty) "" else " extends" + extend.mkString(" with "))
+}
+
+class RCParam(val name: String, val pType: String) {
+    override def toString = name + ": " + pType
 }
 
 class Gen2(getPos: (Any) => List[Int]) {
     val rules = collection.mutable.Map[String, Rule]()
-    val classes = collection.mutable.Map[String, RuleClass]()
+    val classes = collection.mutable.Map[String, RClass]()
+    val actions = new ActionSet
     val ruleRefs = 
             new collection.mutable.HashMap[String, collection.mutable.Set[RParam]]
                with collection.mutable.MultiMap[String, RParam]
@@ -197,8 +278,21 @@ class Gen2(getPos: (Any) => List[Int]) {
 
         rules.values.foreach(_.analyze())
         rules.values.foreach(findRuleRefs(_))
+
+        // Do the class generation and type inference.
+        for (r <- rules.values) {
+            r.generateClasses(rules, classes, actions)
+        }
+
+        // Rules are generated, let's run delayed actions
+        for ((r, aSet) <- actions) {
+            aSet.foreach(_(classes(r)))
+        }
+
         rules.foreach(println)
-        println("Rulerefs:\n" + ruleRefs)
+        println("Rulerefs:\n" + ruleRefs.mkString("\n"))
+
+        println("Classes: \n" + classes.mkString("\n"))
     }
 
     /** Adds rule to symbol table. */
