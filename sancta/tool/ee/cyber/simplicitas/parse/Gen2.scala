@@ -16,6 +16,12 @@ object Actions {
 
 import Actions._
 
+trait STable {
+    def rules: collection.mutable.Map[String, Rule]
+    def classes: collection.mutable.Map[String, RClass]
+    def actions: ActionSet
+}
+
 abstract class Rule(val name: String, var tree: List[Any]) {
     var returnType: String = null
     var returnCode: String = null
@@ -71,26 +77,22 @@ abstract class Rule(val name: String, var tree: List[Any]) {
 
     def collectParams(): Unit
 
-    def generateClasses(rules: collection.mutable.Map[String, Rule],
-            classes: collection.mutable.Map[String, RClass],
-            actions: ActionSet): Unit
+    def generateClasses(): Unit
 }
 
-class FragmentRule(pName: String, pTree: List[Any])
+class FragmentRule(pName: String, pTree: List[Any], symbols: STable)
         extends Rule(pName, pTree) {
     def collectParams() {}
 
-    def generateClasses(rules: collection.mutable.Map[String, Rule],
-            classes: collection.mutable.Map[String, RClass],
-            actions: ActionSet) = ()
+    def generateClasses() = ()
 }
 
-class TerminalRule(pName: String, hidden: Boolean, pTree: List[Any])
-        extends Rule(pName, pTree) {
+class TerminalRule(pName: String, hidden: Boolean, pTree: List[Any],
+        symbols: STable) extends Rule(pName, pTree) {
+    import symbols._
+
     def collectParams() {}
-    def generateClasses(rules: collection.mutable.Map[String, Rule],
-            classes: collection.mutable.Map[String, RClass],
-            actions: ActionSet) {
+    def generateClasses() {
         // TODO: make the class extend from TerminalNode
         classes(name) = new RClass(name, "case class")
     }
@@ -100,16 +102,16 @@ abstract class NonterminalRule(pName: String, pTree: List[Any])
         extends Rule(pName, pTree) {
 }
 
-class OptionRule(pName: String, pTree: List[Any])
+class OptionRule(pName: String, pTree: List[Any], symbols: STable)
         extends NonterminalRule(pName, pTree) {
+    import symbols._
+
     /** Finds and records all the rule parameters. */
     def collectParams() {
         // Nothing to do: tree already contains list of called rules.
     }
 
-    def generateClasses(rules: collection.mutable.Map[String, Rule],
-            classes: collection.mutable.Map[String, RClass],
-            actions: ActionSet) {
+    def generateClasses() {
         classes(name) = new RClass(name, "trait")
         for (opt <- tree) {
             actions.addBinding(opt.toString, addExtend(name))
@@ -132,8 +134,9 @@ object Modifier extends Enumeration("?", "*", "+") {
     val Optional, Star, Plus = Value
 }
 
-class NormalRule(pName: String, pTree: List[Any])
-    extends NonterminalRule(pName, pTree) {
+class NormalRule(pName: String, pTree: List[Any], symbols: STable)
+        extends NonterminalRule(pName, pTree) {
+    import symbols._
 
     /** Identifies current branch in the options. */
     var currentBranch: BranchIdentifier = BranchIdentifier.empty
@@ -229,9 +232,7 @@ class NormalRule(pName: String, pTree: List[Any])
         }
     }
 
-    def generateClasses(rules: collection.mutable.Map[String, Rule],
-            classes: collection.mutable.Map[String, RClass],
-            actions: ActionSet) {
+    def generateClasses() {
         val cl = new RClass(name, "case class")
         classes(name) = cl
 
@@ -271,13 +272,13 @@ class RCParam(val name: String, val pType: String) {
 }
 
 class Gen2(getPos: (Any) => List[Int]) {
-    val rules = collection.mutable.Map[String, Rule]()
-    val classes = collection.mutable.Map[String, RClass]()
-    val actions = new ActionSet
-    val ruleRefs = 
-            new collection.mutable.HashMap[String, collection.mutable.Set[RParam]]
-               with collection.mutable.MultiMap[String, RParam]
-            
+    object Symbols extends STable {
+        val rules = collection.mutable.Map[String, Rule]()
+        val classes = collection.mutable.Map[String, RClass]()
+        val actions = new ActionSet
+    }
+
+    import Symbols._
 
     def grammargen(tree: Any) {
         tree match {
@@ -286,11 +287,10 @@ class Gen2(getPos: (Any) => List[Int]) {
         }
 
         rules.values.foreach(_.analyze())
-        rules.values.foreach(findRuleRefs(_))
 
         // Do the class generation and type inference.
         for (r <- rules.values) {
-            r.generateClasses(rules, classes, actions)
+            r.generateClasses()
 
             // Foo returns Bar => case class Foo extends Bar
             if (r.returnType ne null)
@@ -315,7 +315,6 @@ class Gen2(getPos: (Any) => List[Int]) {
         cleanupExtends()
 
         rules.foreach(println)
-        println("Rulerefs:\n" + ruleRefs.mkString("\n"))
 
         println("Classes: \n" + classes.values.mkString("\n"))
     }
@@ -323,23 +322,17 @@ class Gen2(getPos: (Any) => List[Int]) {
     /** Adds rule to symbol table. */
     def addRule(rule: Any) = rule match {
         case "terminal" :: "hidden" :: (name: String) :: rest =>
-            rules(name) = new TerminalRule(name, true, rest)
+            rules(name) = new TerminalRule(name, true, rest, Symbols)
         case "terminal" :: (name: String) :: rest =>
-            rules(name) = new TerminalRule(name, false, rest)
+            rules(name) = new TerminalRule(name, false, rest, Symbols)
         case "fragment" :: (name: String) :: rest =>
-            rules(name) = new FragmentRule(name, rest)
+            rules(name) = new FragmentRule(name, rest, Symbols)
         case "option" :: (name: String) :: rest =>
-            rules(name) = new OptionRule(name, rest)
+            rules(name) = new OptionRule(name, rest, Symbols)
         case ":" :: (name: String) :: rest =>
-            rules(name) = new NormalRule(name, rest)
+            rules(name) = new NormalRule(name, rest, Symbols)
         case _ =>
             println("Invalid rule: " + rule)
-    }
-
-    def findRuleRefs(rule: Rule) {
-        for (p <- rule.params) {
-            ruleRefs.addBinding(p.rule, p)
-        }
     }
 
     /** Cleans up the extends declarations:
