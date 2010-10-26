@@ -234,15 +234,6 @@ class NormalRule(pName: String, pTree: List[Any])
             actions: ActionSet) {
         val cl = new RClass(name, "case class")
         classes(name) = cl
-
-        // Rule: if rule returns type that does not match any rule,
-        // then create new trait and make rule extend this trait.
-        if (returnType ne null) {
-            if (!rules.contains(returnType) && !classes.contains(returnType)) {
-                classes(returnType) = new RClass(returnType, "trait")
-            }
-            cl.extend += returnType
-        }
     }
 }
 
@@ -300,6 +291,16 @@ class Gen2(getPos: (Any) => List[Int]) {
             // Foo returns Bar => case class Foo extends Bar
             if (r.returnType ne null)
                 actions.addBinding(r.name, addExtend(r.returnType))
+ 
+            // Rule: if rule returns type that does not match any rule,
+            // then create new trait and make rule extend this trait.
+            if (r.returnType ne null) {
+                if (!rules.contains(r.returnType) &&
+                        !classes.contains(r.returnType)) {
+                    classes(r.returnType) = new RClass(r.returnType, "trait")
+                }
+                classes(r.name).extend += r.returnType
+            }
         }
 
         // Rules are generated, let's run delayed actions
