@@ -234,6 +234,10 @@ class NormalRule(pName: String, pTree: List[Any])
             actions: ActionSet) {
         val cl = new RClass(name, "case class")
         classes(name) = cl
+
+        for (p <- params) {
+            cl.params += new RCParam(p.name, rules(p.rule).actualReturnType)
+        }
     }
 }
 
