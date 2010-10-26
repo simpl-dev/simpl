@@ -9,6 +9,9 @@ object Actions {
     class ActionSet extends
         collection.mutable.HashMap[String, collection.mutable.Set[Action]]
            with collection.mutable.MultiMap[String, Action]
+
+    def addExtend(cl: String): (RClass) => Unit =
+        (rule: RClass) => rule.extend += cl
 }
 
 import Actions._
@@ -19,6 +22,8 @@ abstract class Rule(val name: String, var tree: List[Any]) {
     var body: String = null
 
     var params = new ArrayBuffer[RParam]
+
+    def actualReturnType = if (returnType ne null) returnType else name
 
     override def toString = name + " returns " + 
             (if (returnType eq null) name else returnType) + " {" + tree +
@@ -107,7 +112,15 @@ class OptionRule(pName: String, pTree: List[Any])
             actions: ActionSet) {
         classes(name) = new RClass(name, "trait")
         for (opt <- tree) {
-            actions.addBinding(opt.toString, (rule) => rule.extend += name)
+            actions.addBinding(opt.toString, addExtend(name))
+
+            // If called rule has some weird return type then we
+            // must extend this return type, otherwise the rule call
+            // will not be type correct.
+            val calledRule = rules(opt.toString)
+            if (calledRule.returnType ne null) {
+                actions.addBinding(actualReturnType, addExtend(calledRule.returnType))
+            }
         }
     }
 }
@@ -254,7 +267,7 @@ class RClass(val name: String, val classType: String) {
 
     override def toString =
         classType + " " + name + "(" + params.mkString(", ") + ")" +
-        (if (extend.isEmpty) "" else " extends" + extend.mkString(" with "))
+        (if (extend.isEmpty) "" else " extends " + extend.mkString(" with "))
 }
 
 class RCParam(val name: String, val pType: String) {
@@ -282,6 +295,10 @@ class Gen2(getPos: (Any) => List[Int]) {
         // Do the class generation and type inference.
         for (r <- rules.values) {
             r.generateClasses(rules, classes, actions)
+
+            // Foo returns Bar => case class Foo extends Bar
+            if (r.returnType ne null)
+                actions.addBinding(r.name, addExtend(r.returnType))
         }
 
         // Rules are generated, let's run delayed actions
@@ -292,7 +309,7 @@ class Gen2(getPos: (Any) => List[Int]) {
         rules.foreach(println)
         println("Rulerefs:\n" + ruleRefs.mkString("\n"))
 
-        println("Classes: \n" + classes.mkString("\n"))
+        println("Classes: \n" + classes.values.mkString("\n"))
     }
 
     /** Adds rule to symbol table. */

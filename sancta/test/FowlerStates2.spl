@@ -32,15 +32,15 @@ Transition: event=Id Id f='=>' state=Id;
 
 // option Expr: Plus | Minus | Mul | Div;
 
-option PlusExpr returns Expr: Plus | Minus;
+option PlusExpr: Plus | Minus;
 
-Plus: a=MulExpr ("+" b=PlusExpr)?;
-Minus: a=MulExpr ("-" b=MinusExpr)?;
+Plus returns Expr: a=MulExpr ("+" b=PlusExpr)?;
+Minus returns Expr: a=MulExpr ("-" b=MinusExpr)?;
 
 option MulExpr: Mul | Div;
 
 Mul returns Expr {if (b eq null) a else Mul(a, b)}: a=Prim ("*" b=MulExpr)?;
-Div: a=Prim ("/" b=MulExpr)?;
+Div returns Expr: a=Prim ("/" b=MulExpr)?;
 
 option Prim: Id | Paren;
 
