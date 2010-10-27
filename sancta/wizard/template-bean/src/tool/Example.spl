@@ -21,6 +21,6 @@ DotId{
 
 terminal Id: ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')*;
 // Java-style single- and multiline comments.
-fragment ML_COMMENT: '/*' (~'*' | '*' ~'/')* '*/';
-fragment SL_COMMENT: '//' ~('\n'|'\r')*;
-hidden terminal WS: (' '|'\t'|'\r'|'\n'|SL_COMMENT|ML_COMMENT)+;
+fragment MlComment: '/*' (~'*' | '*' ~'/')* '*/';
+fragment SlComment: '//' ~('\n'|'\r')*;
+hidden terminal Ws: (' '|'\t'|'\r'|'\n'|SlComment|MlComment)+;

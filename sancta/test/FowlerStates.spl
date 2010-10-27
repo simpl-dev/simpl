@@ -4,9 +4,9 @@ options (backtrack=false;)
 
 Program: Definition+;
 
-option Definition{val testing = 0}: Import | Machine | ExternalMachine | STRING;
+option Definition{val testing = 0}: Import | Machine | ExternalMachine | Str;
 
-Import: 'import' importURI=STRING;
+Import: 'import' importURI=Str;
 
 ExternalMachine: 'external' Id;
 
@@ -33,9 +33,9 @@ State: 'state'
 Transition: event=Id Id f='=>' state=Id;
 
 terminal Id: ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')*;
-fragment STR_BODY: ~('\\'|'"') | '\\' .;
-terminal STRING {var doh = 0}:
-	'"' STR_BODY* '"' | '\'' STR_BODY* '\'';
-fragment ML_COMMENT: '/*' (~'*' | '*' ~'/')* '*/';
-fragment SL_COMMENT: '//' ~('\n'|'\r')*;
-terminal WS: (' '|'\t'|'\r'|'\n'|SL_COMMENT|ML_COMMENT)+ {skip();} ;
+fragment StrBody: ~('\\'|'"') | '\\' .;
+terminal Str {var doh = 0}:
+	'"' StrBody* '"' | '\'' StrBody* '\'';
+fragment MlComment: '/*' (~'*' | '*' ~'/')* '*/';
+fragment SlComment: '//' ~('\n'|'\r')*;
+terminal WS: (' '|'\t'|'\r'|'\n'|SlComment|MlComment)+ {skip();} ;
