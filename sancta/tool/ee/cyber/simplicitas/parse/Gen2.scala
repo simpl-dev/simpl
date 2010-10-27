@@ -27,12 +27,15 @@ trait STable {
     def newId: String
 }
 
-abstract class Rule(val name: String, var tree: List[Any]) {
+abstract class Rule(val name: String, var tree: List[Any],
+        symbols: STable) {
     var returnType: String = null
     var returnCode: String = null
     var body: String = null
 
     var params = new ArrayBuffer[RParam]
+
+    import symbols._
 
     def actualReturnType = if (returnType ne null) returnType else name
 
@@ -82,33 +85,49 @@ abstract class Rule(val name: String, var tree: List[Any]) {
 
     def collectParams(): Unit
 
-    def generateClasses(): Unit
-}
-
-class FragmentRule(pName: String, pTree: List[Any], symbols: STable)
-        extends Rule(pName, pTree) {
-    def collectParams() {}
-
-    def generateClasses() = ()
-}
-
-class TerminalRule(pName: String, hidden: Boolean, pTree: List[Any],
-        symbols: STable) extends Rule(pName, pTree) {
-    import symbols._
-
-    def collectParams() {}
     def generateClasses() {
-        // TODO: make the class extend from TerminalNode
-        classes(name) = new RClass(name, "case class")
+        // Foo returns Bar => case class Foo extends Bar
+        if (returnType ne null)
+            actions.addBinding(name, addExtend(returnType))
+ 
+            // Rule: if rule returns type that does not match any rule,
+        // then create new trait and make rule extend this trait.
+        if (returnType ne null) {
+            if (!rules.contains(returnType) &&
+                    !classes.contains(returnType)) {
+                classes(returnType) = new RClass(returnType, "trait")
+            }
+            classes(name).extend += returnType
+        }
     }
 }
 
-abstract class NonterminalRule(pName: String, pTree: List[Any])
-        extends Rule(pName, pTree) {
+class FragmentRule(pName: String, pTree: List[Any], symbols: STable)
+        extends Rule(pName, pTree, symbols) {
+    def collectParams() {}
+
+    override def generateClasses() = super.generateClasses()
+}
+
+class TerminalRule(pName: String, hidden: Boolean, pTree: List[Any],
+        symbols: STable) extends Rule(pName, pTree, symbols) {
+    import symbols._
+
+    def collectParams() {}
+    override def generateClasses() {
+        // TODO: make the class extend from TerminalNode
+        classes(name) = new RClass(name, "case class")
+
+        super.generateClasses()
+    }
+}
+
+abstract class NonterminalRule(pName: String, pTree: List[Any], symbols: STable)
+        extends Rule(pName, pTree, symbols) {
 }
 
 class OptionRule(pName: String, pTree: List[Any], symbols: STable)
-        extends NonterminalRule(pName, pTree) {
+        extends NonterminalRule(pName, pTree, symbols) {
     import symbols._
 
     /** Finds and records all the rule parameters. */
@@ -116,7 +135,7 @@ class OptionRule(pName: String, pTree: List[Any], symbols: STable)
         // Nothing to do: tree already contains list of called rules.
     }
 
-    def generateClasses() {
+    override def generateClasses() {
         classes(name) = new RClass(name, "trait")
         for (opt <- tree) {
             actions.addBinding(opt.toString, addExtend(name))
@@ -130,6 +149,8 @@ class OptionRule(pName: String, pTree: List[Any], symbols: STable)
                         addExtend(calledRule.returnType))
             }
         }
+
+        super.generateClasses()
     }
 }
 
@@ -140,7 +161,7 @@ object Modifier extends Enumeration("?", "*", "+") {
 }
 
 class NormalRule(pName: String, pTree: List[Any], symbols: STable)
-        extends NonterminalRule(pName, pTree) {
+        extends NonterminalRule(pName, pTree, symbols) {
     import symbols._
 
     /** Identifies current branch in the options. */
@@ -251,11 +272,11 @@ class NormalRule(pName: String, pTree: List[Any], symbols: STable)
                           np.rule)
                 }
             case _ =>
-            ()
+                ()
         }
     }
 
-    def generateClasses() {
+    override def generateClasses() {
         println("generateClasses(" + name + ")")
         val cl = new RClass(name, "case class")
         classes(name) = cl
@@ -270,6 +291,8 @@ class NormalRule(pName: String, pTree: List[Any], symbols: STable)
             cl.params += new RCParam(p.name,
                     if (p.isList) "List[" + ruleType + "]" else ruleType)
         }
+
+        super.generateClasses()
     }
 }
 
@@ -327,20 +350,6 @@ class Gen2(getPos: (Any) => List[Int]) {
         // Do the class generation and type inference.
         for (r <- rules.values) {
             r.generateClasses()
-
-            // Foo returns Bar => case class Foo extends Bar
-            if (r.returnType ne null)
-                actions.addBinding(r.name, addExtend(r.returnType))
- 
-            // Rule: if rule returns type that does not match any rule,
-            // then create new trait and make rule extend this trait.
-            if (r.returnType ne null) {
-                if (!rules.contains(r.returnType) &&
-                        !classes.contains(r.returnType)) {
-                    classes(r.returnType) = new RClass(r.returnType, "trait")
-                }
-                classes(r.name).extend += r.returnType
-            }
         }
 
         // Rules are generated, let's run delayed actions
