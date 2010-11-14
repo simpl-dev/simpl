@@ -411,7 +411,7 @@ class RuleGen(symbols: SymbolTable, termCode: ArrayBuffer[String],
         for (i <- 1 to s.length - 1) {
             val ch = s.charAt(i)
             if (Character.isJavaIdentifierPart(ch))
-                buf.append(if (i > 1) ch
+                buf.append(if (!buf.isEmpty) ch
                         else Character.toUpperCase(ch))
         }
         buf.toString
