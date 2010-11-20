@@ -45,8 +45,9 @@ class GeneratorBase(destDir: String) {
    * Creates a named file with given contents. The name of the file
    * is relative to the destDir attribute. Any intermediate directories
    * will be created when necessary.
+   * @return full path of the newly created file.
    */
-  def writeFile(name: String, contents: String) {
+  def writeFile(name: String, contents: String): String = {
     val file = new File(
         (if (destDir eq null) "" else destDir + File.separatorChar) +
           name)
@@ -59,11 +60,11 @@ class GeneratorBase(destDir: String) {
     } finally {
       writer.close()
     }
+    file.getAbsolutePath
   }
 
-  def writeFile(name: String, contents: StringTemplate) {
+  def writeFile(name: String, contents: StringTemplate): String =
     writeFile(name, contents.toString)
-  }
   
   /** Creates a parent directory for this file, if it does not
    * already exist. */
