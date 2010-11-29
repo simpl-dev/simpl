@@ -1,0 +1,81 @@
+grammar puf.spl.Puf;
+
+// options (backtrack=true;)
+
+Program: Include? decls=Rdecl+;
+
+Include: "#" "include" file=Id ".puf"; 
+
+option Decl: Rdecl | Tdecl;
+Rdecl: lhs=Flhs "=" expr=Expr ";";
+Tdecl: lhs=Tlhs "=" expr=Expr ";";
+
+Flhs: Id+;
+Tlhs: "(" h=Id ("," t=Id)* ")";
+
+option Expr: 
+	CaseExpr 
+	| LetrecExpr 
+	| LetExpr 
+	| FunExpr 
+	| IfExpr 
+	| OrExpr;
+
+CaseExpr: "case" expr=Expr "of" nilAlt=NilAlt ";" consAlt=ConsAlt;
+NilAlt: "[" "]" "->" expr=Expr;
+ConsAlt: head=Id ":" tail=Id "->" expr=Expr;
+LetrecExpr: "letrec" decl=Rdecl+ "in" Expr;
+LetExpr: "let" decl=Decl+ "in" Expr;
+FunExpr: "fn" params=Id+ "->" Expr;
+IfExpr: "if" cond=Expr "then" ifThen=Expr "else" ifElse=Expr;
+
+OrExpr: left=AndExpr ("||" rest=AndExpr)*;
+AndExpr returns Expr: left=EqExpr ("&&" rest=EqExpr)*;
+
+EqExpr returns Expr: left=CompareExpr (op=EqOp right=CompareExpr)?;
+terminal EqOp: "==" | "/=";
+
+CompareExpr returns Expr: left=ConsExpr (op=CompareOp right=ConsExpr)?;
+terminal CompareOp: "<" | "<=" | ">" | ">=";
+
+ConsExpr returns Expr: left=PlusExpr (":" right=ConsExpr)?;
+
+PlusExpr returns Expr: left=MulExpr (op=PlusExprOp rest=MulExpr)*;
+option PlusExprOp {
+    def text: String
+}: PlusOp | MinusOp;
+terminal PlusOp: "+";
+terminal MinusOp: "-";
+
+MulExpr returns Expr: left=UnaryExpr (op=MulExprOp rest=UnaryExpr)*;
+terminal MulExprOp: "*" | "/" | "%";
+
+option UnaryExpr returns Expr: 
+    NegExpr 
+    | NotExpr 
+    | SelectExpr 
+    | ApplyExpr;
+NegExpr: MinusOp expr=PrimaryExpr;
+NotExpr: "not" expr=PrimaryExpr;
+ApplyExpr: fun=PrimaryExpr (params=PrimaryExpr)*;
+SelectExpr: "#" sel=Num tuple=PrimaryExpr;
+
+option PrimaryExpr returns Expr:
+    Id 
+    | Num 
+    | TupleLiteral
+    | ListLiteral
+    ;
+TupleLiteral:
+    "(" ")"
+    | "(" first=Expr ("," rest=Expr)* ")";
+ListLiteral: 
+    "[" "]" 
+    | "[" first=Expr ("," rest=Expr)+ "]";
+
+terminal Str: '"' ~('"')* '"';
+terminal Id: ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')*;
+terminal Num: ('0'..'9')+;
+fragment MlComment: '/*' (~'*' | '*' ~'/')* '*/';
+fragment SlComment: '//' ~('\n'|'\r')*;
+hidden terminal Ws: (' '|'\t'|'\r'|'\n'|MlComment|SlComment)+;

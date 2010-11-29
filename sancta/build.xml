@@ -67,6 +67,7 @@
         <taskdef name="grammar" classpathref="parselib"
                  classname="ee.cyber.simplicitas.parse.GrammarTask"/>
         <grammar src="test/FowlerStates2.spl" destdir="${target}/test-java"/>
+        <grammar src="test/Puf.spl" destdir="${target}/test-java"/>
         <mkdir dir="${target}/test-classes"/>
         <scalac destdir="${target}/test-classes" classpathref="parselib"
                 unchecked="yes">
