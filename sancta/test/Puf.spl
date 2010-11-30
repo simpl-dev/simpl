@@ -12,8 +12,8 @@ option Decl {
     // TODO: unapply for pattern matching.
 }: TupleDecl | FunDecl;
 
-TupleDecl: left=TupleLeft "=" expr=Expr ";";
-FunDecl: left=FunLeft "=" expr=Expr ";";
+TupleDecl returns Decl: left=TupleLeft "=" expr=Expr ";";
+FunDecl returns Decl: left=FunLeft "=" expr=Expr ";";
 option DeclLeft: FunLeft | TupleLeft;
 FunLeft returns DeclLeft: Id+;
 TupleLeft returns DeclLeft: "(" h=Id ("," t=Id)* ")";
@@ -34,32 +34,40 @@ LetExpr: "let" decl=Decl+ "in" Expr;
 FunExpr: "fn" params=Id+ "->" Expr;
 IfExpr: "if" cond=Expr "then" ifThen=Expr "else" ifElse=Expr;
 
-OrExpr returns {makeBinaryOps(BinaryOp.Or, left :: rest)}:
-    left=AndExpr ("||" rest=AndExpr)*;
-AndExpr returns Expr {makeBinaryOps(BinaryOp.And, left :: rest)}:
-    left=EqExpr ("&&" rest=EqExpr)*;
+OrExpr
+    returns {makeBinaryOp(BinaryOp.Or, left :: rest)}
+    : left=AndExpr ("||" rest=AndExpr)*;
+AndExpr returns Expr {makeBinaryOp(BinaryOp.And, left :: rest)}
+    : left=EqExpr ("&&" rest=EqExpr)*;
 
-EqExpr returns Expr {
-    if (right eq null)
-        left
-    else
-        makeBinaryOp(op.text, left, right)
-    }: left=CompareExpr (op=EqOp right=CompareExpr)?;
+EqExpr
+    returns Expr {makeBinaryOp(op.text, left, right)}
+    : left=CompareExpr (op=EqOp right=CompareExpr)?;
 terminal EqOp: "==" | "/=";
 
-CompareExpr returns Expr: left=ConsExpr (op=CompareOp right=ConsExpr)?;
+CompareExpr
+    returns Expr {makeBinaryOp(op.text, left, right)}
+    : left=ConsExpr (op=CompareOp right=ConsExpr)?;
 terminal CompareOp: "<" | "<=" | ">" | ">=";
 
-ConsExpr returns Expr: left=PlusExpr (":" right=ConsExpr)?;
+ConsExpr
+    returns Expr {makeBinaryOp(BinaryOp.Cons, left, right)}
+    : left=PlusExpr (":" right=ConsExpr)?;
 
-PlusExpr returns Expr: left=MulExpr (op=PlusExprOp rest=MulExpr)*;
+PlusExpr
+    returns Expr {makeBinaryOp(left :: rest, op)}
+    : left=MulExpr (op=PlusExprOp rest=MulExpr)*;
 option PlusExprOp {
     def text: String
 }: PlusOp | MinusOp;
 terminal PlusOp: "+";
+// There must be special terminal because unary negation also uses the minus
+// token.
 terminal MinusOp: "-";
 
-MulExpr returns Expr: left=UnaryExpr (op=MulExprOp rest=UnaryExpr)*;
+MulExpr
+    returns Expr {makeBinaryOp(left :: rest, op)}
+    : left=UnaryExpr (op=MulExprOp rest=UnaryExpr)*;
 terminal MulExprOp: "*" | "/" | "%";
 
 option UnaryExpr returns Expr: 
@@ -67,8 +75,12 @@ option UnaryExpr returns Expr:
     | NotExpr 
     | SelectExpr 
     | ApplyExpr;
-NegExpr: MinusOp expr=PrimaryExpr;
-NotExpr: "not" expr=PrimaryExpr;
+NegExpr
+    returns Expr {Unary(UnaryOp.Neg, expr)}
+    : MinusOp expr=PrimaryExpr;
+NotExpr
+    returns Expr {Unary(UnaryOp.Not, expr)}
+    : "not" expr=PrimaryExpr;
 ApplyExpr: fun=PrimaryExpr (params=PrimaryExpr)*;
 SelectExpr: "#" sel=Num tuple=PrimaryExpr;
 
@@ -78,16 +90,26 @@ option PrimaryExpr returns Expr:
     | TupleLiteral
     | ListLiteral
     ;
-TupleLiteral:
-    "(" ")"
+TupleLiteral
+    returns Expr {
+        // Expression "(foo)" is actually not a tuple but parenthesised
+        // expression.
+        if (first ne null && rest.isEmpty)
+            first
+        else
+            TupleLiteral(first, rest)
+    }
+    : "(" ")"
     | "(" first=Expr ("," rest=Expr)* ")";
-ListLiteral: 
-    "[" "]" 
+ListLiteral
+    {def items = if (first eq null) Nil else first :: rest}
+    : "[" "]" 
     | "[" first=Expr ("," rest=Expr)+ "]";
 
-terminal Str: '"' ~('"')* '"';
 terminal Id: ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')*;
-terminal Num: ('0'..'9')+;
+terminal Num
+    {def value = text.toInt}
+    : ('0'..'9')+;
 fragment MlComment: '/*' (~'*' | '*' ~'/')* '*/';
 fragment SlComment: '//' ~('\n'|'\r')*;
 hidden terminal Ws: (' '|'\t'|'\r'|'\n'|MlComment|SlComment)+;
