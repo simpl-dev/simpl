@@ -83,7 +83,9 @@ class Generator {
 
         val gen = new Gen2(getPos)
         gen.grammargen(gtree)
+        writeFile(gen.grammarName + ".scala", gen.getTreeSource)
 
+        
 //        val gen = new GrammarGen(getPos)
 //        gen.grammargen(gtree)
 //        val grammarFile = gen.getGrammarName + ".g"

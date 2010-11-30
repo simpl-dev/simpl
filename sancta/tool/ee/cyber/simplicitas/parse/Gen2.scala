@@ -317,8 +317,14 @@ class RClass(val name: String, val classType: String) {
     val params = new ArrayBuffer[RCParam]
 
     override def toString =
-        classType + " " + name + "(" + params.mkString(", ") + ")" +
+        classType + " " + name +
+            (if (hasParamList)
+                "(" + params.mkString(", ") + ")"
+            else 
+                "") +
         (if (extend.isEmpty) "" else " extends " + extend.mkString(" with "))
+
+    private def hasParamList = classType != "trait"
 }
 
 class RCParam(val name: String, val pType: String) {
@@ -338,10 +344,14 @@ class Gen2(getPos: (Any) => List[Int]) {
     }
 
     import Symbols._
+    
+    var grammarName: String = null
+    var grammarPackage: String = null
 
     def grammargen(tree: Any) {
         tree match {
             case ("grammar" :: nameParts) :: rest =>
+                matchGrammarName(nameParts, tree)
                 rest.foreach(addRule)
         }
 
@@ -408,5 +418,38 @@ class Gen2(getPos: (Any) => List[Int]) {
                 }
             }
         }
+    }
+
+    /** Parses the full name of the grammar. Fills grammarName and
+      * grammarPackage variables. */
+    def matchGrammarName(nameParts: List[Any], tree: Any) {
+        nameParts.reverse match {
+            case (name: String) :: "." :: pname =>
+                grammarName = name
+                grammarPackage = (pname.reverse foldLeft "")(_+_)
+            case List(name: String) => 
+                grammarName = name
+            case _ =>
+                println("no grammar name")
+//                error(tree, "no grammar name")
+        }
+    }
+
+    def getTreeSource = {
+        val ret = new StringBuilder()
+                val treeSrc = new StringBuilder()
+
+        ret append ("package " + grammarPackage + ";\n\n" +
+                    "import ee.cyber.simplicitas." +
+                        "{CommonNode, CommonToken, TerminalNode, LiteralNode}\n" +
+                    "import ee.cyber.simplicitas.parse." +
+                        "{ErrorHandler}\n\n")
+
+        for (c <- classes.values) {
+            ret.append(c)
+            ret.append("\n")
+        }
+
+        ret.toString
     }
 }
