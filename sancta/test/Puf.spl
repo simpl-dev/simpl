@@ -2,16 +2,21 @@ grammar puf.spl.Puf;
 
 // options (backtrack=true;)
 
-Program: Include? decls=Rdecl+;
+Program: Include? decls=FunDecl+;
 
 Include: "#" "include" file=Id ".puf"; 
 
-option Decl: Rdecl | Tdecl;
-Rdecl: lhs=Flhs "=" expr=Expr ";";
-Tdecl: lhs=Tlhs "=" expr=Expr ";";
+option Decl {
+    def left: DeclLeft
+    def expr: Expr
+    // TODO: unapply for pattern matching.
+}: TupleDecl | FunDecl;
 
-Flhs: Id+;
-Tlhs: "(" h=Id ("," t=Id)* ")";
+TupleDecl: left=TupleLeft "=" expr=Expr ";";
+FunDecl: left=FunLeft "=" expr=Expr ";";
+option DeclLeft: FunLeft | TupleLeft;
+FunLeft returns DeclLeft: Id+;
+TupleLeft returns DeclLeft: "(" h=Id ("," t=Id)* ")";
 
 option Expr: 
 	CaseExpr 
@@ -24,15 +29,22 @@ option Expr:
 CaseExpr: "case" expr=Expr "of" nilAlt=NilAlt ";" consAlt=ConsAlt;
 NilAlt: "[" "]" "->" expr=Expr;
 ConsAlt: head=Id ":" tail=Id "->" expr=Expr;
-LetrecExpr: "letrec" decl=Rdecl+ "in" Expr;
+LetrecExpr: "letrec" decl=FunDecl+ "in" Expr;
 LetExpr: "let" decl=Decl+ "in" Expr;
 FunExpr: "fn" params=Id+ "->" Expr;
 IfExpr: "if" cond=Expr "then" ifThen=Expr "else" ifElse=Expr;
 
-OrExpr: left=AndExpr ("||" rest=AndExpr)*;
-AndExpr returns Expr: left=EqExpr ("&&" rest=EqExpr)*;
+OrExpr returns {makeBinaryOps(BinaryOp.Or, left :: rest)}:
+    left=AndExpr ("||" rest=AndExpr)*;
+AndExpr returns Expr {makeBinaryOps(BinaryOp.And, left :: rest)}:
+    left=EqExpr ("&&" rest=EqExpr)*;
 
-EqExpr returns Expr: left=CompareExpr (op=EqOp right=CompareExpr)?;
+EqExpr returns Expr {
+    if (right eq null)
+        left
+    else
+        makeBinaryOp(op.text, left, right)
+    }: left=CompareExpr (op=EqOp right=CompareExpr)?;
 terminal EqOp: "==" | "/=";
 
 CompareExpr returns Expr: left=ConsExpr (op=CompareOp right=ConsExpr)?;
