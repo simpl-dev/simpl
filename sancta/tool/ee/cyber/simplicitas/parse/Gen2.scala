@@ -246,8 +246,6 @@ class NormalRule(pName: String, pTree: List[Any], symbols: STable)
         val param = new RParam(varName, calledRuleName, currentBranch, isList)
 
         checkParamNameConflicts(param)
-
-        params += param
     }
     
     // Check if name of the node conflicts with some other name in
@@ -270,9 +268,12 @@ class NormalRule(pName: String, pTree: List[Any], symbols: STable)
                     throw new Exception("token type conflict: " + varName +
                           " was " + other.rule + ", but redefined as " +
                           np.rule)
+                } else {
+                    // The compatible parameter already exists, do nothing.
+                    ()
                 }
             case _ =>
-                ()
+                params += np
         }
     }
 
@@ -388,7 +389,7 @@ class Gen2(getPos: (Any) => List[Int]) {
         case ":" :: (name: String) :: rest =>
             rules(name) = new NormalRule(name, rest, Symbols)
         case _ =>
-            println("Invalid rule: " + rule)
+            throw new Exception("Invalid rule: " + rule)
     }
 
     /** Cleans up the extends declarations:
@@ -430,7 +431,7 @@ class Gen2(getPos: (Any) => List[Int]) {
             case List(name: String) => 
                 grammarName = name
             case _ =>
-                println("no grammar name")
+                throw new Exception("no grammar name")
 //                error(tree, "no grammar name")
         }
     }
