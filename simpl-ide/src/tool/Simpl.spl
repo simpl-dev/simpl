@@ -51,11 +51,13 @@ FragmentDef: 'fragment' name=Id ':' pattern=Pattern ';';
 
 /** Defines an option rule. Option rule defines base class for all the
     alternatives mentioned in the rule. */
-OptionDef: 'option' name=Id body=Code? ':'
+OptionDef: 'option' name=Id body=Code? returns=ReturnType? ':'
     alts=RuleRef ('|' alts2=RuleRef)* ';';
 
 /** Defines non-terminal rule. */
-NonTerminalDef: name=Id body=Code? ':' alt=AltList ';';
+NonTerminalDef: name=Id body=Code? returns=ReturnType? ':' alt=AltList ';';
+
+ReturnType: 'returns' retType=DottedId? body=Code?;
 
 /** List of alternatives, separated by pipe character. */
 AltList: lst=MatchList ('|' lst2=MatchList)*;
