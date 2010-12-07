@@ -335,7 +335,7 @@ class RClass(val name: String, val classType: String, body: String) {
             "extends " + extend.mkString(" with ")
 
     private def bodyCode(buf: StringBuilder) {
-        buf.append("{\n")
+        buf.append(" {\n")
         if (hasParamList) {
             buf.append("    def childrenNames = Array(")
             buf.append(params.map("\"" + _.name + "\"").mkString(", "));
@@ -343,7 +343,7 @@ class RClass(val name: String, val classType: String, body: String) {
         }
         if (body ne null) {
             // Strip the {} marks from beginning and the end.
-            buf.append(body.substring(1, body.length - 2))
+            buf.append(body.substring(1, body.length - 1))
         }
         buf.append("}")
     }
