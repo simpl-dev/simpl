@@ -90,12 +90,12 @@ abstract class Rule(val name: String, var tree: List[Any],
         if (returnType ne null)
             actions.addBinding(name, addExtend(returnType))
  
-            // Rule: if rule returns type that does not match any rule,
+        // Rule: if rule returns type that does not match any rule,
         // then create new trait and make rule extend this trait.
         if (returnType ne null) {
             if (!rules.contains(returnType) &&
                     !classes.contains(returnType)) {
-                classes(returnType) = new RClass(returnType, "trait")
+                classes(returnType) = new RClass(returnType, "trait", body)
             }
             classes(name).extend += returnType
         }
@@ -115,8 +115,10 @@ class TerminalRule(pName: String, hidden: Boolean, pTree: List[Any],
 
     def collectParams() {}
     override def generateClasses() {
-        // TODO: make the class extend from TerminalNode
-        classes(name) = new RClass(name, "case class")
+        val newClass = new RClass(name, "case class", body)
+        newClass.extend += "TerminalNode"
+        newClass.params += new RCParam("text", "String")
+        classes(name) = newClass
 
         super.generateClasses()
     }
@@ -136,7 +138,7 @@ class OptionRule(pName: String, pTree: List[Any], symbols: STable)
     }
 
     override def generateClasses() {
-        classes(name) = new RClass(name, "trait")
+        classes(name) = new RClass(name, "trait", body)
         for (opt <- tree) {
             actions.addBinding(opt.toString, addExtend(name))
 
@@ -279,7 +281,7 @@ class NormalRule(pName: String, pTree: List[Any], symbols: STable)
 
     override def generateClasses() {
         println("generateClasses(" + name + ")")
-        val cl = new RClass(name, "case class")
+        val cl = new RClass(name, "case class", body)
         classes(name) = cl
 
         for (p <- params) {
@@ -313,18 +315,46 @@ class RParam(val name: String, val rule: String, val branch: BranchIdentifier,
         (if (isList) ", LIST " else " ") + branch
 }
 
-class RClass(val name: String, val classType: String) {
+class RClass(val name: String, val classType: String, body: String) {
     val extend = new collection.mutable.HashSet[String]
     val params = new ArrayBuffer[RCParam]
 
     override def toString =
-        classType + " " + name +
-            (if (hasParamList)
-                "(" + params.mkString(", ") + ")"
-            else 
-                "") +
-        (if (extend.isEmpty) "" else " extends " + extend.mkString(" with "))
+        classType + " " + name + paramsCode + " " + extendsCode
 
+    private def paramsCode = 
+        if (hasParamList)
+            "(" + params.mkString(", ") + ")"
+        else 
+            ""
+
+    private def extendsCode =
+        if (extend.isEmpty)
+            "extends CommonNode"
+        else
+            "extends " + extend.mkString(" with ")
+
+    private def bodyCode(buf: StringBuilder) {
+        buf.append("{\n")
+        if (hasParamList) {
+            buf.append("    def childrenNames = Array(")
+            buf.append(params.map("\"" + _.name + "\"").mkString(", "));
+            buf.append(");\n")
+        }
+        if (body ne null) {
+            // Strip the {} marks from beginning and the end.
+            buf.append(body.substring(1, body.length - 2))
+        }
+        buf.append("}")
+    }
+            
+    def generate(buf: StringBuilder) {
+        buf.append(toString)
+        
+        bodyCode(buf)
+        buf.append("\n")
+    }
+        
     private def hasParamList = classType != "trait"
 }
 
@@ -402,7 +432,12 @@ class Gen2(getPos: (Any) => List[Int]) {
 
         def reachableSet(items: collection.mutable.Set[String]):
                 collection.mutable.Set[String] = {
-            val newItems = items.flatMap(classes(_).extend)
+            val newItems = items.flatMap(
+                    (name: String) =>
+                        if (classes.contains(name))
+                            classes(name).extend
+                        else
+                            Nil)
 
             if (newItems.forall(items.contains(_)))  // No new classes
                 items
@@ -447,8 +482,7 @@ class Gen2(getPos: (Any) => List[Int]) {
                         "{ErrorHandler}\n\n")
 
         for (c <- classes.values) {
-            ret.append(c)
-            ret.append("\n")
+            c.generate(ret)
         }
 
         ret.toString
