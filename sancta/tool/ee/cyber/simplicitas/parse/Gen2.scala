@@ -347,14 +347,14 @@ class RClass(val name: String, val classType: String, body: String) {
         }
         buf.append("}")
     }
-            
+
     def generate(buf: StringBuilder) {
         buf.append(toString)
-        
+
         bodyCode(buf)
         buf.append("\n")
     }
-        
+
     private def hasParamList = classType != "trait"
 }
 
