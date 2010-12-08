@@ -104,6 +104,8 @@ abstract class Rule(val name: String, var tree: List[Any], symbols: STable) {
             classes(name).extend += returnType
         }
     }
+
+    def generateGrammar(buf: StringBuilder)
 }
 
 class FragmentRule(pName: String, pTree: List[Any], symbols: STable)
@@ -111,6 +113,10 @@ class FragmentRule(pName: String, pTree: List[Any], symbols: STable)
     def collectParams() {}
 
     override def generateClasses() = super.generateClasses()
+
+    def generateGrammar(buf: StringBuilder) {
+        buf.append("fragment " + name + ": XXX;\n")
+    }
 }
 
 class TerminalRule(pName: String, hidden: Boolean, pTree: List[Any],
@@ -131,6 +137,10 @@ class TerminalRule(pName: String, hidden: Boolean, pTree: List[Any],
 
         super.generateClasses()
     }
+
+    def generateGrammar(buf: StringBuilder) {
+        buf.append("terminal " + name + ": XXX;\n")
+    }
 }
 
 class LiteralRule(pName: String, text: String, symbols: STable)
@@ -140,6 +150,10 @@ class LiteralRule(pName: String, text: String, symbols: STable)
     def collectParams() {}
     // Literal rules do not generate any classes.
     override def generateClasses() {}
+
+    def generateGrammar(buf: StringBuilder) {
+        buf.append("literal " + name + ": XXX;\n")
+    }
 }
 
 abstract class NonterminalRule(pName: String, pTree: List[Any], symbols: STable)
@@ -171,6 +185,10 @@ class OptionRule(pName: String, pTree: List[Any], symbols: STable)
         }
 
         super.generateClasses()
+    }
+
+    def generateGrammar(buf: StringBuilder) {
+        buf.append("option " + name + ": XXX;\n")
     }
 }
 
@@ -316,5 +334,9 @@ class NormalRule(pName: String, pTree: List[Any], symbols: STable)
         }
 
         super.generateClasses()
+    }
+
+    def generateGrammar(buf: StringBuilder) {
+        buf.append(name + ": XXX;\n")
     }
 }

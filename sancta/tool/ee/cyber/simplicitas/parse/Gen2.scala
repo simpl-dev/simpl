@@ -39,6 +39,8 @@ class Gen2(getPos: (Any) => List[Int]) {
     /** Grammar-level options that are passed to ANTLR. */
     private var grammarOptions = ""
 
+    val error = GrammarUtils.error(getPos)_
+
     def grammargen(tree: Any) {
         tree match {
             case ("grammar" :: nameParts) :: rest =>
@@ -63,11 +65,6 @@ class Gen2(getPos: (Any) => List[Int]) {
         }
 
         cleanupExtends()
-
-        rules.foreach(println)
-
-        println("Classes: \n" + classes.values.mkString("\n"))
-        println("Keywords: " + keywords)
     }
 
     /** Adds rule to symbol table. */
@@ -83,7 +80,7 @@ class Gen2(getPos: (Any) => List[Int]) {
         case ":" :: (name: String) :: rest =>
             rules(name) = new NormalRule(name, rest, Symbols)
         case _ =>
-            throw new Exception("Invalid rule: " + rule)
+            error(rule, "Malformed rule")
     }
 
     /** Cleans up the extends declarations:
@@ -130,8 +127,7 @@ class Gen2(getPos: (Any) => List[Int]) {
             case List(name: String) => 
                 grammarName = name
             case _ =>
-                throw new Exception("no grammar name")
-//                error(tree, "no grammar name")
+                error(tree, "No grammar name")
         }
     }
 
@@ -169,6 +165,23 @@ class Gen2(getPos: (Any) => List[Int]) {
         val ret = new StringBuilder()
 
         ret.append(grammarHeader)
+
+        for (r <- rules.values if r.isInstanceOf[NonterminalRule]) {
+            r.generateGrammar(ret)
+        }
+
+        // Artificially generated keyword rules precede the terminal rules.
+        // Otherwise they can be shadowed by the regular expressions in
+        // the terminal rules.
+        for (r <- rules.values if r.isInstanceOf[LiteralRule]) {
+            r.generateGrammar(ret)
+        }
+
+        for (r <- rules.values if 
+                r.isInstanceOf[TerminalRule] || r.isInstanceOf[FragmentRule]) {
+            r.generateGrammar(ret)
+            ret.append("\n")
+        }
 
         ret.toString
     }
