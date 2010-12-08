@@ -119,10 +119,14 @@ class TerminalRule(pName: String, hidden: Boolean, pTree: List[Any],
 
     def collectParams() {}
     override def generateClasses() {
-        val newClass = new RClass(name, "case class", body)
-        newClass.extend += "TerminalNode"
-        newClass.params += new RCParam("text", "String")
-        classes(name) = newClass
+        // Hidden rules do not contribute to the AST and therefore
+        // should generate no classes.
+        if (!hidden) {
+            val newClass = new RClass(name, "case class", body)
+            newClass.extend += "TerminalNode"
+            newClass.params += new RCParam("text", "String")
+            classes(name) = newClass
+        }
 
         super.generateClasses()
     }
