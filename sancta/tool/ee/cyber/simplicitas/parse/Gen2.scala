@@ -335,6 +335,11 @@ class RClass(val name: String, val classType: String, body: String) {
             "extends " + extend.mkString(" with ")
 
     private def bodyCode(buf: StringBuilder) {
+        if (!hasParamList && (body eq null)) {
+            // Avoid empty brackets.
+            return
+        }
+
         buf.append(" {\n")
         if (hasParamList) {
             buf.append("    def childrenNames = Array(")
