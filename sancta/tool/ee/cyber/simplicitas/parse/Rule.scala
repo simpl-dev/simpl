@@ -258,7 +258,7 @@ class NormalRule(pName: String, pTree: List[Any], symbols: STable)
 
         checkParamNameConflicts(param)
     }
-    
+
     def addLiteralRule(pattern: String) {
         if (keywords.contains(pattern)) {
             return
