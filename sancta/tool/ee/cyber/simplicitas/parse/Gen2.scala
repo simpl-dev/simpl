@@ -30,14 +30,21 @@ class Gen2(getPos: (Any) => List[Int]) {
 
     import Symbols._
     
+    /** Name of the grammar. */
     var grammarName: String = null
+
+    /** Java package for grammar */
     var grammarPackage: String = null
+
+    /** Grammar-level options that are passed to ANTLR. */
+    private var grammarOptions = ""
 
     def grammargen(tree: Any) {
         tree match {
             case ("grammar" :: nameParts) :: rest =>
                 matchGrammarName(nameParts, tree)
-                rest.foreach(addRule)
+                val ruleList = matchGrammarOptions(rest)
+                ruleList.foreach(addRule)
         }
 
         // toSet is necessary because in the analysis step some additional
@@ -128,15 +135,21 @@ class Gen2(getPos: (Any) => List[Int]) {
         }
     }
 
+    /** Parses grammar-level "options(foo = bar;)" declaration. */
+    def matchGrammarOptions(tree: Any) = tree match {
+        case ("options" :: opts) :: rules =>
+            for (List(name, value) <- opts) {
+                grammarOptions += " " + name + "=" + value + ";"
+            }
+            rules
+        case rules: List[Any] => 
+            rules
+    }
+
     def getTreeSource = {
         val ret = new StringBuilder()
-                val treeSrc = new StringBuilder()
 
-        ret append ("package " + grammarPackage + ";\n\n" +
-                    "import ee.cyber.simplicitas." +
-                        "{CommonNode, CommonToken, TerminalNode, LiteralNode}\n" +
-                    "import ee.cyber.simplicitas.parse." +
-                        "{ErrorHandler}\n\n")
+        ret.append(treeHeader)
 
         for (c <- classes.values) {
             c.generate(ret)
@@ -144,4 +157,57 @@ class Gen2(getPos: (Any) => List[Int]) {
 
         ret.toString
     }
+
+    def treeHeader =
+        "package " + grammarPackage + ";\n\n" +
+        "import ee.cyber.simplicitas." +
+            "{CommonNode, CommonToken, TerminalNode, LiteralNode}\n" +
+        "import ee.cyber.simplicitas.parse." +
+            "{ErrorHandler}\n\n"
+
+    def getGrammarSource = {
+        val ret = new StringBuilder()
+
+        ret.append(grammarHeader)
+
+        ret.toString
+    }
+
+    def grammarHeader =
+        "grammar " + grammarName + ";\n" +
+        "options {\n" +
+            "superClass=ParserBase;\n" +
+            grammarOptions + "\n" +
+		"}\n\n" +
+        "@header {\n" +
+            "package " + grammarPackage + ";\n" +
+            "import java.util.ArrayList;\n" +
+            "import ee.cyber.simplicitas.CommonNode;\n" +
+            "import ee.cyber.simplicitas.LiteralNode;\n" +
+            "import ee.cyber.simplicitas.parse.ParserBase;\n" +
+            "import ee.cyber.simplicitas.SourceLocation;\n" +
+            "import ee.cyber.simplicitas.parse.TokenLocation;\n" +
+        "}\n" +
+        "@lexer::header { package " + grammarPackage + """; }
+@lexer::members {
+    private ee.cyber.simplicitas.parse.ErrorHandler handler = null;
+    public void reportError(RecognitionException ex) {
+        handler.reportError(ex);
+        super.reportError(ex);
+    }
+
+    public void emitErrorMessage(String s) {
+        handler.emitErrorMessage(s);
+    }
+
+    public void setErrorHandler(ee.cyber.simplicitas.parse.ErrorHandler handler) {
+        this.handler = handler;
+    }
+
+    public void displayRecognitionError(String[] tokenNames,
+            RecognitionException e) {
+        emitErrorMessage(getErrorMessage(e, tokenNames));
+    }
+}
+    """
 }
