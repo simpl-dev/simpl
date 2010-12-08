@@ -118,6 +118,7 @@ class TerminalRule(pName: String, hidden: Boolean, pTree: List[Any],
     import symbols._
 
     def collectParams() {}
+
     override def generateClasses() {
         // Hidden rules do not contribute to the AST and therefore
         // should generate no classes.
@@ -130,6 +131,15 @@ class TerminalRule(pName: String, hidden: Boolean, pTree: List[Any],
 
         super.generateClasses()
     }
+}
+
+class LiteralRule(pName: String, text: String, symbols: STable)
+        extends Rule(pName, List(List("NODE", stripQuotes(text))), symbols) {
+    returnType = "LiteralNode"
+
+    def collectParams() {}
+    // Literal rules do not generate any classes.
+    override def generateClasses() {}
 }
 
 abstract class NonterminalRule(pName: String, pTree: List[Any], symbols: STable)
@@ -230,6 +240,7 @@ class NormalRule(pName: String, pTree: List[Any], symbols: STable)
 
         // Unnamed call to literal "foo"
         if ((name eq null) && pattern.startsWith("'")) {
+            addLiteralRule(pattern)
             return
         }
 
@@ -237,18 +248,8 @@ class NormalRule(pName: String, pTree: List[Any], symbols: STable)
 
         // handle calls to named literals: foo="bar"
         if (pattern.startsWith("'")) {
-            if (!keywords.contains(pattern)) {
-                // TODO: try to make better variable name.
-                calledRuleName = newId
-                // TODO: somehow tie this in with LiteralNode class
-                // so that there is no need to generate separate class
-                // for every literal call.
-                rules(calledRuleName) = new TerminalRule(calledRuleName, false,
-                        List(pattern), symbols)
-                keywords(pattern) = calledRuleName
-            } else {
-                calledRuleName = keywords(pattern)
-            }
+            addLiteralRule(pattern)
+            calledRuleName = keywords(pattern)
         }
 
         val varName = if (name eq null) uncapitalize(pattern) else name
@@ -258,6 +259,17 @@ class NormalRule(pName: String, pTree: List[Any], symbols: STable)
         checkParamNameConflicts(param)
     }
     
+    def addLiteralRule(pattern: String) {
+        if (keywords.contains(pattern)) {
+            return
+        }
+
+        // TODO: try to make better variable name.
+        val ruleName = newId
+        rules(ruleName) = new LiteralRule(ruleName, pattern, symbols)
+        keywords(pattern) = ruleName
+    }
+
     // Check if name of the node conflicts with some other name in
     // the same branch. For example:
     // x=foo y=bar x=baz is a conflict.

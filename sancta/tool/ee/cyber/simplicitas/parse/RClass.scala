@@ -2,6 +2,8 @@ package ee.cyber.simplicitas.parse
 
 import scala.collection.mutable.ArrayBuffer
 
+import GrammarUtils._
+
 class RClass(val name: String, val classType: String, body: String) {
     val extend = new collection.mutable.HashSet[String]
     val params = new ArrayBuffer[RCParam]
@@ -35,7 +37,7 @@ class RClass(val name: String, val classType: String, body: String) {
         }
         if (body ne null) {
             // Strip the {} marks from beginning and the end.
-            buf.append(body.substring(1, body.length - 1))
+            buf.append(stripQuotes(body))
         }
         buf.append("}")
     }

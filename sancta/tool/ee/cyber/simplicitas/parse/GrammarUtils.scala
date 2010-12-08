@@ -90,4 +90,6 @@ object GrammarUtils {
             (Character toLowerCase (s charAt 0)) + (s substring 1)
 
     def join(i: Iterable[Any]) = i.mkString(", ")
+
+    def stripQuotes(s: String) = s.substring(1, s.length - 1)
 }

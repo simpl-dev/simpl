@@ -40,10 +40,13 @@ class Gen2(getPos: (Any) => List[Int]) {
                 rest.foreach(addRule)
         }
 
-        rules.values.foreach(_.analyze())
+        // toSet is necessary because in the analysis step some additional
+        // rules can be generated.
+        rules.values.toSet[Rule].foreach(_.analyze())
 
         // Do the class generation and type inference.
-        for (r <- rules.values) {
+        for (r: Rule <- rules.values.toSet) {
+            println("generateClasses(" + r.name + ")")
             r.generateClasses()
         }
 
