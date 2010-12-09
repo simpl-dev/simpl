@@ -168,6 +168,7 @@ class Gen2(getPos: (Any) => List[Int]) {
 
         for (r <- rules.values if r.isInstanceOf[NonterminalRule]) {
             r.generateGrammar(ret)
+            ret.append("\n")
         }
 
         // Artificially generated keyword rules precede the terminal rules.
@@ -175,6 +176,7 @@ class Gen2(getPos: (Any) => List[Int]) {
         // the terminal rules.
         for (r <- rules.values if r.isInstanceOf[LiteralRule]) {
             r.generateGrammar(ret)
+            ret.append("\n")
         }
 
         for (r <- rules.values if 

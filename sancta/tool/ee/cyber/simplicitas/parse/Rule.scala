@@ -282,10 +282,32 @@ class NormalRule(pName: String, pTree: List[Any], symbols: STable)
             return
         }
 
-        // TODO: try to make better variable name.
-        val ruleName = newId
+        val ruleName = makeKeywordName(pattern)
         rules(ruleName) = new LiteralRule(ruleName, pattern, symbols)
         keywords(pattern) = ruleName
+    }
+    
+    /** Turns string 'foo' into Foo. */
+    def makeKeywordName(s: String) = {
+        val buf = new StringBuilder()
+        for (i <- 1 to s.length - 1) {
+            val ch = s.charAt(i)
+            if (Character.isJavaIdentifierPart(ch))
+                buf.append(if (!buf.isEmpty) ch
+                        else Character.toUpperCase(ch))
+        }
+        var id = buf.toString
+
+        // Make it a valid Java identifier
+        if (id != "" && !(Character isJavaIdentifierStart (id charAt 0)))
+            id = "X_" + id
+
+        // If it conflicts with existing rules, just create new variable.
+        if (id == "" || (rules.contains(id))) {
+            id = newId
+        }
+
+        id
     }
 
     // Check if name of the node conflicts with some other name in
