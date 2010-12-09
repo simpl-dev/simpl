@@ -11,9 +11,12 @@ import GrammarUtils._
   * @param isList Whether the parameter is used in + or * context.
   */
 class RParam(val name: String, val rule: String, val branch: BranchIdentifier,
-        val isList: Boolean) {
+        val isList: Boolean, symbols: STable) {
     /** The actual Scala type of the parameter. */
     var paramType: String = null
+
+    /** The name of the parameter in the ANTLR grammar rule. */
+    var antlrName: String = symbols.newId
 
     override def toString = name + ": " + 
         (if (paramType eq null) rule else paramType + "(" + rule + ")") +
@@ -107,7 +110,32 @@ abstract class Rule(val name: String, var tree: List[Any], symbols: STable) {
         }
     }
 
-    def generateGrammar(buf: StringBuilder)
+    def generateGrammar(buf: StringBuilder) {
+        val arrayBuf = new ArrayBuffer[String]
+        generateGrammar(arrayBuf)
+        for (s <- arrayBuf) {
+            buf.append(s)
+        }
+    }
+
+    def generateGrammar(implicit buf: ArrayBuffer[String]) {
+        buf += antlrName + ruleReturns
+        ruleInit
+        ruleAfter
+        buf += ":\n    "
+        ruleBody
+        buf += ";\n"
+    }
+
+    def antlrName = name
+    def ruleReturns = ""
+
+    def ruleInit(implicit buf: ArrayBuffer[String]) {}
+    def ruleAfter(implicit buf: ArrayBuffer[String]) {}
+    def ruleBody(implicit buf: ArrayBuffer[String]) {}
+
+    // TODO: some decent implementation.
+    def paramValue(param: RParam) = param.antlrName
 }
 
 class FragmentRule(pName: String, pTree: List[Any], symbols: STable)
@@ -115,10 +143,6 @@ class FragmentRule(pName: String, pTree: List[Any], symbols: STable)
     def collectParams() {}
 
     override def generateClasses() = super.generateClasses()
-
-    def generateGrammar(buf: StringBuilder) {
-        buf.append("fragment " + name + ": XXX;\n")
-    }
 }
 
 class TerminalRule(pName: String, hidden: Boolean, pTree: List[Any],
@@ -139,10 +163,6 @@ class TerminalRule(pName: String, hidden: Boolean, pTree: List[Any],
 
         super.generateClasses()
     }
-
-    def generateGrammar(buf: StringBuilder) {
-        buf.append("terminal " + name + ": XXX;\n")
-    }
 }
 
 class LiteralRule(pName: String, text: String, symbols: STable)
@@ -152,14 +172,11 @@ class LiteralRule(pName: String, text: String, symbols: STable)
     def collectParams() {}
     // Literal rules do not generate any classes.
     override def generateClasses() {}
-
-    def generateGrammar(buf: StringBuilder) {
-        buf.append("literal " + name + ": XXX;\n")
-    }
 }
 
 abstract class NonterminalRule(pName: String, pTree: List[Any], symbols: STable)
         extends Rule(pName, pTree, symbols) {
+    override def ruleReturns =  " returns [" + actualReturnType  + " r]"
 }
 
 class OptionRule(pName: String, pTree: List[Any], symbols: STable)
@@ -193,8 +210,23 @@ class OptionRule(pName: String, pTree: List[Any], symbols: STable)
         super.generateClasses()
     }
 
-    def generateGrammar(buf: StringBuilder) {
-        buf.append("option " + name + ": XXX;\n")
+    override def ruleBody(implicit buf: ArrayBuffer[String]) {
+        var first = true
+
+        for (opt <- tree) {
+            // Assuming here that option rule contains just list of options.
+            val option = opt.toString
+
+            if (!first) {
+                buf += "\n    | "
+            }
+
+            val param = new RParam("", option, null, false, symbols)
+            
+            buf += param.antlrName + "=" + rules(option).antlrName + 
+                    "{$r=" + paramValue(param) + ";}"
+            first = false
+        }
     }
 }
 
@@ -278,7 +310,8 @@ class NormalRule(pName: String, pTree: List[Any], symbols: STable)
 
         val varName = if (name eq null) uncapitalize(pattern) else name
 
-        val param = new RParam(varName, calledRuleName, currentBranch, isList)
+        val param = new RParam(varName, calledRuleName, currentBranch, isList,
+                symbols)
 
         checkParamNameConflicts(param)
     }
@@ -362,9 +395,5 @@ class NormalRule(pName: String, pTree: List[Any], symbols: STable)
         }
 
         super.generateClasses()
-    }
-
-    def generateGrammar(buf: StringBuilder) {
-        buf.append(name + ": XXX;\n")
     }
 }

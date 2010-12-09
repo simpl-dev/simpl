@@ -200,7 +200,7 @@ class Gen2(pGetPos: (Any) => List[Int]) {
         "options {\n" +
             "superClass=ParserBase;\n" +
             grammarOptions + "\n" +
-		"}\n\n" +
+        "}\n\n" +
         "@header {\n" +
             "package " + grammarPackage + ";\n" +
             "import java.util.ArrayList;\n" +
@@ -231,5 +231,5 @@ class Gen2(pGetPos: (Any) => List[Int]) {
         emitErrorMessage(getErrorMessage(e, tokenNames));
     }
 }
-    """
+"""
 }
