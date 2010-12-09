@@ -39,6 +39,8 @@ abstract class Rule(val name: String, var tree: List[Any], symbols: STable) {
 
     var params = new ArrayBuffer[RParam]
 
+    val error = GrammarUtils.error(symbols.getPos)_
+
     import symbols._
 
     def actualReturnType = if (returnType ne null) returnType else name
@@ -173,6 +175,10 @@ class OptionRule(pName: String, pTree: List[Any], symbols: STable)
         classes(name) = new RClass(name, "trait", body)
         for (opt <- tree) {
             actions.addBinding(opt.toString, addExtend(name))
+
+            if (!rules.contains(opt.toString)) {
+                error(opt, "Reference to undefined rule " + opt)
+            }
 
             // If called rule has some weird return type then we
             // must extend this return type, otherwise the rule call

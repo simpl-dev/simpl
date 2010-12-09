@@ -13,10 +13,15 @@ trait STable {
     /** Map from kw contents to name of rule. */
     def keywords: collection.mutable.Map[String, String]
 
+    /** Returns position of the given node.
+      * Strictly does not belong to symbol table, but it is convenient to
+      * pass it around along with other global-ish information. */
+    def getPos: (Any) => List[Int]
+
     def newId: String
 }
 
-class Gen2(getPos: (Any) => List[Int]) {
+class Gen2(pGetPos: (Any) => List[Int]) {
     object Symbols extends STable {
         val rules = collection.mutable.Map[String, Rule]()
         val classes = collection.mutable.Map[String, RClass]()
@@ -24,6 +29,8 @@ class Gen2(getPos: (Any) => List[Int]) {
         val keywords = collection.mutable.Map[String, String]()
 
         private var idVal = 0
+
+        def getPos = pGetPos
 
         def newId = {idVal += 1; "Z" + idVal}
     }
@@ -39,7 +46,7 @@ class Gen2(getPos: (Any) => List[Int]) {
     /** Grammar-level options that are passed to ANTLR. */
     private var grammarOptions = ""
 
-    val error = GrammarUtils.error(getPos)_
+    val error = GrammarUtils.error(pGetPos)_
 
     def grammargen(tree: Any) {
         tree match {
