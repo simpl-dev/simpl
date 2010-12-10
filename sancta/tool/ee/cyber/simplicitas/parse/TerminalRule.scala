@@ -6,6 +6,7 @@ import GrammarUtils._
 
 abstract class TerminalFragment(pName: String, pTree: List[Any], symbols: STable)
         extends Rule(pName, pTree, symbols) {
+    override def antlrName = name.capitalize
     def collectParams() {}
 
     override def ruleBody(implicit buf: ArrayBuffer[String]) {
@@ -67,6 +68,7 @@ class LiteralRule(pName: String, text: String, symbols: STable)
                 symbols) {
     returnType = "LiteralNode"
 
+    override def antlrName = name.capitalize
     def collectParams() {}
     // Literal rules do not generate any classes.
     override def generateClasses() {}
