@@ -81,10 +81,10 @@ class NormalRule(pName: String, pTree: List[Any], symbols: STable)
 
     /** Finds and records all the rule parameters. */
     def collectParams() {
-        doOptionList(tree)
+        collectOptionList(tree)
     }
 
-    def doOptionList(lst: List[Any]) {
+    def collectOptionList(lst: List[Any]) {
         for ("NODE" :: matches <- lst) {
             for (m <- matches) {
                 m match {
@@ -115,7 +115,7 @@ class NormalRule(pName: String, pTree: List[Any], symbols: STable)
                 val oldBranch = currentBranch
 
                 currentBranch = currentBranch.extend
-                doOptionList(options)
+                collectOptionList(options)
 
                 currentBranch = oldBranch
         }
@@ -227,5 +227,9 @@ class NormalRule(pName: String, pTree: List[Any], symbols: STable)
         }
 
         super.generateClasses()
+    }
+
+    override def ruleBody(implicit buf: ArrayBuffer[String]) {
+        doOptionList((node: Any) => buf += node.toString, tree)
     }
 }
