@@ -50,8 +50,8 @@ token       : '('^ altList ')'! | (ID '='^)? ID | (ID '='^)? STR;
 //termParam   : ID ':' dottedId '=' CODE -> ^(ARG ID CODE dottedId);
 termAltList : termList ('|'! termList)*;
 termList    : termMatch+ -> ^(NODE termMatch+);
-termMatch   : (inv='~')? terminal modifier? CODE*
-                -> CODE* modifier? $inv? terminal;
+termMatch   : (inv='~')? terminal modifier?
+                -> ^(MATCH modifier? $inv? terminal);
 terminal    : '('^ termAltList ')'! | ID | STR '..'^ STR | STR | '.';
 
 fragment LETTER: 'a'..'z' | 'A'..'Z' | '_';

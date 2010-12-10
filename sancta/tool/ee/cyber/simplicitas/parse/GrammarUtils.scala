@@ -92,4 +92,38 @@ object GrammarUtils {
     def join(i: Iterable[Any]) = i.mkString(", ")
 
     def stripQuotes(s: String) = s.substring(1, s.length - 1)
+
+    // Helper functions for generating grammar code.
+
+    def doOptionList(fun: Any => Unit, lst: List[Any])
+            (implicit buf: ArrayBuffer[String]) {
+        var first = true
+
+        for ("NODE" :: matches <- lst) {
+            if (!first) {
+                buf += "\n    | "
+            }
+
+            for (m <- matches) {
+                m match {
+                    case List("MATCH", ruleCall) =>
+                        fun(ruleCall)
+                    case List("MATCH", "~", ruleCall) =>
+                        buf += "~"
+                        fun(ruleCall)
+                    case List("MATCH", modifier: String, ruleCall) =>
+                        fun(ruleCall)
+                        buf += modifier
+                    case List("MATCH", modifier: String, "~", ruleCall) =>
+                        buf += "~"
+                        fun(ruleCall)
+                        buf += modifier
+                    case _ =>
+                        println(m)
+                }
+            }
+
+            first = false
+        }
+    }
 }
