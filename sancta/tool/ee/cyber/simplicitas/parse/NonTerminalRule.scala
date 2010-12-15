@@ -229,6 +229,26 @@ class NormalRule(pName: String, pTree: List[Any], symbols: STable)
         super.generateClasses()
     }
 
+    override def ruleInit(implicit buf: ArrayBuffer[String]) {
+        buf += "\n@init {SourceLocation _start=null;"
+        buf += "int _end=-1;int _endLine=-1;int _endColumn=-1;"
+        for (p <- params if p.isList) {
+            buf += "ArrayList " + p.listVar + "=new ArrayList();"
+        }
+        buf += "}"
+    }
+
+    override def ruleAfter(implicit buf: ArrayBuffer[String]) {
+        buf += "\n@after {$r = new " + name + "("
+        buf += join(params.map(
+                p => if (p.isList)
+                    "scalaList(" + p.listVar + ")"
+                    else
+                        paramValue(p)
+                    ))
+        buf += ");$r.setLocation(_start,_end==-1?(_start==null?0:_start.endIndex()):_end,_endLine==-1?(_start==null?0:_start.endLine()):_endLine,_endColumn==-1?(_start==null?0:_start.endColumn()):_endColumn);}:"
+    }
+
     override def ruleBody(implicit buf: ArrayBuffer[String]) {
         doOptionList((node: Any) => buf += node.toString, tree)
     }

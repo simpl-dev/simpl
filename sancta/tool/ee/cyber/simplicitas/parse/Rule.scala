@@ -17,6 +17,7 @@ class RParam(val name: String, val rule: String, val branch: BranchIdentifier,
 
     /** The name of the parameter in the ANTLR grammar rule. */
     var antlrName: String = symbols.newId
+    val listVar: String = if (isList) symbols.newId else null
 
     override def toString = name + ": " + 
         (if (paramType eq null) rule else paramType + "(" + rule + ")") +
