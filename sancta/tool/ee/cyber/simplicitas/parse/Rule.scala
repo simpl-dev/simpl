@@ -136,5 +136,5 @@ abstract class Rule(val name: String, var tree: List[Any], symbols: STable) {
     def ruleBody(implicit buf: ArrayBuffer[String]) {}
 
     // TODO: some decent implementation.
-    def paramValue(param: RParam) = param.antlrName
+    def paramValue(param: RParam): String
 }

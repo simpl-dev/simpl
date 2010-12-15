@@ -35,6 +35,14 @@ abstract class TerminalFragment(pName: String, pTree: List[Any], symbols: STable
                 throw new IllegalArgumentException(node.toString)
         }
     }
+
+    def paramValue(param: RParam) = {
+        val varName = "$" + param.antlrName
+        val v = "(" + name + ")setTokenPos(new " + name +
+                "(" + varName + ".getText()" + ")," + varName + ")"
+
+        varName + "==null?null:" + v
+    }
 }
 
 
@@ -75,5 +83,13 @@ class LiteralRule(pName: String, text: String, symbols: STable)
 
     override def ruleBody(implicit buf: ArrayBuffer[String]) {
         buf += text
+    }
+
+    def paramValue(param: RParam) = {
+        val varName = "$" + param.antlrName
+        val v = "(" + name + ")setTokenPos(new " + name +
+                "(" + varName + ".getText()" + ")," + varName + ")"
+
+        varName + "==null?null:" + v
     }
 }

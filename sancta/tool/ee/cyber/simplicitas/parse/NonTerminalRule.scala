@@ -9,6 +9,8 @@ abstract class NonterminalRule(pName: String, pTree: List[Any], symbols: STable)
         extends Rule(pName, pTree, symbols) {
     override def antlrName = uncapitalize(name) + "_"
     override def ruleReturns =  " returns [" + actualReturnType  + " r]"
+
+    def paramValue(param: RParam) = "$" + param.antlrName + ".r" 
 }
 
 class OptionRule(pName: String, pTree: List[Any], symbols: STable)
