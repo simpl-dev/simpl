@@ -38,4 +38,4 @@ terminal STRING {var doh = 0}:
 '"' STR_BODY* '"' | '\'' STR_BODY* '\'';
 fragment ML_COMMENT: '/*' (~'*' | '*' ~'/')* '*/';
 fragment SL_COMMENT: '//' ~('\n'|'\r')*;
-terminal WS: (' '|'\t'|'\r'|'\n'|SL_COMMENT|ML_COMMENT)+ {skip();} ;
+terminal WS: (' '|'\t'|'\r'|'\n'|SL_COMMENT|ML_COMMENT)+ ;

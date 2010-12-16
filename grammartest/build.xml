@@ -1,7 +1,7 @@
 <!-- ex: se sts=4 sw=4 expandtab: -->
 <project name="example-bean" default="run-test" basedir=".">
     <property file="${basedir}/ant.properties"/>
-    <property name="simpl.version" value="1.0.1"/>
+    <property name="simpl.version" value="1.1.0"/>
     <property name="junit.version" value="4.8.1"/>
 
     <property name="target" value="${basedir}/target"/>
