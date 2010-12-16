@@ -137,4 +137,6 @@ abstract class Rule(val name: String, var tree: List[Any], symbols: STable) {
 
     // TODO: some decent implementation.
     def paramValue(param: RParam): String
+
+    def isTerminalRule: Boolean
 }

@@ -5,16 +5,17 @@ import scala.collection.mutable.ArrayBuffer
 import GrammarUtils._
 import Actions._
 
-abstract class NonterminalRule(pName: String, pTree: List[Any], symbols: STable)
+abstract class NonTerminalRule(pName: String, pTree: List[Any], symbols: STable)
         extends Rule(pName, pTree, symbols) {
     override def antlrName = uncapitalize(name) + "_"
     override def ruleReturns =  " returns [" + actualReturnType  + " r]"
 
-    def paramValue(param: RParam) = "$" + param.antlrName + ".r" 
+    def paramValue(param: RParam) = "$" + param.antlrName + ".r"
+    def isTerminalRule = false
 }
 
 class OptionRule(pName: String, pTree: List[Any], symbols: STable)
-        extends NonterminalRule(pName, pTree, symbols) {
+        extends NonTerminalRule(pName, pTree, symbols) {
     import symbols._
 
     /** Finds and records all the rule parameters. */
@@ -71,7 +72,7 @@ object Modifier extends Enumeration("?", "*", "+") {
 }
 
 class NormalRule(pName: String, pTree: List[Any], symbols: STable)
-        extends NonterminalRule(pName, pTree, symbols) {
+        extends NonTerminalRule(pName, pTree, symbols) {
     import symbols._
 
     /** Identifies current branch in the options. */
@@ -129,7 +130,7 @@ class NormalRule(pName: String, pTree: List[Any], symbols: STable)
                 currentBranch + ", list=" + isList)
 
         // Unnamed call to literal "foo"
-        if ((name eq null) && pattern.startsWith("'")) {
+        if ((name eq null) && isLiteralPattern(pattern)) {
             addLiteralRule(pattern)
             return
         }
@@ -142,9 +143,9 @@ class NormalRule(pName: String, pTree: List[Any], symbols: STable)
             calledRuleName = keywords(pattern)
         }
 
-        val varName = if (name eq null) uncapitalize(pattern) else name
+        val paramName = getParamName(name, pattern)
 
-        val param = new RParam(varName, calledRuleName, currentBranch, isList,
+        val param = new RParam(paramName, calledRuleName, currentBranch, isList,
                 symbols)
 
         checkParamNameConflicts(param)
@@ -248,10 +249,109 @@ class NormalRule(pName: String, pTree: List[Any], symbols: STable)
                     else
                         paramValue(p)
                     ))
-        buf += ");$r.setLocation(_start,_end==-1?(_start==null?0:_start.endIndex()):_end,_endLine==-1?(_start==null?0:_start.endLine()):_endLine,_endColumn==-1?(_start==null?0:_start.endColumn()):_endColumn);}:"
+        buf += ");$r.setLocation(_start,"
+        buf += "_end==-1?(_start==null?0:_start.endIndex()):_end,"
+        buf += "_endLine==-1?(_start==null?0:_start.endLine()):_endLine,"
+        buf += "_endColumn==-1?(_start==null?0:_start.endColumn()):_endColumn);}:"
     }
 
     override def ruleBody(implicit buf: ArrayBuffer[String]) {
-        doOptionList((node: Any) => buf += node.toString, tree)
+        doOptionList(generateRuleCall, tree)
     }
+
+    def generateRuleCall(node: Any)(implicit buf: ArrayBuffer[String]) {
+        def generate(name: String, pattern: String) {
+            val ruleName: String =
+                if (isLiteralPattern(pattern))
+                    keywords(pattern)
+                else
+                    pattern
+
+            buf += "\n    "
+                    
+            // Unnamed call to literal "foo"
+            if ((name eq null) && isLiteralPattern(pattern)) {
+                val varName = newId
+
+                buf += "("
+                buf += varName + "=" + ruleName
+                buf += " {"
+                endHook(varName, null)
+                buf += "})"
+
+                return
+            }
+    
+//            val patternVar = newId
+//    
+            val paramName = getParamName(name, pattern)
+            val param = getParamByName(paramName)
+
+            if (param.isList) {
+                buf += "(" + param.antlrName + "=" + rules(param.rule).antlrName + "{"
+
+                var iv = ""
+                if (rules(param.rule).isTerminalRule) {
+                    iv = newId
+                    buf += "CommonNode " + iv + "=" + paramValue(param) + ";"
+                } else {
+                    iv = "$" + param.antlrName + ".r"
+                }
+                buf += param.listVar + ".add(" + iv + ");if(_start==null)_start=" + iv
+    
+                buf += ";"
+                endHook(param.antlrName, param.rule)
+                buf += "})"
+            } else {
+                buf += "("
+                buf += param.antlrName + "=" + rules(param.rule).antlrName
+                buf += " {"
+                endHook(param.antlrName, param.rule)
+                buf += "})"
+            }
+        }
+
+        def endHook(varName: String, patternVar: String)
+                (implicit buf: ArrayBuffer[String]) = {
+            if (patternVar == null || rules(patternVar).isTerminalRule) {
+                buf += "if($" + varName + "!=null){" +
+                    "TokenLocation _tl = new TokenLocation(" + varName + "); " +
+                    "if (_start == null) _start = _tl; " +
+                    "if(_start.startIndex()<=_tl.endIndex()){_end=_tl.endIndex();" +
+                    "_endLine=_tl.endLine();_endColumn=_tl.endColumn();}}"
+            } else {
+                buf += "if (_start == null) _start = $" + varName + ".r; " +
+                    "if($" + varName + ".r!=null && _start.startIndex()<=$" + varName + ".r.endIndex())" +
+                    "{_end=$" + varName + ".r.endIndex();" +
+                    "_endLine=$" + varName + ".r.endLine();_endColumn=$" + varName + ".r.endColumn();}"
+            }
+        }
+
+        node match {
+            // Foo
+            case pattern: String =>
+                generate(null, pattern)
+            // foo=Bar
+            case List("=", name: String, pattern: String) =>
+                generate(name, pattern)
+            // (foo)
+            case "(" :: options =>
+                doOptionList(generateRuleCall, options)
+        }
+    }
+
+    private def isLiteralPattern(pattern: String) = pattern.startsWith("'")
+
+    private def getParamName(name: String, pattern: String) =
+        if (name eq null)
+            uncapitalize(pattern)
+        else
+            name
+
+    private def getParamByName(name: String) =
+        params.find(_.name == name) match {
+            case Some(ret) => ret
+            case None => throw new IllegalArgumentException(
+                    "Cannot find rule parameter " + name)
+        }
 }

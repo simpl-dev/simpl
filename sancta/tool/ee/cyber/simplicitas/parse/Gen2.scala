@@ -173,7 +173,7 @@ class Gen2(pGetPos: (Any) => List[Int]) {
 
         ret.append(grammarHeader)
 
-        for (r <- rules.values if r.isInstanceOf[NonterminalRule]) {
+        for (r <- rules.values if !r.isTerminalRule) {
             r.generateGrammar(ret)
             ret.append("\n")
         }

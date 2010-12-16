@@ -8,6 +8,7 @@ abstract class TerminalFragment(pName: String, pTree: List[Any], symbols: STable
         extends Rule(pName, pTree, symbols) {
     override def antlrName = name.capitalize
     def collectParams() {}
+    def isTerminalRule = true
 
     override def ruleBody(implicit buf: ArrayBuffer[String]) {
         println("generating " + name + ": " + tree)
@@ -80,6 +81,7 @@ class LiteralRule(pName: String, text: String, symbols: STable)
     def collectParams() {}
     // Literal rules do not generate any classes.
     override def generateClasses() {}
+    def isTerminalRule = true
 
     override def ruleBody(implicit buf: ArrayBuffer[String]) {
         buf += text
