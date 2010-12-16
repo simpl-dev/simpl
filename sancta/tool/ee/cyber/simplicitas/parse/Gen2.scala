@@ -157,6 +157,10 @@ class Gen2(pGetPos: (Any) => List[Int]) {
         for (c <- classes.values) {
             c.generate(ret)
         }
+        
+        tokenKind(ret)
+        grammarClass(ret)
+        
 
         ret.toString
     }
@@ -167,6 +171,20 @@ class Gen2(pGetPos: (Any) => List[Int]) {
             "{CommonNode, CommonToken, TerminalNode, LiteralNode}\n" +
         "import ee.cyber.simplicitas.parse." +
             "{ErrorHandler}\n\n"
+
+    def tokenKind(buf: StringBuilder) {
+        buf.append("\nobject " + grammarName +
+                        "Kind extends Enumeration {\n  type Kind = Value;\n")
+        for (r <- rules.values if r.isInstanceOf[TerminalRule] ||
+                r.isInstanceOf[LiteralRule]) {
+            buf.append("    val " + r.name + " = Value(" + grammarName +
+                            "Lexer." + r.name + ");\n")
+        }
+        buf.append("}\n")
+    }
+
+    def grammarClass(buf: StringBuilder) {
+    }
 
     def getGrammarSource = {
         val ret = new StringBuilder()
