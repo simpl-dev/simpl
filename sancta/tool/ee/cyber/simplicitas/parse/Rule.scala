@@ -120,7 +120,7 @@ abstract class Rule(val name: String, var tree: List[Any], symbols: STable) {
     }
 
     def generateGrammar(implicit buf: ArrayBuffer[String]) {
-        buf += antlrName + ruleReturns
+        buf += rulePrefix + antlrName + ruleReturns
         ruleInit
         ruleAfter
         buf += ":\n    "
@@ -131,6 +131,7 @@ abstract class Rule(val name: String, var tree: List[Any], symbols: STable) {
     def antlrName = name
     def ruleReturns = ""
 
+    def rulePrefix = ""
     def ruleInit(implicit buf: ArrayBuffer[String]) {}
     def ruleAfter(implicit buf: ArrayBuffer[String]) {}
     def ruleBody(implicit buf: ArrayBuffer[String]) {}

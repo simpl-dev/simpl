@@ -16,7 +16,6 @@ abstract class TerminalFragment(pName: String, pTree: List[Any], symbols: STable
     }
 
     def matchTerminal(node: Any)(implicit buf: ArrayBuffer[String]) {
-        println("node = |" + node + "|")
         node match {
             // ( Foo )
             case "(" :: alt =>
@@ -50,6 +49,7 @@ abstract class TerminalFragment(pName: String, pTree: List[Any], symbols: STable
 class FragmentRule(pName: String, pTree: List[Any], symbols: STable)
         extends TerminalFragment(pName, pTree, symbols) {
     override def generateClasses() = super.generateClasses()
+    override def rulePrefix = "fragment "
 }
 
 class TerminalRule(pName: String, hidden: Boolean, pTree: List[Any],
@@ -89,8 +89,8 @@ class LiteralRule(pName: String, text: String, symbols: STable)
 
     def paramValue(param: RParam) = {
         val varName = "$" + param.antlrName
-        val v = "(" + name + ")setTokenPos(new " + name +
-                "(" + varName + ".getText()" + ")," + varName + ")"
+        val v = "(LiteralNode)setTokenPos(new LiteralNode(" +
+                varName + ".getText()" + ")," + varName + ")"
 
         varName + "==null?null:" + v
     }

@@ -59,7 +59,7 @@ class OptionRule(pName: String, pTree: List[Any], symbols: STable)
             val param = new RParam("", option, null, false, symbols)
             
             buf += param.antlrName + "=" + rules(option).antlrName + 
-                    "{$r=" + paramValue(param) + ";}"
+                    "{$r=" + rules(param.rule).paramValue(param) + ";}"
             first = false
         }
     }
@@ -247,12 +247,12 @@ class NormalRule(pName: String, pTree: List[Any], symbols: STable)
                 p => if (p.isList)
                     "scalaList(" + p.listVar + ")"
                     else
-                        paramValue(p)
+                        rules(p.rule).paramValue(p)
                     ))
         buf += ");$r.setLocation(_start,"
         buf += "_end==-1?(_start==null?0:_start.endIndex()):_end,"
         buf += "_endLine==-1?(_start==null?0:_start.endLine()):_endLine,"
-        buf += "_endColumn==-1?(_start==null?0:_start.endColumn()):_endColumn);}:"
+        buf += "_endColumn==-1?(_start==null?0:_start.endColumn()):_endColumn);}"
     }
 
     override def ruleBody(implicit buf: ArrayBuffer[String]) {
@@ -293,7 +293,7 @@ class NormalRule(pName: String, pTree: List[Any], symbols: STable)
                 var iv = ""
                 if (rules(param.rule).isTerminalRule) {
                     iv = newId
-                    buf += "CommonNode " + iv + "=" + paramValue(param) + ";"
+                    buf += "CommonNode " + iv + "=" + rules(param.rule).paramValue(param) + ";"
                 } else {
                     iv = "$" + param.antlrName + ".r"
                 }
@@ -336,7 +336,9 @@ class NormalRule(pName: String, pTree: List[Any], symbols: STable)
                 generate(name, pattern)
             // (foo)
             case "(" :: options =>
+                buf += "("
                 doOptionList(generateRuleCall, options)
+                buf += ")"
         }
     }
 

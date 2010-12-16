@@ -119,7 +119,8 @@ object GrammarUtils {
                         fun(ruleCall)
                         buf += modifier
                     case _ =>
-                        println(m)
+                        throw new IllegalArgumentException(
+                                "Invalid syntax tree: " + m)
                 }
             }
 
