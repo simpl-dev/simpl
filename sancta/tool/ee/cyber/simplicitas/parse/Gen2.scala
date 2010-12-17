@@ -46,6 +46,8 @@ class Gen2(pGetPos: (Any) => List[Int]) {
     /** Grammar-level options that are passed to ANTLR. */
     private var grammarOptions = ""
 
+    private var firstRule: String = null
+
     val error = GrammarUtils.error(pGetPos)_
 
     def grammargen(tree: Any) {
@@ -84,8 +86,14 @@ class Gen2(pGetPos: (Any) => List[Int]) {
             rules(name) = new FragmentRule(name, rest, Symbols)
         case "option" :: (name: String) :: rest =>
             rules(name) = new OptionRule(name, rest, Symbols)
+            if (firstRule == null) {
+                firstRule = name
+            }
         case ":" :: (name: String) :: rest =>
             rules(name) = new NormalRule(name, rest, Symbols)
+            if (firstRule == null) {
+                firstRule = name
+            }
         case _ =>
             error(rule, "Malformed rule")
     }
@@ -184,6 +192,41 @@ class Gen2(pGetPos: (Any) => List[Int]) {
     }
 
     def grammarClass(buf: StringBuilder) {
+        bufappend(
+            "\nclass " + grammarName + "Grammar extends " +
+                "ee.cyber.simplicitas.parse.GrammarBase[" +
+                firstRule + ", " + grammarName + "Kind.Kind] {\n" +
+            "  type Token = CommonToken[" + grammarName + "Kind.Kind]\n" +
+            "  def lexer(source: org.antlr.runtime.CharStream, errorHandler:" +
+                " ErrorHandler): org.antlr.runtime.TokenSource = {\n" +
+                "    val lex = new " + grammarName + "Lexer(source)\n" +
+                "    lex.setErrorHandler(errorHandler)\n" +
+                "    lex\n  }\n" +
+            "  def doParse(tokens: org.antlr.runtime.TokenStream," +
+                " errorHandler: ErrorHandler): " + firstRule + " = {\n" +
+                "    val parser = new " + grammarName + "Parser(tokens)\n" +
+                "    parser.errorHandler = errorHandler\n" +
+                "    parser." + rules(firstRule).antlrName + "()\n" +
+                "  }\n" +
+            "  def tokenType(token: Int): " + grammarName + "Kind.Kind =\n" +
+            "    " + grammarName + "Kind(token);\n" +
+            "  def tokenKind(token: Int): Int = token match {\n")
+        val reallyKeywords = new ArrayBuffer[String]()
+        for (kw <- keywords.keys) {
+            val what =
+                if (Character.isJavaIdentifierPart(kw charAt 1)) {
+                    reallyKeywords += kw.substring(1, kw.length - 1)
+                    "keyword"
+                } else {
+                    "operator"
+                }
+            buf.append("    case " + grammarName + "Lexer." +
+                            keywords(kw) + " => " + what + ";\n")
+        }
+        buf.append("    case _ => normal;\n  }\n" +
+            "  val keywords: Seq[String] = Array[String](" +
+            join(for (kw <- reallyKeywords) yield '"' + kw + '"') +
+            ")\n}\n")
     }
 
     def getGrammarSource = {
