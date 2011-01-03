@@ -10,11 +10,6 @@ abstract class TerminalFragment(pName: String, pTree: List[Any], symbols: STable
     def collectParams() {}
     def isTerminalRule = true
 
-    override def ruleBody(implicit buf: ArrayBuffer[String]) {
-        println("generating " + name + ": " + tree)
-        doOptionList(matchTerminal, tree)
-    }
-
     def matchTerminal(node: Any)(implicit buf: ArrayBuffer[String]) {
         node match {
             // ( Foo )
@@ -50,6 +45,11 @@ class FragmentRule(pName: String, pTree: List[Any], symbols: STable)
         extends TerminalFragment(pName, pTree, symbols) {
     override def generateClasses() = super.generateClasses()
     override def rulePrefix = "fragment "
+
+    override def ruleBody(implicit buf: ArrayBuffer[String]) {
+        println("generating " + name + ": " + tree)
+        doOptionList(matchTerminal, tree)
+    }
 }
 
 class TerminalRule(pName: String, hidden: Boolean, pTree: List[Any],
@@ -67,6 +67,14 @@ class TerminalRule(pName: String, hidden: Boolean, pTree: List[Any],
         }
 
         super.generateClasses()
+    }
+
+    override def ruleBody(implicit buf: ArrayBuffer[String]) {
+        println("generating " + name + ": " + tree)
+        doOptionList(matchTerminal, tree)
+        if (hidden) {
+            buf += "{$channel = HIDDEN;}"
+        }
     }
 }
 
