@@ -22,13 +22,14 @@ tokens {
     package ee.cyber.simplicitas.parse;
 }
 
-grammarDef  : headerDef ruleDef+ EOF!;
-headerDef   : packageDef optionDef?;
+grammarDef  : header ruleDef+ EOF!;
+header      : packageDef (optionDef | scalaHeader)*;
 packageDef  : 'grammar'^ dottedId ';'!;
 optionDef   : 'options'^ '('! optionList ')'!;
 optionList  : option*;
 option      : ID '=' ID ';' -> ^(ID ID);
 dottedId    : ID ('.' ID)*;
+scalaHeader : 'header'^ CODE;
 
 ruleDef:
       ('hidden'?) 'terminal'^ ID body? ':'! termAltList ';'!

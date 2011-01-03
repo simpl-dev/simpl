@@ -91,7 +91,11 @@ object GrammarUtils {
 
     def join(i: Iterable[Any]) = i.mkString(", ")
 
-    def stripQuotes(s: String) = s.substring(1, s.length - 1)
+    def stripQuotes(s: String) =
+        if ((s ne null) && (s != ""))
+            s.substring(1, s.length - 1)
+        else
+            ""
 
     // Helper functions for generating grammar code.
 

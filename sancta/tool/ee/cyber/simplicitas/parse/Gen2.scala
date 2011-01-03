@@ -46,6 +46,9 @@ class Gen2(pGetPos: (Any) => List[Int]) {
     /** Grammar-level options that are passed to ANTLR. */
     private var grammarOptions = ""
 
+    /** Header for generated Scala code. */
+    private var scalaHeader = ""
+
     private var firstRule: String = null
 
     val error = GrammarUtils.error(pGetPos)_
@@ -147,12 +150,15 @@ class Gen2(pGetPos: (Any) => List[Int]) {
     }
 
     /** Parses grammar-level "options(foo = bar;)" declaration. */
-    def matchGrammarOptions(tree: Any) = tree match {
-        case ("options" :: opts) :: rules =>
+    def matchGrammarOptions(tree: Any): List[Any] = tree match {
+        case ("options" :: opts) :: rest =>
             for (List(name, value) <- opts) {
                 grammarOptions += " " + name + "=" + value + ";"
             }
-            rules
+            matchGrammarOptions(rest)
+        case ("header" :: header :: Nil) :: rest =>
+            scalaHeader = header.toString
+            matchGrammarOptions(rest)
         case rules: List[Any] => 
             rules
     }
@@ -168,7 +174,8 @@ class Gen2(pGetPos: (Any) => List[Int]) {
         
         tokenKind(ret)
         grammarClass(ret)
-        
+
+        returnsCode(ret)
 
         ret.toString
     }
@@ -178,7 +185,8 @@ class Gen2(pGetPos: (Any) => List[Int]) {
         "import ee.cyber.simplicitas." +
             "{CommonNode, CommonToken, TerminalNode, LiteralNode}\n" +
         "import ee.cyber.simplicitas.parse." +
-            "{ErrorHandler}\n\n"
+            "{ErrorHandler}\n\n" +
+        stripQuotes(scalaHeader) + "\n\n"
 
     def tokenKind(buf: StringBuilder) {
         buf.append("\nobject " + grammarName +
@@ -227,6 +235,26 @@ class Gen2(pGetPos: (Any) => List[Int]) {
             "  val keywords: Seq[String] = Array[String](" +
             join(for (kw <- reallyKeywords) yield '"' + kw + '"') +
             ")\n}\n")
+    }
+
+    private def returnsCode(buf: StringBuilder) {
+        if (!rules.values.exists(_.returnCode ne null)) {
+            return
+        }
+
+        buf.append("object " + grammarName +"Grammar {\n")
+
+        for (r <- rules.values) {
+            if (r.returnCode ne null) {
+                buf.append("    def return" + r.name + "(__foo: " + r.name + 
+                        "): " + r.actualReturnType + " = {\n")
+                buf.append("        import __foo._\n")
+                buf.append("        " + stripQuotes(r.returnCode) + "\n")
+                buf.append("    }\n")
+            }
+        }
+
+        buf.append("}\n")
     }
 
     def getGrammarSource = {

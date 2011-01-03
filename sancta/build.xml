@@ -72,10 +72,14 @@
         <scalac destdir="${target}/test-classes" classpathref="parselib"
                 unchecked="yes">
             <src location="${target}/test-java"/>
+            <src location="test"/>
         </scalac>
-        <javac destdir="${target}/test-classes" srcdir="${target}/test-java"
+        <javac destdir="${target}/test-classes"
                source="1.4" encoding="UTF-8" classpathref="parselib"
-               includeantruntime="false"/>
+               includeantruntime="false">
+            <src location="${target}/test-java"/>
+            <src location="test"/>
+        </javac>
     </target>
 
     <target name="wizard-lib">
@@ -171,7 +175,7 @@
 
     <target name="build" depends="test,plugin-lib,wizard-lib,install-build"/>
 
-	<target name="dist" depends="build,doc-jar"/>
+    <target name="dist" depends="build,doc-jar"/>
 
     <target name="rebuild" depends="clean,build"/>
 </project>

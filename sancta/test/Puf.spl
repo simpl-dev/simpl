@@ -2,6 +2,10 @@ grammar puf.spl.Puf;
 
 // options (backtrack=true;)
 
+header {
+import PufExtras._
+}
+
 Program: Include? decls=FunDecl+;
 
 Include: "#" "include" file=Id ".puf"; 
@@ -35,7 +39,7 @@ FunExpr: "fn" params=Id+ "->" Expr;
 IfExpr: "if" cond=Expr "then" ifThen=Expr "else" ifElse=Expr;
 
 OrExpr
-    returns {makeBinaryOp(BinaryOp.Or, left :: rest)}
+    returns Expr {makeBinaryOp(BinaryOp.Or, left :: rest)}
     : left=AndExpr ("||" rest=AndExpr)*;
 AndExpr returns Expr {makeBinaryOp(BinaryOp.And, left :: rest)}
     : left=EqExpr ("&&" rest=EqExpr)*;
@@ -94,7 +98,7 @@ TupleLiteral
     returns Expr {
         // Expression "(foo)" is actually not a tuple but parenthesised
         // expression.
-        if (first ne null && rest.isEmpty)
+        if ((first ne null) && rest.isEmpty)
             first
         else
             TupleLiteral(first, rest)
