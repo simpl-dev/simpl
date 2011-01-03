@@ -206,7 +206,7 @@ class Gen2(pGetPos: (Any) => List[Int]) {
                 " errorHandler: ErrorHandler): " + firstRule + " = {\n" +
                 "    val parser = new " + grammarName + "Parser(tokens)\n" +
                 "    parser.errorHandler = errorHandler\n" +
-                "    parser." + rules(firstRule).antlrName + "()\n" +
+                "    parser.toplevel()\n" +
                 "  }\n" +
             "  def tokenType(token: Int): " + grammarName + "Kind.Kind =\n" +
             "    " + grammarName + "Kind(token);\n" +
@@ -234,6 +234,8 @@ class Gen2(pGetPos: (Any) => List[Int]) {
 
         ret.append(grammarHeader)
 
+        ret.append(getFirstRule)
+
         for (r <- rules.values if !r.isTerminalRule) {
             r.generateGrammar(ret)
             ret.append("\n")
@@ -256,7 +258,14 @@ class Gen2(pGetPos: (Any) => List[Int]) {
         ret.toString
     }
 
-    def grammarHeader =
+    private def getFirstRule = {
+        val tlRule = rules(firstRule)
+
+        "toplevel returns [" + tlRule.actualReturnType + " r]: " +
+                "tl=" + tlRule.antlrName + "{$r = $tl.r;};\n\n"
+    }
+
+    private def grammarHeader =
         "grammar " + grammarName + ";\n" +
         "options {\n" +
             "superClass=ParserBase;\n" +
