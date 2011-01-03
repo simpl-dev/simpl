@@ -192,7 +192,7 @@ class Gen2(pGetPos: (Any) => List[Int]) {
     }
 
     def grammarClass(buf: StringBuilder) {
-        bufappend(
+        buf.append(
             "\nclass " + grammarName + "Grammar extends " +
                 "ee.cyber.simplicitas.parse.GrammarBase[" +
                 firstRule + ", " + grammarName + "Kind.Kind] {\n" +
