@@ -100,7 +100,7 @@ trait CommonNode extends Product with SourceLocation {
       * parameter. If the node already contains child with this name,
       * the child's value will be overriden. This parameter applies recursively
       * to all the children.
-      */ 
+      */
     def toJavaMap(typeAttr: String = null): java.util.Map[String, Object] = {
         import java.util.{Map, Set, AbstractMap, HashMap, HashSet}
         type Entry = Map.Entry[String, Object]
@@ -205,6 +205,9 @@ trait CommonNode extends Product with SourceLocation {
 /** Parent class for all the terminal nodes. */
 abstract class TerminalNode extends CommonNode {
     override def children = Nil // No children on terminals
+
+    /** Returns contents of the terminal node. */
+    def text: String
 }
 
 /** Generic node class for all the literals that assigned a value
@@ -222,7 +225,7 @@ case class LiteralNode(text: String) extends TerminalNode {
 trait GenericToken extends SourceLocation {
     /** Text that the token contains. */
     def text: String
-    
+
     /** Whether the token is keyword. */
     def isKeyword: Boolean
     /** Whether the token is ignored by the parser (white space or comment). */
@@ -237,7 +240,7 @@ trait GenericToken extends SourceLocation {
 }
 
 /** Represents tkoen in the DSL souroce file. The attribute <code>kind</code>
-  * corresponds to token kind from olexer. There will be automatically 
+  * corresponds to token kind from lexer. There will be automatically
   * generated enumeration that will contain all the token kinds present in
   * a given DSL */
 trait CommonToken[Kind] extends GenericToken {
