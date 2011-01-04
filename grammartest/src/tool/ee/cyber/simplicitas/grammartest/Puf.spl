@@ -55,7 +55,7 @@ CompareExpr
 terminal CompareOp: "<" | "<=" | ">" | ">=";
 
 ConsExpr
-    returns Expr {makeBinaryOp(BinaryOp.Cons, left, right)}
+    returns Expr {if (right eq null) left else _self}
     : left=PlusExpr (":" right=ConsExpr)?;
 
 PlusExpr
@@ -85,7 +85,9 @@ NegExpr
 NotExpr
     returns Expr {Unary(UnaryOp.Not, expr)}
     : "not" expr=PrimaryExpr;
-ApplyExpr: fun=PrimaryExpr (params=PrimaryExpr)*;
+ApplyExpr
+    returns Expr {if (params.isEmpty) fun else _self}
+    : fun=PrimaryExpr (params=PrimaryExpr)*;
 SelectExpr: "#" sel=Num tuple=PrimaryExpr;
 
 option PrimaryExpr returns Expr:
@@ -95,18 +97,20 @@ option PrimaryExpr returns Expr:
     | ListLiteral
     ;
 TupleLiteral
+    {def items = if (first eq null) Nil else first :: rest}
     returns Expr {
         // Expression "(foo)" is actually not a tuple but parenthesised
         // expression.
         if ((first ne null) && rest.isEmpty)
             first
         else
-            TupleLiteral(first, rest)
+            _self
     }
     : "(" ")"
     | "(" first=Expr ("," rest=Expr)* ")";
 ListLiteral
-    {def items = if (first eq null) Nil else first :: rest}
+    {def items = first :: rest}
+    returns Expr {if (first eq null) ListNil() else _self}
     : "[" "]"
     | "[" first=Expr ("," rest=Expr)+ "]";
 

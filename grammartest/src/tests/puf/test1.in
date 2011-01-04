@@ -1,5 +1,14 @@
 #include prelude.puf
 
+// Left-association test
+foo = 1 + 2 - 3 + 4;
+
+// Cons is right-associative
+foo = 1 : 2 : 3 : 4 : [];
+
+// Operator precedence
+foo = 1 + 2 * 3 + 4;
+
 // Factorial
 
 fact n = if n == 0
