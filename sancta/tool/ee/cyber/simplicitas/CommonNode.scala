@@ -72,15 +72,59 @@ trait CommonNode extends Product with SourceLocation {
     /** Parent node of this node. Useful e.g. for traversing scopes. */
     var parent: CommonNode = null
 
-    def setLocation(start: SourceLocation, endIndex: Int, endLine: Int, endColumn: Int) {
-        if (start ne null) {
-            startIndex = start.startIndex
-            startLine = start.startLine
-            startColumn = start.startColumn
+    /** Copies location from another node. */
+    def setLocation(loc: SourceLocation): this.type = {
+        if (loc ne null) {
+            startIndex = loc.startIndex
+            startLine = loc.startLine
+            startColumn = loc.startColumn
+
+            endIndex = loc.endIndex
+            endLine = loc.endLine
+            endColumn = loc.endColumn
         }
-        this.endIndex = endIndex
-        this.endLine = endLine
-        this.endColumn = endColumn
+
+        this
+    }
+
+    /** Copies starting position from another node. */
+    def setStart(loc: SourceLocation): this.type = {
+        if (loc ne null) {
+            startIndex = loc.startIndex
+            startLine = loc.startLine
+            startColumn = loc.startColumn
+        }
+
+        this
+    }
+
+    /** Copies endpoint position from another node. */
+    def setEnd(loc: SourceLocation): this.type = {
+        if (loc ne null) {
+            endIndex = loc.endIndex
+            endLine = loc.endLine
+            endColumn = loc.endColumn
+        }
+
+        this
+    }
+
+    /** Set starting position. */
+    def setStart(index: Int, line: Int, column: Int): this.type = {
+        startIndex = index
+        startLine = line
+        startColumn = column
+
+        this
+    }
+
+    /** Set ending position. */
+    def setEnd(index: Int, line: Int, column: Int): this.type = {
+        endIndex = index
+        endLine = line
+        endColumn = column
+
+        this
     }
 
     def updateParents(myParent: CommonNode) {

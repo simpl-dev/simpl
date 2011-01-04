@@ -63,8 +63,8 @@ class OptionRule(pName: String, pTree: List[Any], symbols: STable)
             }
 
             val param = new RParam("", option, null, false, symbols)
-            
-            buf += param.antlrName + "=" + rules(option).antlrName + 
+
+            buf += param.antlrName + "=" + rules(option).antlrName +
                     "{$r=" + wrapInReturn(rules(param.rule).paramValue(param)) +
                     ";}"
             first = false
@@ -121,7 +121,7 @@ class NormalRule(pName: String, pTree: List[Any], symbols: STable)
             case List("=", name: String, pattern: String) =>
                 doRuleCall(name, pattern)
             // (foo)
-            case "(" :: options => 
+            case "(" :: options =>
                 val oldBranch = currentBranch
 
                 currentBranch = currentBranch.extend
@@ -167,7 +167,7 @@ class NormalRule(pName: String, pTree: List[Any], symbols: STable)
         rules(ruleName) = new LiteralRule(ruleName, pattern, symbols)
         keywords(pattern) = ruleName
     }
-    
+
     /** Turns string 'foo' into Foo. */
     def makeKeywordName(s: String) = {
         val buf = new StringBuilder()
@@ -256,8 +256,8 @@ class NormalRule(pName: String, pTree: List[Any], symbols: STable)
                     else
                         rules(p.rule).paramValue(p)
                     )) + ")") + ";"
-        buf += "$r.setLocation(_start,"
-        buf += "_end==-1?(_start==null?0:_start.endIndex()):_end,"
+        buf += "$r.setStart(_start);"
+        buf += "$r.setEnd(_end==-1?(_start==null?0:_start.endIndex()):_end,"
         buf += "_endLine==-1?(_start==null?0:_start.endLine()):_endLine,"
         buf += "_endColumn==-1?(_start==null?0:_start.endColumn()):_endColumn);}"
     }
@@ -275,7 +275,7 @@ class NormalRule(pName: String, pTree: List[Any], symbols: STable)
                     pattern
 
             buf += "\n    "
-                    
+
             // Unnamed call to literal "foo"
             if ((name eq null) && isLiteralPattern(pattern)) {
                 val varName = newId
@@ -288,9 +288,9 @@ class NormalRule(pName: String, pTree: List[Any], symbols: STable)
 
                 return
             }
-    
+
 //            val patternVar = newId
-//    
+//
             val paramName = getParamName(name, pattern)
             val param = getParamByName(paramName)
 
@@ -305,7 +305,7 @@ class NormalRule(pName: String, pTree: List[Any], symbols: STable)
                     iv = "$" + param.antlrName + ".r"
                 }
                 buf += param.listVar + ".add(" + iv + ");if(_start==null)_start=" + iv
-    
+
                 buf += ";"
                 endHook(param.antlrName, param.rule)
                 buf += "})"
