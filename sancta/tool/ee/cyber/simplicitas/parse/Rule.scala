@@ -19,7 +19,7 @@ class RParam(val name: String, val rule: String, val branch: BranchIdentifier,
     var antlrName: String = symbols.newId
     val listVar: String = if (isList) symbols.newId else null
 
-    override def toString = name + ": " + 
+    override def toString = name + ": " +
         (if (paramType eq null) rule else paramType + "(" + rule + ")") +
         (if (isList) ", LIST " else " ") + branch
 }
@@ -49,14 +49,13 @@ abstract class Rule(val name: String, var tree: List[Any], symbols: STable) {
 
     def actualReturnType = if (returnType ne null) returnType else name
 
-    override def toString = name + " returns " + 
+    override def toString = name + " returns " +
             (if (returnType eq null) name else returnType) + " {" + tree +
             "}\nParameters:\n" + params.map(_.toString).mkString("\n")
 
     def analyze() {
-        println("analyze(" + name + ")")
-        matchReturns()
         matchBody()
+        matchReturns()
         collectParams()
     }
 
@@ -75,7 +74,6 @@ abstract class Rule(val name: String, var tree: List[Any], symbols: STable) {
 
         tree match {
             case ("returns" :: returnArgs) :: rest =>
-                println("matched returns!")
                 returnArgs.foreach(matchReturnArg)
                 tree = rest
             case _ =>
@@ -99,7 +97,7 @@ abstract class Rule(val name: String, var tree: List[Any], symbols: STable) {
         // Foo returns Bar => case class Foo extends Bar
         if (returnType ne null)
             actions.addBinding(name, addExtend(returnType))
- 
+
         // Rule: if rule returns type that does not match any rule,
         // then create new trait and make rule extend this trait.
         if (returnType ne null) {
