@@ -17,6 +17,9 @@ trait STable {
       * Strictly does not belong to symbol table, but it is convenient to
       * pass it around along with other global-ish information. */
     def getPos: (Any) => List[Int]
+    
+    /** Name of the grammar. Also, convenient to pass around. */
+    def getGrammarName: String
 
     def newId: String
 }
@@ -31,6 +34,7 @@ class Gen2(pGetPos: (Any) => List[Int]) {
         private var idVal = 0
 
         def getPos = pGetPos
+        def getGrammarName = grammarName
 
         def newId = {idVal += 1; "Z" + idVal}
     }

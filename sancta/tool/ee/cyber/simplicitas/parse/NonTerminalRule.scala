@@ -12,6 +12,12 @@ abstract class NonTerminalRule(pName: String, pTree: List[Any], symbols: STable)
 
     def paramValue(param: RParam) = "$" + param.antlrName + ".r"
     def isTerminalRule = false
+
+    protected def wrapInReturn(expr: String) =
+        if (returnCode ne null)
+            symbols.getGrammarName + "Grammar.return" + name +"(" + expr + ")"
+        else
+            expr
 }
 
 class OptionRule(pName: String, pTree: List[Any], symbols: STable)
@@ -59,7 +65,8 @@ class OptionRule(pName: String, pTree: List[Any], symbols: STable)
             val param = new RParam("", option, null, false, symbols)
             
             buf += param.antlrName + "=" + rules(option).antlrName + 
-                    "{$r=" + rules(param.rule).paramValue(param) + ";}"
+                    "{$r=" + wrapInReturn(rules(param.rule).paramValue(param)) +
+                    ";}"
             first = false
         }
     }
@@ -242,14 +249,14 @@ class NormalRule(pName: String, pTree: List[Any], symbols: STable)
     }
 
     override def ruleAfter(implicit buf: ArrayBuffer[String]) {
-        buf += "\n@after {$r = new " + name + "("
-        buf += join(params.map(
+        buf += "\n@after {$r = "
+        buf += wrapInReturn("new " + name + "(" + join(params.map(
                 p => if (p.isList)
                     "scalaList(" + p.listVar + ")"
                     else
                         rules(p.rule).paramValue(p)
-                    ))
-        buf += ");$r.setLocation(_start,"
+                    )) + ")") + ";"
+        buf += "$r.setLocation(_start,"
         buf += "_end==-1?(_start==null?0:_start.endIndex()):_end,"
         buf += "_endLine==-1?(_start==null?0:_start.endLine()):_endLine,"
         buf += "_endColumn==-1?(_start==null?0:_start.endColumn()):_endColumn);}"
