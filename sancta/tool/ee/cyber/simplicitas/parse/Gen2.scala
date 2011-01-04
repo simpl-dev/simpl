@@ -250,9 +250,9 @@ class Gen2(pGetPos: (Any) => List[Int]) {
 
         for (r <- rules.values) {
             if (r.returnCode ne null) {
-                buf.append("    def return" + r.name + "(__foo: " + r.name +
+                buf.append("    def return" + r.name + "(_self: " + r.name +
                         "): " + r.actualReturnType + " = {\n")
-                buf.append("        import __foo._\n")
+                buf.append("        import _self._\n")
                 buf.append("        " + stripQuotes(r.returnCode) + "\n")
                 buf.append("    }\n")
             }
