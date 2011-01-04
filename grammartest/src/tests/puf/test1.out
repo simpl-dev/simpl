@@ -1,0 +1,167 @@
+0:263:Program {
+  decls=List {
+    47:66:FunDecl {
+      expr=53:65:Binary {
+        left=53:61:Binary {
+          left=53:57:Binary {
+            left=53:53:Num {
+              text="1"
+            }
+            op="+"
+            right=57:57:Num {
+              text="2"
+            }
+          }
+          op="-"
+          right=61:61:Num {
+            text="3"
+          }
+        }
+        op="+"
+        right=65:65:Num {
+          text="4"
+        }
+      }
+      left=47:49:FunLeft {
+        id=List {
+          47:49:Id {
+            text="foo"
+          }
+        }
+      }
+    }
+    98:122:FunDecl {
+      expr=104:121:ConsExpr {
+        left=104:104:Num {
+          text="1"
+        }
+        right=108:121:ConsExpr {
+          left=108:108:Num {
+            text="2"
+          }
+          right=112:121:ConsExpr {
+            left=112:112:Num {
+              text="3"
+            }
+            right=116:121:ConsExpr {
+              left=116:116:Num {
+                text="4"
+              }
+              right=120:121:ListNil {
+              }
+            }
+          }
+        }
+      }
+      left=98:100:FunLeft {
+        id=List {
+          98:100:Id {
+            text="foo"
+          }
+        }
+      }
+    }
+    148:167:FunDecl {
+      expr=154:166:Binary {
+        left=154:162:Binary {
+          left=154:154:Num {
+            text="1"
+          }
+          op="+"
+          right=158:162:Binary {
+            left=158:158:Num {
+              text="2"
+            }
+            op="*"
+            right=162:162:Num {
+              text="3"
+            }
+          }
+        }
+        op="+"
+        right=166:166:Num {
+          text="4"
+        }
+      }
+      left=148:150:FunLeft {
+        id=List {
+          148:150:Id {
+            text="foo"
+          }
+        }
+      }
+    }
+    184:247:FunDecl {
+      expr=193:246:IfExpr {
+        cond=196:201:Binary {
+          left=196:196:Id {
+            text="n"
+          }
+          op="=="
+          right=201:201:Num {
+            text="0"
+          }
+        }
+        ifElse=233:246:Binary {
+          left=233:233:Id {
+            text="n"
+          }
+          op="*"
+          right=237:246:ApplyExpr {
+            fun=237:240:Id {
+              text="fact"
+            }
+            params=List {
+              242:246:Binary {
+                left=243:243:Id {
+                  text="n"
+                }
+                op="-"
+                right=245:245:Num {
+                  text="1"
+                }
+              }
+            }
+          }
+        }
+        ifThen=217:217:Num {
+          text="1"
+        }
+      }
+      left=184:189:FunLeft {
+        id=List {
+          184:187:Id {
+            text="fact"
+          }
+          189:189:Id {
+            text="n"
+          }
+        }
+      }
+    }
+    250:263:FunDecl {
+      expr=257:262:ApplyExpr {
+        fun=257:260:Id {
+          text="fact"
+        }
+        params=List {
+          262:262:Num {
+            text="5"
+          }
+        }
+      }
+      left=250:253:FunLeft {
+        id=List {
+          250:253:Id {
+            text="main"
+          }
+        }
+      }
+    }
+  }
+  include=0:19:Include {
+    file=9:15:Id {
+      text="prelude"
+    }
+  }
+}

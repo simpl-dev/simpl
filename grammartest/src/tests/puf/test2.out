@@ -1,0 +1,267 @@
+0:370:Program {
+  decls=List {
+    0:78:FunDecl {
+      expr=17:77:CaseExpr {
+        consAlt=53:77:ConsAlt {
+          expr=62:77:ConsExpr {
+            left=62:64:ApplyExpr {
+              fun=62:62:Id {
+                text="f"
+              }
+              params=List {
+                64:64:Id {
+                  text="h"
+                }
+              }
+            }
+            right=68:77:ApplyExpr {
+              fun=68:73:Id {
+                text="mapRec"
+              }
+              params=List {
+                75:75:Id {
+                  text="f"
+                }
+                77:77:Id {
+                  text="t"
+                }
+              }
+            }
+          }
+          head=53:53:Id {
+            text="h"
+          }
+          tail=57:57:Id {
+            text="t"
+          }
+        }
+        expr=22:22:Id {
+          text="l"
+        }
+        nilAlt=35:42:NilAlt {
+          expr=41:42:ListNil {
+          }
+        }
+      }
+      left=0:9:FunLeft {
+        id=List {
+          0:5:Id {
+            text="mapRec"
+          }
+          7:7:Id {
+            text="f"
+          }
+          9:9:Id {
+            text="l"
+          }
+        }
+      }
+    }
+    80:250:FunDecl {
+      expr=98:249:LetrecExpr {
+        decl=List {
+          113:222:FunDecl {
+            expr=140:221:CaseExpr {
+              consAlt=193:221:ConsAlt {
+                expr=202:221:ApplyExpr {
+                  fun=202:205:Id {
+                    text="loop"
+                  }
+                  params=List {
+                    207:217:ConsExpr {
+                      left=208:210:ApplyExpr {
+                        fun=208:208:Id {
+                          text="f"
+                        }
+                        params=List {
+                          210:210:Id {
+                            text="h"
+                          }
+                        }
+                      }
+                      right=214:216:Id {
+                        text="acc"
+                      }
+                    }
+                    219:219:Id {
+                      text="f"
+                    }
+                    221:221:Id {
+                      text="t"
+                    }
+                  }
+                }
+                head=193:193:Id {
+                  text="h"
+                }
+                tail=197:197:Id {
+                  text="t"
+                }
+              }
+              expr=145:145:Id {
+                text="l"
+              }
+              nilAlt=166:174:NilAlt {
+                expr=172:174:Id {
+                  text="acc"
+                }
+              }
+            }
+            left=113:124:FunLeft {
+              id=List {
+                113:116:Id {
+                  text="loop"
+                }
+                118:120:Id {
+                  text="acc"
+                }
+                122:122:Id {
+                  text="f"
+                }
+                124:124:Id {
+                  text="l"
+                }
+              }
+            }
+          }
+        }
+        expr=239:249:ApplyExpr {
+          fun=239:242:Id {
+            text="loop"
+          }
+          params=List {
+            244:245:ListNil {
+            }
+            247:247:Id {
+              text="f"
+            }
+            249:249:Id {
+              text="l"
+            }
+          }
+        }
+      }
+      left=80:90:FunLeft {
+        id=List {
+          80:86:Id {
+            text="mapIter"
+          }
+          88:88:Id {
+            text="f"
+          }
+          90:90:Id {
+            text="l"
+          }
+        }
+      }
+    }
+    252:275:FunDecl {
+      expr=265:274:ApplyExpr {
+        fun=265:272:Id {
+          text="infinite"
+        }
+        params=List {
+          274:274:Id {
+            text="x"
+          }
+        }
+      }
+      left=252:261:FunLeft {
+        id=List {
+          252:259:Id {
+            text="infinite"
+          }
+          261:261:Id {
+            text="x"
+          }
+        }
+      }
+    }
+    277:293:FunDecl {
+      expr=288:292:Binary {
+        left=288:288:Id {
+          text="x"
+        }
+        op="*"
+        right=292:292:Num {
+          text="2"
+        }
+      }
+      left=277:284:FunLeft {
+        id=List {
+          277:282:Id {
+            text="double"
+          }
+          284:284:Id {
+            text="x"
+          }
+        }
+      }
+    }
+    295:313:FunDecl {
+      expr=301:312:ListLiteral {
+        first=302:302:Num {
+          text="1"
+        }
+        rest=List {
+          305:305:Num {
+            text="2"
+          }
+          308:308:Num {
+            text="3"
+          }
+          311:311:Num {
+            text="4"
+          }
+        }
+      }
+      left=295:297:FunLeft {
+        id=List {
+          295:297:Id {
+            text="lst"
+          }
+        }
+      }
+    }
+    315:370:FunDecl {
+      expr=322:369:TupleLiteral {
+        first=328:344:ApplyExpr {
+          fun=328:333:Id {
+            text="mapRec"
+          }
+          params=List {
+            335:340:Id {
+              text="double"
+            }
+            342:344:Id {
+              text="lst"
+            }
+          }
+        }
+        rest=List {
+          351:368:ApplyExpr {
+            fun=351:357:Id {
+              text="mapIter"
+            }
+            params=List {
+              359:364:Id {
+                text="double"
+              }
+              366:368:Id {
+                text="lst"
+              }
+            }
+          }
+        }
+      }
+      left=315:318:FunLeft {
+        id=List {
+          315:318:Id {
+            text="main"
+          }
+        }
+      }
+    }
+  }
+  include=(null)
+}

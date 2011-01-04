@@ -30,7 +30,9 @@ object PufExtras {
                  ops: List[BinaryOp.Type]): Expr =
             (right, ops) match {
                 case (rh :: rt, oh :: ot) =>
-                    loop(Binary(oh, left, rh), rt, ot)
+                    loop(
+                        Binary(oh, left, rh).setStart(left).setEnd(rh),
+                        rt, ot)
                 case (Nil, Nil) =>
                     left
             }
@@ -49,9 +51,9 @@ object PufExtras {
         else
             left
 
-    implicit def binaryCons(op: BinaryOp.Type):
-            (Expr, Expr) => Expr =
-        Binary(op, _, _)
+    implicit def binaryCons(op: BinaryOp.Type) =
+        (x1: Expr, x2: Expr) =>
+            Binary(op, x1, x2).setStart(x1).setEnd(x2)
 
     def splitLeftAssoc(lst: List[Expr], cons: (Expr, Expr) => Expr): Expr = {
         lst match {
