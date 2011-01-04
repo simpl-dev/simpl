@@ -1,13 +1,13 @@
 package ee.cyber.simplicitas.grammartest.puf
 
-import ee.cyber.simplicitas.CommonNode
+import ee.cyber.simplicitas.{TerminalNode, CommonNode}
 
 case class Unary(op: UnaryOp.Type, arg: Expr) extends Expr {
     def childrenNames = Array("op", "arg")
 }
 
 object PufExtras {
-    def makeBinaryOp(op: String, left: Expr, right: Expr) = {
+    def makeBinaryOp(op: TerminalNode, left: Expr, right: Expr) = {
         left
     }
 

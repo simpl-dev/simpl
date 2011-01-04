@@ -70,7 +70,9 @@ object Main extends Assert {
             f = new BufferedInputStream(new FileInputStream(filePath))
             f.read(buffer)
         } finally {
-            f.close()
+            if (f ne null) {
+                f.close()
+            }
         }
         new String(buffer);
     }

@@ -45,12 +45,12 @@ AndExpr returns Expr {makeBinaryOp(BinaryOp.And, left :: rest)}
     : left=EqExpr ("&&" rest=EqExpr)*;
 
 EqExpr
-    returns Expr {makeBinaryOp(op.text, left, right)}
+    returns Expr {makeBinaryOp(op, left, right)}
     : left=CompareExpr (op=EqOp right=CompareExpr)?;
 terminal EqOp: "==" | "/=";
 
 CompareExpr
-    returns Expr {makeBinaryOp(op.text, left, right)}
+    returns Expr {makeBinaryOp(op, left, right)}
     : left=ConsExpr (op=CompareOp right=ConsExpr)?;
 terminal CompareOp: "<" | "<=" | ">" | ">=";
 

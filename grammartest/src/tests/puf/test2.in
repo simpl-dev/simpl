@@ -1,0 +1,18 @@
+mapRec f l =
+    case l of
+        [] -> [];
+        h : t -> f h : mapRec f t;
+mapIter f l =
+    letrec
+        loop acc f l =
+            case l of
+                [] -> acc;
+                h : t -> loop (f h : acc) f t;
+    in
+        loop [] f l;
+infinite x = infinite x;
+double x = x * 2;
+lst = [1, 2, 3, 4];
+main = (
+    mapRec double lst,
+    mapIter double lst);
