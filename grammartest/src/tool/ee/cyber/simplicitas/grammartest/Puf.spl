@@ -1,4 +1,4 @@
-grammar puf.spl.Puf;
+grammar ee.cyber.simplicitas.grammartest.puf.Puf;
 
 // options (backtrack=true;)
 
@@ -23,12 +23,12 @@ FunLeft returns DeclLeft: Id+;
 TupleLeft returns DeclLeft: "(" h=Id ("," t=Id)* ")";
 
 option Expr:
-	CaseExpr
-	| LetrecExpr
-	| LetExpr
-	| FunExpr
-	| IfExpr
-	| OrExpr;
+CaseExpr
+| LetrecExpr
+| LetExpr
+| FunExpr
+| IfExpr
+| OrExpr;
 
 CaseExpr: "case" expr=Expr "of" nilAlt=NilAlt ";" consAlt=ConsAlt;
 NilAlt: "[" "]" "->" expr=Expr;

@@ -29,7 +29,7 @@ optionDef   : 'options'^ '('! optionList ')'!;
 optionList  : option*;
 option      : ID '=' ID ';' -> ^(ID ID);
 dottedId    : ID ('.' ID)*;
-scalaHeader : 'header'^ CODE;
+scalaHeader : 'scalaheader'^ CODE;
 
 ruleDef:
       ('hidden'?) 'terminal'^ ID body? ':'! termAltList ';'!
@@ -41,7 +41,7 @@ body        : CODE -> ^(BODY CODE);
 returnType  : 'returns'^ dottedId? body?;
 altList     : matchList ('|'! matchList)*;
 matchList   : match+ -> ^(NODE match+);
-match       : token modifier? -> ^(MATCH modifier? token); 
+match       : token modifier? -> ^(MATCH modifier? token);
 name        : ID '='^;
 modifier    : '?' | '*' | '+';
 token       : '('^ altList ')'! | (ID '='^)? ID | (ID '='^)? STR;
@@ -58,7 +58,7 @@ terminal    : '('^ termAltList ')'! | ID | STR '..'^ STR | STR | '.';
 fragment LETTER: 'a'..'z' | 'A'..'Z' | '_';
 ID: LETTER (LETTER | '0'..'9')*;
 fragment SINGLE_QUOTED_STR : '\'' (~('\''|'\\') | '\\' .)* '\'';
-fragment DOUBLE_QUOTED_STR : '"' (~('"'|'\\') | '\\' .)* '"' 
+fragment DOUBLE_QUOTED_STR : '"' (~('"'|'\\') | '\\' .)* '"'
 	{setText("'" + getText().substring(1, getText().length() - 1)
 		.replaceAll("(?<!\\\\)(\\\\{2})*'", "\\\\$0") + "'");};
 STR: SINGLE_QUOTED_STR | DOUBLE_QUOTED_STR;

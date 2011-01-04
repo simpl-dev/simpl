@@ -17,7 +17,7 @@ trait STable {
       * Strictly does not belong to symbol table, but it is convenient to
       * pass it around along with other global-ish information. */
     def getPos: (Any) => List[Int]
-    
+
     /** Name of the grammar. Also, convenient to pass around. */
     def getGrammarName: String
 
@@ -40,7 +40,7 @@ class Gen2(pGetPos: (Any) => List[Int]) {
     }
 
     import Symbols._
-    
+
     /** Name of the grammar. */
     var grammarName: String = null
 
@@ -146,7 +146,7 @@ class Gen2(pGetPos: (Any) => List[Int]) {
             case (name: String) :: "." :: pname =>
                 grammarName = name
                 grammarPackage = (pname.reverse foldLeft "")(_+_)
-            case List(name: String) => 
+            case List(name: String) =>
                 grammarName = name
             case _ =>
                 error(tree, "No grammar name")
@@ -160,10 +160,10 @@ class Gen2(pGetPos: (Any) => List[Int]) {
                 grammarOptions += " " + name + "=" + value + ";"
             }
             matchGrammarOptions(rest)
-        case ("header" :: header :: Nil) :: rest =>
+        case ("scalaheader" :: header :: Nil) :: rest =>
             scalaHeader = header.toString
             matchGrammarOptions(rest)
-        case rules: List[Any] => 
+        case rules: List[Any] =>
             rules
     }
 
@@ -175,7 +175,7 @@ class Gen2(pGetPos: (Any) => List[Int]) {
         for (c <- classes.values) {
             c.generate(ret)
         }
-        
+
         tokenKind(ret)
         grammarClass(ret)
 
@@ -250,7 +250,7 @@ class Gen2(pGetPos: (Any) => List[Int]) {
 
         for (r <- rules.values) {
             if (r.returnCode ne null) {
-                buf.append("    def return" + r.name + "(__foo: " + r.name + 
+                buf.append("    def return" + r.name + "(__foo: " + r.name +
                         "): " + r.actualReturnType + " = {\n")
                 buf.append("        import __foo._\n")
                 buf.append("        " + stripQuotes(r.returnCode) + "\n")
@@ -281,7 +281,7 @@ class Gen2(pGetPos: (Any) => List[Int]) {
             ret.append("\n")
         }
 
-        for (r <- rules.values if 
+        for (r <- rules.values if
                 r.isInstanceOf[TerminalRule] || r.isInstanceOf[FragmentRule]) {
             r.generateGrammar(ret)
             ret.append("\n")
