@@ -16,7 +16,7 @@ trait SymbolTable {
 
     /** Rules in this language, indexed by rule name. */
     def rules: collection.mutable.Map[String, RuleClass]
-    
+
     private var idcounter = 0
 
     def newId = {
@@ -69,7 +69,28 @@ case class ConstructorParam(name: String, vtype: String, code: String,
 
 class GrammarException(msg: String) extends Exception(msg)
 
+object BranchIdentifier {
+    /** The initial value for branch identifiers. */
+    val empty = new BranchIdentifier(List(0))
+}
 
+/** Represents branch identifiers. See the comment at the beginning of the file
+  * for details. */
+class BranchIdentifier(val branch: List[Int]) {
+    /** Returns identifier for the sibling branch. */
+    def nextBranch =
+        new BranchIdentifier((branch dropRight 1) ++ List(branch.last + 1))
+
+    /** Adds one level to the branch identifier. */
+    def extend = new BranchIdentifier(branch ++ List(0))
+
+    /** Returns true, if this branch conflicts with other branch. */
+    def conflictsWith(other: BranchIdentifier) =
+        (other.branch.zip(branch)) forall
+                        ((a: Tuple2[Int, Int]) => a._1 == a._2)
+
+    override def toString = branch.toString
+}
 
 /** Various utility methods useful for grammar generation. */
 object GrammarUtils {

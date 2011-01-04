@@ -74,29 +74,6 @@ case class RuleParam(name: String, ruleName: String, var varName: String,
     var scalaClass = ruleName
 }
 
-object BranchIdentifier {
-    /** The initial value for branch identifiers. */
-    val empty = new BranchIdentifier(List(0))
-}
-
-/** Represents branch identifiers. See the comment at the beginning of the file
-  * for details. */
-class BranchIdentifier(val branch: List[Int]) {
-    /** Returns identifier for the sibling branch. */
-    def nextBranch = 
-        new BranchIdentifier((branch dropRight 1) ++ List(branch.last + 1))
-
-    /** Adds one level to the branch identifier. */
-    def extend = new BranchIdentifier(branch ++ List(0))
-
-    /** Returns true, if this branch conflicts with other branch. */
-    def conflictsWith(other: BranchIdentifier) =
-        (other.branch.zip(branch)) forall
-                        ((a: Tuple2[Int, Int]) => a._1 == a._2)
-
-    override def toString = branch.toString
-}
-
 /** Code for generating code for a single grammar rule.
   * @param symbols information about the rules in the grammar.
   * @param termCode buffer that will contain ANTLR code for terminal rules.
@@ -105,11 +82,11 @@ class BranchIdentifier(val branch: List[Int]) {
   * @param posMap function that will return node's position in the
   * input program.
   */
-class RuleGen(symbols: SymbolTable, termCode: ArrayBuffer[String], 
+class RuleGen(symbols: SymbolTable, termCode: ArrayBuffer[String],
         nonTermCode: ArrayBuffer[String], posMap: Any => List[Int]) {
     import symbols._
     import GrammarUtils._
-    
+
     val error = GrammarUtils.error(posMap)_
 
     /** Identifies current branch in the options. */
@@ -185,7 +162,7 @@ class RuleGen(symbols: SymbolTable, termCode: ArrayBuffer[String],
 
         g += "}\n@after {$r = new " + name + "("
 
-        // The following string will be modified later to include 
+        // The following string will be modified later to include
         // code for all the constructor parameters for this node.
         g += ""
         val params_idx = g.size - 1
@@ -217,10 +194,10 @@ class RuleGen(symbols: SymbolTable, termCode: ArrayBuffer[String],
 
         // Fill in the info needed for generating the Scala class.
         rules(name).classType = "case class " + name
-        rules(name).parameters = 
+        rules(name).parameters =
             for (p <- params) yield
-                ConstructorParam(p.name, 
-                        if (p.isList) "List[" + p.scalaClass + "]" 
+                ConstructorParam(p.name,
+                        if (p.isList) "List[" + p.scalaClass + "]"
                         else p.scalaClass,
                         "", "var ")
 
@@ -272,7 +249,7 @@ class RuleGen(symbols: SymbolTable, termCode: ArrayBuffer[String],
         g += ";\n"
     }
 
-    /** Matches code block at the beginning of the rule. 
+    /** Matches code block at the beginning of the rule.
       * @param tree AST corresponding to rule.
       * @param ruleName name of the rule.
       * @return the rule body without the code block.
@@ -302,7 +279,7 @@ class RuleGen(symbols: SymbolTable, termCode: ArrayBuffer[String],
 
     /** Processes list of alternatives. The tree contains list of alternatives,
       * each wrapped in a list starting with NODE.
-      * @param doMatch function that will be called for each alternative. 
+      * @param doMatch function that will be called for each alternative.
       * @param tree AST containing list of alternatives for a rule.
       */
     def matchAltList(doMatch: List[Any] => List[Any], tree: List[Any]) {
@@ -373,9 +350,9 @@ class RuleGen(symbols: SymbolTable, termCode: ArrayBuffer[String],
       * (= ...) element, then assumes that this will become the name of
       * the next term. Otherwise, the name will be null. */
     def matchName(tree: List[Any]): List[Any]  = tree match {
-        case List("=", name: String) :: t => 
+        case List("=", name: String) :: t =>
             matchModifier(matchNonTermPattern(name), t)
-        case t => 
+        case t =>
             matchModifier(unnamedPattern, t)
     }
 
@@ -420,7 +397,7 @@ class RuleGen(symbols: SymbolTable, termCode: ArrayBuffer[String],
     /** Checks whether given pattern represents literal string.
       * If yes, then adds the literal to list of known terminals and
       * keywords. Returns variable referring to that pattern.
-      * If the pattern is rule call, does nothing 
+      * If the pattern is rule call, does nothing
      */
     def getPatternVar(pattern: String, createLiteralClass: Boolean): String = {
         println("getPatternVar(" + pattern + ")")
