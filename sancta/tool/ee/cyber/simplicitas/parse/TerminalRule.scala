@@ -4,7 +4,7 @@ import scala.collection.mutable.ArrayBuffer
 
 import GrammarUtils._
 
-abstract class TerminalFragment(pName: String, pTree: List[Any], symbols: STable)
+abstract class TerminalFragment(pName: String, pTree: List[Any], symbols: SymbolTable)
         extends Rule(pName, pTree, symbols) {
     override def antlrName = name.capitalize
     def collectParams() {}
@@ -31,7 +31,7 @@ abstract class TerminalFragment(pName: String, pTree: List[Any], symbols: STable
         }
     }
 
-    def paramValue(param: RParam) = {
+    def paramValue(param: RuleParam) = {
         val varName = "$" + param.antlrName
         val v = "(" + name + ")setTokenPos(new " + name +
                 "(" + varName + ".getText()" + ")," + varName + ")"
@@ -41,7 +41,7 @@ abstract class TerminalFragment(pName: String, pTree: List[Any], symbols: STable
 }
 
 
-class FragmentRule(pName: String, pTree: List[Any], symbols: STable)
+class FragmentRule(pName: String, pTree: List[Any], symbols: SymbolTable)
         extends TerminalFragment(pName, pTree, symbols) {
     override def generateClasses() = super.generateClasses()
     override def rulePrefix = "fragment "
@@ -53,16 +53,16 @@ class FragmentRule(pName: String, pTree: List[Any], symbols: STable)
 }
 
 class TerminalRule(pName: String, hidden: Boolean, pTree: List[Any],
-        symbols: STable) extends TerminalFragment(pName, pTree, symbols) {
+        symbols: SymbolTable) extends TerminalFragment(pName, pTree, symbols) {
     import symbols._
 
     override def generateClasses() {
         // Hidden rules do not contribute to the AST and therefore
         // should generate no classes.
         if (!hidden) {
-            val newClass = new RClass(name, "case class", body)
+            val newClass = new RuleClass(name, "case class", body)
             newClass.extend += "TerminalNode"
-            newClass.params += new RCParam("text", "String")
+            newClass.params += new RuleClassParam("text", "String")
             classes(name) = newClass
         }
 
@@ -78,9 +78,9 @@ class TerminalRule(pName: String, hidden: Boolean, pTree: List[Any],
     }
 }
 
-class LiteralRule(pName: String, text: String, symbols: STable)
+class LiteralRule(pName: String, text: String, symbols: SymbolTable)
         extends Rule(
-                pName, 
+                pName,
                 List(List("NODE", List("MATCH", stripQuotes(text)))),
                 symbols) {
     returnType = "LiteralNode"
@@ -95,7 +95,7 @@ class LiteralRule(pName: String, text: String, symbols: STable)
         buf += text
     }
 
-    def paramValue(param: RParam) = {
+    def paramValue(param: RuleParam) = {
         val varName = "$" + param.antlrName
         val v = "(LiteralNode)setTokenPos(new LiteralNode(" +
                 varName + ".getText()" + ")," + varName + ")"

@@ -2,21 +2,26 @@ package ee.cyber.simplicitas.parse
 
 import scala.collection.mutable.ArrayBuffer
 
-import GrammarUtils._
+import Actions._
 
-/** Rule parameter.
-  * @param name The name of the parameter.
+/** Information about other rule that is called from current rule.
+  * @param name variable name for rule in the grammar ("foo" in foo=Bar).
   * @param rule Name of the rule called.
-  * @param branch Identifies the branch
+  * @param branch Identifies the branch.
+  * @see BranchIdentifier class for further details.
   * @param isList Whether the parameter is used in + or * context.
   */
-class RParam(val name: String, val rule: String, val branch: BranchIdentifier,
-        val isList: Boolean, symbols: STable) {
+class RuleParam(val name: String, val rule: String,
+        val branch: BranchIdentifier, val isList: Boolean,
+        symbols: SymbolTable) {
     /** The actual Scala type of the parameter. */
     var paramType: String = null
 
     /** The name of the parameter in the ANTLR grammar rule. */
     var antlrName: String = symbols.newId
+
+    /** Name of the temporary variable used to collect
+      * the list elements (used if this parameter is a list). */
     val listVar: String = if (isList) symbols.newId else null
 
     override def toString = name + ": " +
@@ -24,24 +29,15 @@ class RParam(val name: String, val rule: String, val branch: BranchIdentifier,
         (if (isList) ", LIST " else " ") + branch
 }
 
-object Actions {
-    type Action = (RClass) => Unit
-    class ActionSet extends
-        collection.mutable.HashMap[String, collection.mutable.Set[Action]]
-           with collection.mutable.MultiMap[String, Action]
-
-    def addExtend(cl: String): (RClass) => Unit =
-        (rule: RClass) => rule.extend += cl
-}
-
-import Actions._
-
-abstract class Rule(val name: String, var tree: List[Any], symbols: STable) {
+/** Represents a rule in the grammar. Also responsible for generating the
+  * corresponding Scala class(es) and the ANTLR rule.
+  * The main work is done in subclasses of Rule. */
+abstract class Rule(val name: String, var tree: List[Any], symbols: SymbolTable) {
     var returnType: String = null
     var returnCode: String = null
     var body: String = null
 
-    var params = new ArrayBuffer[RParam]
+    var params = new ArrayBuffer[RuleParam]
 
     val error = GrammarUtils.error(symbols.getPos)_
 
@@ -103,7 +99,7 @@ abstract class Rule(val name: String, var tree: List[Any], symbols: STable) {
         if (returnType ne null) {
             if (!rules.contains(returnType) &&
                     !classes.contains(returnType)) {
-                classes(returnType) = new RClass(returnType, "trait", body)
+                classes(returnType) = new RuleClass(returnType, "trait", body)
             }
             classes(name).extend += returnType
         }
@@ -135,7 +131,7 @@ abstract class Rule(val name: String, var tree: List[Any], symbols: STable) {
     def ruleBody(implicit buf: ArrayBuffer[String]) {}
 
     // TODO: some decent implementation.
-    def paramValue(param: RParam): String
+    def paramValue(param: RuleParam): String
 
     def isTerminalRule: Boolean
 }

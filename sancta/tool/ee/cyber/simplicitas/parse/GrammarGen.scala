@@ -5,29 +5,10 @@ import scala.collection.mutable.ArrayBuffer
 import GrammarUtils._
 import Actions._
 
-trait STable {
-    def rules: collection.mutable.Map[String, Rule]
-    def classes: collection.mutable.Map[String, RClass]
-    def actions: ActionSet
-
-    /** Map from kw contents to name of rule. */
-    def keywords: collection.mutable.Map[String, String]
-
-    /** Returns position of the given node.
-      * Strictly does not belong to symbol table, but it is convenient to
-      * pass it around along with other global-ish information. */
-    def getPos: (Any) => List[Int]
-
-    /** Name of the grammar. Also, convenient to pass around. */
-    def getGrammarName: String
-
-    def newId: String
-}
-
 class Gen2(pGetPos: (Any) => List[Int]) {
-    object Symbols extends STable {
+    object Symbols extends SymbolTable {
         val rules = collection.mutable.Map[String, Rule]()
-        val classes = collection.mutable.Map[String, RClass]()
+        val classes = collection.mutable.Map[String, RuleClass]()
         val actions = new ActionSet
         val keywords = collection.mutable.Map[String, String]()
 

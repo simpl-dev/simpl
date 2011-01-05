@@ -5,12 +5,12 @@ import scala.collection.mutable.ArrayBuffer
 import GrammarUtils._
 import Actions._
 
-abstract class NonTerminalRule(pName: String, pTree: List[Any], symbols: STable)
+abstract class NonTerminalRule(pName: String, pTree: List[Any], symbols: SymbolTable)
         extends Rule(pName, pTree, symbols) {
     override def antlrName = uncapitalize(name) + "_"
     override def ruleReturns =  " returns [" + actualReturnType  + " r]"
 
-    def paramValue(param: RParam) = "$" + param.antlrName + ".r"
+    def paramValue(param: RuleParam) = "$" + param.antlrName + ".r"
     def isTerminalRule = false
 
     protected def wrapInReturn(expr: String) =
@@ -20,7 +20,7 @@ abstract class NonTerminalRule(pName: String, pTree: List[Any], symbols: STable)
             expr
 }
 
-class OptionRule(pName: String, pTree: List[Any], symbols: STable)
+class OptionRule(pName: String, pTree: List[Any], symbols: SymbolTable)
         extends NonTerminalRule(pName, pTree, symbols) {
     import symbols._
 
@@ -30,7 +30,7 @@ class OptionRule(pName: String, pTree: List[Any], symbols: STable)
     }
 
     override def generateClasses() {
-        classes(name) = new RClass(name, "trait", body)
+        classes(name) = new RuleClass(name, "trait", body)
         for (opt <- tree) {
             actions.addBinding(opt.toString, addExtend(name))
 
@@ -62,7 +62,7 @@ class OptionRule(pName: String, pTree: List[Any], symbols: STable)
                 buf += "\n    | "
             }
 
-            val param = new RParam("", option, null, false, symbols)
+            val param = new RuleParam("", option, null, false, symbols)
 
             buf += param.antlrName + "=" + rules(option).antlrName +
                     "{$r=" + wrapInReturn(rules(param.rule).paramValue(param)) +
@@ -78,7 +78,7 @@ object Modifier extends Enumeration("?", "*", "+") {
     val Optional, Star, Plus = Value
 }
 
-class NormalRule(pName: String, pTree: List[Any], symbols: STable)
+class NormalRule(pName: String, pTree: List[Any], symbols: SymbolTable)
         extends NonTerminalRule(pName, pTree, symbols) {
     import symbols._
 
@@ -152,7 +152,7 @@ class NormalRule(pName: String, pTree: List[Any], symbols: STable)
 
         val paramName = getParamName(name, pattern)
 
-        val param = new RParam(paramName, calledRuleName, currentBranch, isList,
+        val param = new RuleParam(paramName, calledRuleName, currentBranch, isList,
                 symbols)
 
         checkParamNameConflicts(param)
@@ -196,7 +196,7 @@ class NormalRule(pName: String, pTree: List[Any], symbols: STable)
     // x=foo y=bar x=baz is a conflict.
     // y=bar (x=foo | x=baz) is not because both x's are in different
     // branches.
-    def checkParamNameConflicts(np: RParam) {
+    def checkParamNameConflicts(np: RuleParam) {
         println("checkParamNameConflicts(" + np.name + ", " + np.rule + ")")
         val varName = np.name
 
@@ -222,7 +222,7 @@ class NormalRule(pName: String, pTree: List[Any], symbols: STable)
 
     override def generateClasses() {
         println("generateClasses(" + name + ")")
-        val cl = new RClass(name, "case class", body)
+        val cl = new RuleClass(name, "case class", body)
         classes(name) = cl
 
         for (p <- params) {
@@ -232,7 +232,7 @@ class NormalRule(pName: String, pTree: List[Any], symbols: STable)
                         p.name)
             }
             val ruleType = rules(p.rule).actualReturnType
-            cl.params += new RCParam(p.name,
+            cl.params += new RuleClassParam(p.name,
                     if (p.isList) "List[" + ruleType + "]" else ruleType)
         }
 

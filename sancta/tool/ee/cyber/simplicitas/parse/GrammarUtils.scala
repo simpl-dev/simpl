@@ -5,67 +5,43 @@ package ee.cyber.simplicitas.parse
 import scala.collection.mutable.ArrayBuffer
 
 
+object Actions {
+    type Action = (RuleClass) => Unit
+    class ActionSet extends
+        collection.mutable.HashMap[String, collection.mutable.Set[Action]]
+           with collection.mutable.MultiMap[String, Action]
+
+    def addExtend(cl: String): (RuleClass) => Unit =
+        (rule: RuleClass) => rule.extend += cl
+}
+
 /** Contains the symbols that are found in the grammar. */
 trait SymbolTable {
-    /** Set of used terminal identifiers. */
-    def terminals: collection.mutable.Set[String]
+    /** Grammar rules (both terminal and nonterminal.
+      * Indexed by the rule name. */
+    def rules: collection.mutable.Map[String, Rule]
+
+    /** Classes that will be generated, indexed by class name. */
+    def classes: collection.mutable.Map[String, RuleClass]
+
+    /** Actions that need to be run after generating classes. */
+    def actions: Actions.ActionSet
 
     /** Keywords supported by this language. Map is from keyword
       * to identifier representing the corresponding lexer rule. */
     def keywords: collection.mutable.Map[String, String]
 
-    /** Rules in this language, indexed by rule name. */
-    def rules: collection.mutable.Map[String, RuleClass]
+    /** Returns position of the given node.
+      * Strictly does not belong to symbol table, but it is convenient to
+      * pass it around along with other global-ish information. */
+    def getPos: (Any) => List[Int]
 
-    private var idcounter = 0
+    /** Name of the grammar. Also here for convenience. */
+    def getGrammarName: String
 
-    def newId = {
-        idcounter += 1
-        println("newId(" + "Z" + idcounter + ")")
-        "Z" + idcounter
-    }
+    /** Returns new unique identifier. */
+    def newId: String
 }
-
-/** Represents class that is generated for each rule. */
-class RuleClass(val antlrName: String) {
-    /** This will be either "trait" or "case class" depending on
-      * the type of the rule. */
-    var classType = ""
-
-    /** Constructor parameters. */
-    var parameters: Seq[ConstructorParam] = Nil
-
-    /** What classes will we extend? */
-    val extend = new ArrayBuffer[String]()
-
-    /** Class body, if user uses the { ... } construct. */
-    var body = ""
-
-    /** Should we generate class from this rule? */
-    var generateCode = true
-
-    def withoutCodegen = {
-        generateCode = false
-        this
-    }
-}
-
-object RuleClass {
-    /** Creates RuleClass object corresponding to terminal rule with
-      * given name. */
-    def terminalRule(name: String) = {
-        val termClass = new RuleClass(name)
-        termClass.extend += "TerminalNode"
-        termClass.classType = "case class " + name
-        termClass.parameters =
-            List(ConstructorParam("text", "String", "$_", ""))
-
-        termClass
-    }
-}
-
-case class ConstructorParam(name: String, vtype: String, code: String,
-        mod: String)
 
 class GrammarException(msg: String) extends Exception(msg)
 
@@ -74,8 +50,42 @@ object BranchIdentifier {
     val empty = new BranchIdentifier(List(0))
 }
 
-/** Represents branch identifiers. See the comment at the beginning of the file
-  * for details. */
+/**
+ * The code tries to ensure that there are no name clashes for rule calls
+ * in different branches. For example, this is legal rule:
+ * Foo: x=Bar y=Baz | x=Bar z=Bag;
+ *
+ * Although the variable x is present in both options, it has the same type
+ * and can therefore safely be used. This is incorrect:
+ * Foo: x=Bar y=Baz | x=Baz z=Bag;
+ *
+ * Now x is type Bar in one branch and Baz in another.
+ *
+ * The important point is to determine which uses of variable would clash
+ * (variable is used two times in the same branch). For example, consider
+ * the following rule (for brevity, here assignments are not used for
+ * sub-rule calls):
+ *
+ * Foo: A ((B C) | (D (E | F)?));
+ *
+ * In this case, A would clash with all the other rule calls, but B and E,
+ * for example, do not clash. However, D and F clash. To determine, which
+ * subrule calls clash, each branch in the rule is assigned an identifier.
+ * If the same variable us used several times in a rule, then the identifiers
+ * are compared to see whether the uses of this variable clash.
+ *
+ * Branch identifers are lists of integers that represents path to a sub-rule
+ * call. For example, identifiers for the previous rule, are:
+ * A: [0]
+ * B: [0, 0]
+ * C: [0, 0]
+ * D: [0, 1]
+ * E: [0, 1, 0]
+ * F: [0, 1, 1]
+ *
+ * Two sub-rule calls with identifiers I1 and I2 clash if I1 is prefix of
+ * I2 or vice versa.
+ */
 class BranchIdentifier(val branch: List[Int]) {
     /** Returns identifier for the sibling branch. */
     def nextBranch =
