@@ -53,10 +53,12 @@ object BranchIdentifier {
 /**
  * The code tries to ensure that there are no name clashes for rule calls
  * in different branches. For example, this is legal rule:
+ *
  * Foo: x=Bar y=Baz | x=Bar z=Bag;
  *
  * Although the variable x is present in both options, it has the same type
  * and can therefore safely be used. This is incorrect:
+ *
  * Foo: x=Bar y=Baz | x=Baz z=Bag;
  *
  * Now x is type Bar in one branch and Baz in another.
@@ -76,6 +78,7 @@ object BranchIdentifier {
  *
  * Branch identifers are lists of integers that represents path to a sub-rule
  * call. For example, identifiers for the previous rule, are:
+ *
  * A: [0]
  * B: [0, 0]
  * C: [0, 0]
@@ -97,7 +100,7 @@ class BranchIdentifier(val branch: List[Int]) {
     /** Returns true, if this branch conflicts with other branch. */
     def conflictsWith(other: BranchIdentifier) =
         (other.branch.zip(branch)) forall
-                        ((a: Tuple2[Int, Int]) => a._1 == a._2)
+                        ((a: (Int, Int)) => a._1 == a._2)
 
     override def toString = branch.toString
 }
@@ -120,16 +123,21 @@ object GrammarUtils {
         else
             (Character toLowerCase (s charAt 0)) + (s substring 1)
 
+    /** Convenience wrapper for @link Iterable.mkString. */
     def join(i: Iterable[Any]) = i.mkString(", ")
 
+    /** Strips one character from beginning and end of string <code>s</code>. */
     def stripQuotes(s: String) =
         if ((s ne null) && (s != ""))
             s.substring(1, s.length - 1)
         else
             ""
 
-    // Helper functions for generating grammar code.
-
+    /** Helper function for generating grammar code. Walks through list of
+     * options (pattern in the form of "foo | bar | baz").
+     * For each found option, calls the given function and outputs
+     * the modifier (*, +, ?, ~) to the grammar output.
+     */
     def doOptionList(fun: Any => Unit, lst: List[Any])
             (implicit buf: ArrayBuffer[String]) {
         var first = true
@@ -141,21 +149,24 @@ object GrammarUtils {
 
             for (m <- matches) {
                 m match {
+                    // Foo
                     case List("MATCH", ruleCall) =>
                         fun(ruleCall)
+                    // !Foo
                     case List("MATCH", "~", ruleCall) =>
                         buf += "~"
                         fun(ruleCall)
+                    // Foo+ or Foo*
                     case List("MATCH", modifier: String, ruleCall) =>
                         fun(ruleCall)
                         buf += modifier
+                    // ~Foo+ or ~Foo*
                     case List("MATCH", modifier: String, "~", ruleCall) =>
                         buf += "~"
                         fun(ruleCall)
                         buf += modifier
                     case _ =>
-                        throw new IllegalArgumentException(
-                                "Invalid syntax tree: " + m)
+                        throw new GrammarException("Invalid syntax tree: " + m)
                 }
             }
 

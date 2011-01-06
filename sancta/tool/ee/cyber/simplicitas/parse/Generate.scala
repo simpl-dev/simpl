@@ -30,7 +30,7 @@ class Generator {
         def addChildren(t: BaseTree, a: ArrayBuffer[Object]) =
             for (i <- 0 to t.getChildCount - 1)
                 convertTree((t getChild i).asInstanceOf[BaseTree], a, pm)
-        
+
         if (t isNil) {
             addChildren(t, a)
         } else if (t.getChildCount == 0) {
@@ -71,7 +71,8 @@ class Generator {
         val parser = new AntLikeParser(tokens)
         val parse_result = parser.grammarDef
         if (parser.getNumberOfSyntaxErrors != 0) {
-            throw new GrammarException("bad grammar")
+            throw new GrammarException(
+                "Syntax errors found in the grammar file")
         }
         val atree = parse_result.getTree.asInstanceOf[CommonTree]
         val pm = new posmap()
@@ -103,7 +104,7 @@ object Generate {
     def main(argv: Array[String]) {
         if (argv.length != 2 && argv.length != 4)
             usage()
-       
+
         val gen = new Generator()
         var inputFile: String  = null
         for (i <- 0 to argv.length - 1 by 2) {
@@ -117,7 +118,7 @@ object Generate {
 
         if (inputFile eq null)
             usage()
-      
+
         try {
             gen.generate(inputFile, "UTF-8")
         } catch {

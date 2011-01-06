@@ -1,16 +1,26 @@
 package ee.cyber.simplicitas.parse
 
 import scala.collection.mutable.ArrayBuffer
-
 import GrammarUtils._
 
+/* This file contains classes for terminal and fragment rules. */
+
+/** Base class for terminal and fragment, but not for literal rules.
+ * Such is life. */
 abstract class TerminalFragment(pName: String, pTree: List[Any], symbols: SymbolTable)
         extends Rule(pName, pTree, symbols) {
     override def antlrName = name.capitalize
-    def collectParams() {}
+
+    def collectParams() {
+        // Terminal rules do not have parameters.
+    }
+
     def isTerminalRule = true
 
-    def matchTerminal(node: Any)(implicit buf: ArrayBuffer[String]) {
+    /** Helper function for use with doOptionList.
+     * Generates grammar for terminal patterns.
+     */
+    protected def matchTerminal(node: Any)(implicit buf: ArrayBuffer[String]) {
         node match {
             // ( Foo )
             case "(" :: alt =>
@@ -40,18 +50,18 @@ abstract class TerminalFragment(pName: String, pTree: List[Any], symbols: Symbol
     }
 }
 
-
+/** Fragment rules. */
 class FragmentRule(pName: String, pTree: List[Any], symbols: SymbolTable)
         extends TerminalFragment(pName, pTree, symbols) {
     override def generateClasses() = super.generateClasses()
     override def rulePrefix = "fragment "
 
-    override def ruleBody(implicit buf: ArrayBuffer[String]) {
-        println("generating " + name + ": " + tree)
+    def ruleBody(implicit buf: ArrayBuffer[String]) {
         doOptionList(matchTerminal, tree)
     }
 }
 
+/** Normal terminal rules in the grammar. */
 class TerminalRule(pName: String, hidden: Boolean, pTree: List[Any],
         symbols: SymbolTable) extends TerminalFragment(pName, pTree, symbols) {
     import symbols._
@@ -69,8 +79,7 @@ class TerminalRule(pName: String, hidden: Boolean, pTree: List[Any],
         super.generateClasses()
     }
 
-    override def ruleBody(implicit buf: ArrayBuffer[String]) {
-        println("generating " + name + ": " + tree)
+    def ruleBody(implicit buf: ArrayBuffer[String]) {
         doOptionList(matchTerminal, tree)
         if (hidden) {
             buf += "{$channel = HIDDEN;}"
@@ -78,6 +87,17 @@ class TerminalRule(pName: String, hidden: Boolean, pTree: List[Any],
     }
 }
 
+/** Literal rules are automatically generated and correspond to keywords
+ * or operators in the grammar (essentially, everything between
+ * quotation marks). They produce rules in the style of
+ *
+ * Foo: "foo";
+ *
+ * The literal rules do not generate separate AST classes like normal terminal
+ * rules. Instead, all the literal rules will create LiteralNode objects.
+ *
+ * @param text The literal string that will be matched by this rule.
+ */
 class LiteralRule(pName: String, text: String, symbols: SymbolTable)
         extends Rule(
                 pName,
@@ -91,7 +111,7 @@ class LiteralRule(pName: String, text: String, symbols: SymbolTable)
     override def generateClasses() {}
     def isTerminalRule = true
 
-    override def ruleBody(implicit buf: ArrayBuffer[String]) {
+    def ruleBody(implicit buf: ArrayBuffer[String]) {
         buf += text
     }
 

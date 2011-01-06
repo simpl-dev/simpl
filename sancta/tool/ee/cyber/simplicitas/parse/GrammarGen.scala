@@ -52,7 +52,6 @@ class Gen2(pGetPos: (Any) => List[Int]) {
 
         // Do the class generation and type inference.
         for (r: Rule <- rules.values.toSet) {
-            println("generateClasses(" + r.name + ")")
             r.generateClasses()
         }
 

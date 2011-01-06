@@ -5,7 +5,9 @@ import scala.collection.mutable.ArrayBuffer
 import GrammarUtils._
 import Actions._
 
-abstract class NonTerminalRule(pName: String, pTree: List[Any], symbols: SymbolTable)
+/** Base class for normal and option rules. */
+abstract class NonTerminalRule(pName: String, pTree: List[Any],
+                               symbols: SymbolTable)
         extends Rule(pName, pTree, symbols) {
     override def antlrName = uncapitalize(name) + "_"
     override def ruleReturns =  " returns [" + actualReturnType  + " r]"
@@ -13,6 +15,7 @@ abstract class NonTerminalRule(pName: String, pTree: List[Any], symbols: SymbolT
     def paramValue(param: RuleParam) = "$" + param.antlrName + ".r"
     def isTerminalRule = false
 
+    /** Wrap code in expr to call to "returns expression" of this rule. */
     protected def wrapInReturn(expr: String) =
         if (returnCode ne null)
             symbols.getGrammarName + "Grammar.return" + name +"(" + expr + ")"
@@ -20,25 +23,31 @@ abstract class NonTerminalRule(pName: String, pTree: List[Any], symbols: SymbolT
             expr
 }
 
+/** Option rules:
+ *
+ * option Foo: Bar | Baz;
+ */
 class OptionRule(pName: String, pTree: List[Any], symbols: SymbolTable)
         extends NonTerminalRule(pName, pTree, symbols) {
     import symbols._
 
-    /** Finds and records all the rule parameters. */
     def collectParams() {
         // Nothing to do: tree already contains list of called rules.
     }
 
     override def generateClasses() {
+        // Create trait for this rule.
         classes(name) = new RuleClass(name, "trait", body)
+
         for (opt <- tree) {
+            // Make the called rule extend the trait.
             actions.addBinding(opt.toString, addExtend(name))
 
             if (!rules.contains(opt.toString)) {
                 error(opt, "Reference to undefined rule " + opt)
             }
 
-            // If called rule has some weird return type then we
+            // If the called rule has some weird return type then we
             // must extend this return type, otherwise the rule call
             // will not be type correct.
             val calledRule = rules(opt.toString)
@@ -72,34 +81,42 @@ class OptionRule(pName: String, pTree: List[Any], symbols: SymbolTable)
     }
 }
 
+/** Possible multiplicity modifiers for patterns. */
 object Modifier extends Enumeration("?", "*", "+") {
     type Val = Value
 
     val Optional, Star, Plus = Value
 }
 
+/**Normal nonterminal rule in the form:
+ *
+ * Foo: bar=Bar baz=Baz+
+ */
 class NormalRule(pName: String, pTree: List[Any], symbols: SymbolTable)
         extends NonTerminalRule(pName, pTree, symbols) {
     import symbols._
 
-    /** Identifies current branch in the options. */
+    /** Identifies current branch in the options. It is only used during
+      * the collectParams() method. */
     var currentBranch: BranchIdentifier = BranchIdentifier.empty
 
     /** whether the currently analyzed branch contains
-      * repetition (Foo+ or Foo*). */
+     * repetition (Foo+ or Foo*). */
     var isList = false
 
-    /** Finds and records all the rule parameters. */
     def collectParams() {
         collectOptionList(tree)
     }
 
-    def collectOptionList(lst: List[Any]) {
+    private def collectOptionList(lst: List[Any]) {
+        // Iterate through all the options...
         for ("NODE" :: matches <- lst) {
             for (m <- matches) {
                 m match {
+                    // Pattern with ?, + or * modifier.
                     case List("MATCH", modifier: String, ruleCall) =>
                         doMatch(Modifier.withName(modifier), ruleCall)
+                    // Just pattern.
                     case List("MATCH", ruleCall) =>
                         doMatch(null, ruleCall)
                 }
@@ -108,11 +125,14 @@ class NormalRule(pName: String, pTree: List[Any], symbols: SymbolTable)
         }
     }
 
-    def doMatch(modifier: Modifier.Val, ruleCall: Any) {
+    /** Processes the pattern in the ruleCall parameter. */
+    private def doMatch(modifier: Modifier.Val, ruleCall: Any) {
         val oldList = isList
+        // Check whether the current pattern has more than one occurrence.
         if ((modifier eq Modifier.Plus) || (modifier eq Modifier.Star)) {
             isList = true
         }
+
         ruleCall match {
             // Foo
             case pattern: String =>
@@ -124,7 +144,9 @@ class NormalRule(pName: String, pTree: List[Any], symbols: SymbolTable)
             case "(" :: options =>
                 val oldBranch = currentBranch
 
+                // The pattern in parentheses will be in a new branch.
                 currentBranch = currentBranch.extend
+                // Recursively process the pattern.
                 collectOptionList(options)
 
                 currentBranch = oldBranch
@@ -132,11 +154,11 @@ class NormalRule(pName: String, pTree: List[Any], symbols: SymbolTable)
         isList = oldList
     }
 
-    def doRuleCall(name: String, pattern: String) {
-        println("doRuleCall(" + name + ", " + pattern + "), branch=" +
-                currentBranch + ", list=" + isList)
-
-        // Unnamed call to literal "foo"
+    /** By now we have isolated pattern in the form "name=pattern"
+     * where name may be null (in case of unnamed pattern) and the pattern
+     * is definitely a call to other rule. */
+    private def doRuleCall(name: String, pattern: String) {
+        // Unnamed call to literal: just "foo"
         if ((name eq null) && isLiteralPattern(pattern)) {
             addLiteralRule(pattern)
             return
@@ -150,54 +172,60 @@ class NormalRule(pName: String, pTree: List[Any], symbols: SymbolTable)
             calledRuleName = keywords(pattern)
         }
 
+        /** What's the name of the parameter? */
         val paramName = getParamName(name, pattern)
 
-        val param = new RuleParam(paramName, calledRuleName, currentBranch, isList,
-                symbols)
+        val param = new RuleParam(paramName, calledRuleName,
+                currentBranch, isList, symbols)
 
+        // Check whether this rule call conflicts with other rule calls
+        // with the same name.
         checkParamNameConflicts(param)
     }
 
-    def addLiteralRule(pattern: String) {
+    /** Processes call to unnamed literal. This literal will not go to AST.
+     * We just have to create rule for it.
+     */
+    private def addLiteralRule(pattern: String) {
+        // It's already registered.
         if (keywords.contains(pattern)) {
             return
         }
 
+        // Make legal name for it.
         val ruleName = makeKeywordName(pattern)
+
+        // Create new rule.
         rules(ruleName) = new LiteralRule(ruleName, pattern, symbols)
         keywords(pattern) = ruleName
     }
 
-    /** Turns string 'foo' into Foo. */
-    def makeKeywordName(s: String) = {
-        val buf = new StringBuilder()
-        for (i <- 1 to s.length - 1) {
-            val ch = s.charAt(i)
-            if (Character.isJavaIdentifierPart(ch))
-                buf.append(if (!buf.isEmpty) ch
-                        else Character.toUpperCase(ch))
-        }
-        var id = buf.toString
+    /** Creates identifier for the keyword. If keyword consists of characters,
+     * uses the keyword itself. If keyword contains punctuation or other
+     * similar stuff, generate new unique ID. Unique ID is also generated if
+     * rule with this name already exists. */
+    private def makeKeywordName(s: String): String = {
+        // Let's see if we can make it Java identifier...
+        var id = s.filter(Character.isJavaIdentifierPart).capitalize
 
         // Make it a valid Java identifier
-        if (id != "" && !(Character isJavaIdentifierStart (id charAt 0)))
+        if (id != "" && !(Character.isJavaIdentifierStart(id(0))))
             id = "X_" + id
 
-        // If it conflicts with existing rules, just create new variable.
-        if (id == "" || (rules.contains(id))) {
-            id = newId
-        }
-
-        id
+        if (id == "" || (rules.contains(id)))
+            // It is unintelligible or conflicts with existing rule.
+            // In this case, create a new variable.
+            newId
+        else
+            id
     }
 
-    // Check if name of the node conflicts with some other name in
-    // the same branch. For example:
-    // x=foo y=bar x=baz is a conflict.
-    // y=bar (x=foo | x=baz) is not because both x's are in different
-    // branches.
-    def checkParamNameConflicts(np: RuleParam) {
-        println("checkParamNameConflicts(" + np.name + ", " + np.rule + ")")
+    /** Check if name of the node conflicts with some other name in
+     * the same branch. For example:
+     * x=foo y=bar x=baz is a conflict.
+     * y=bar (x=foo | x=baz) is not because both x's are in different
+     * branches. */
+    private def checkParamNameConflicts(np: RuleParam) {
         val varName = np.name
 
         params find (_.name == varName) match {
@@ -205,32 +233,43 @@ class NormalRule(pName: String, pTree: List[Any], symbols: SymbolTable)
             // Check if there are conflicts.
             case Some(other) =>
                 if (currentBranch.conflictsWith(other.branch)) {
-                    throw new Exception("multiple tokens named '" + varName + "'")
+                    // There are two rule calls with the same name in the
+                    // same branch.
+                    error(tree,
+                        "Rule contains several calls with the same parameter name: " +
+                            varName)
                 } else if (other.rule != np.rule) {
-                    // TODO: better check for type conflict.
-                    throw new Exception("token type conflict: " + varName +
-                          " was " + other.rule + ", but redefined as " +
-                          np.rule)
+                    // There is rule call with same name and it has different
+                    // type. Hence, we cannot generate meaningful
+                    // AST classes and grammar.
+                    error(tree, "Parameter " + varName +
+                            " is to call different rules: " + np.rule +
+                            " and " + other.rule)
                 } else {
-                    // The compatible parameter already exists, do nothing.
+                    // Rule call with same name exists, but it has compatible
+                    // type. We are happy and need to do nothing more.
                     ()
                 }
+            // No similar parameter found, add it to the list.
             case _ =>
                 params += np
         }
     }
 
     override def generateClasses() {
-        println("generateClasses(" + name + ")")
+        // There will always be a case class generated for this rule, even
+        // if the return type of the rule is something else.
         val cl = new RuleClass(name, "case class", body)
         classes(name) = cl
 
         for (p <- params) {
-            println("param: " + p)
             if (!rules.contains(p.rule)) {
-                throw new Exception("Invalid rule reference: " + name + "." +
+                error(tree, "Invalid rule reference: " + name + "." +
                         p.name)
             }
+
+            // The generated class will have parameters whose type is
+            // the declared return type of the rule (not just rule name).
             val ruleType = rules(p.rule).actualReturnType
             cl.params += new RuleClassParam(p.name,
                     if (p.isList) "List[" + ruleType + "]" else ruleType)
@@ -242,6 +281,9 @@ class NormalRule(pName: String, pTree: List[Any], symbols: SymbolTable)
     override def ruleInit(implicit buf: ArrayBuffer[String]) {
         buf += "\n@init {SourceLocation _start=null;"
         buf += "int _end=-1;int _endLine=-1;int _endColumn=-1;"
+
+        // For each list parameter, generate a new variable whose
+        // value will accumulate the list contents.
         for (p <- params if p.isList) {
             buf += "ArrayList " + p.listVar + "=new ArrayList();"
         }
@@ -262,11 +304,11 @@ class NormalRule(pName: String, pTree: List[Any], symbols: SymbolTable)
         buf += "_endColumn==-1?(_start==null?0:_start.endColumn()):_endColumn);}"
     }
 
-    override def ruleBody(implicit buf: ArrayBuffer[String]) {
+    def ruleBody(implicit buf: ArrayBuffer[String]) {
         doOptionList(generateRuleCall, tree)
     }
 
-    def generateRuleCall(node: Any)(implicit buf: ArrayBuffer[String]) {
+    private def generateRuleCall(node: Any)(implicit buf: ArrayBuffer[String]) {
         def generate(name: String, pattern: String) {
             val ruleName: String =
                 if (isLiteralPattern(pattern))
@@ -334,6 +376,7 @@ class NormalRule(pName: String, pTree: List[Any], symbols: SymbolTable)
             }
         }
 
+        // The actual body of the generateRuleCall method
         node match {
             // Foo
             case pattern: String =>
@@ -349,8 +392,10 @@ class NormalRule(pName: String, pTree: List[Any], symbols: SymbolTable)
         }
     }
 
+    /** Return true, if the pattern corresponds to just string literal. */
     private def isLiteralPattern(pattern: String) = pattern.startsWith("'")
 
+    /** Get the name of parameter in the rule call. */
     private def getParamName(name: String, pattern: String) =
         if (name eq null)
             uncapitalize(pattern)
