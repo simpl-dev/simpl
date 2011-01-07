@@ -7,7 +7,7 @@ import Actions._
 
 class Gen2(pGetPos: (Any) => List[Int]) {
     object Symbols extends SymbolTable {
-        val rules = collection.mutable.Map[String, Rule]()
+        val rules = collection.mutable.LinkedHashMap[String, Rule]()
         val classes = collection.mutable.Map[String, RuleClass]()
         val actions = new ActionSet
         val keywords = collection.mutable.Map[String, String]()
