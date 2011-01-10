@@ -66,23 +66,34 @@ class Gen2(pGetPos: (Any) => List[Int]) {
     /** Adds rule to symbol table. */
     def addRule(rule: Any) = rule match {
         case "terminal" :: "hidden" :: (name: String) :: rest =>
+            checkDuplicates(name, rule)
             rules(name) = new TerminalRule(name, true, rest, Symbols)
         case "terminal" :: (name: String) :: rest =>
+            checkDuplicates(name, rule)
             rules(name) = new TerminalRule(name, false, rest, Symbols)
         case "fragment" :: (name: String) :: rest =>
+            checkDuplicates(name, rule)
             rules(name) = new FragmentRule(name, rest, Symbols)
         case "option" :: (name: String) :: rest =>
+            checkDuplicates(name, rule)
             rules(name) = new OptionRule(name, rest, Symbols)
             if (firstRule == null) {
                 firstRule = name
             }
         case ":" :: (name: String) :: rest =>
+            checkDuplicates(name, rule)
             rules(name) = new NormalRule(name, rest, Symbols)
             if (firstRule == null) {
                 firstRule = name
             }
         case _ =>
             error(rule, "Malformed rule")
+    }
+
+    private def checkDuplicates(rule: String, node: Any) {
+        if (rules.contains(rule)) {
+            error(node, "Duplicate rule: " + rule)
+        }
     }
 
     /** Cleans up the extends declarations:
