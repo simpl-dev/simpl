@@ -206,10 +206,10 @@ class NormalRule(pName: String, pTree: List[Any], symbols: SymbolTable)
      * rule with this name already exists. */
     private def makeKeywordName(s: String): String = {
         // Let's see if we can make it Java identifier...
-        var id = s.filter(Character.isJavaIdentifierPart).capitalize
+        var id = s.filter(isIdentifierPart).capitalize
 
         // Make it a valid Java identifier
-        if (id != "" && !(Character.isJavaIdentifierStart(id(0))))
+        if (id != "" && !(isIdentifierStart(id(0))))
             id = "X_" + id
 
         if (id == "" || (rules.contains(id)))

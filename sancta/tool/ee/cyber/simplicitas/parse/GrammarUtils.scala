@@ -173,4 +173,10 @@ object GrammarUtils {
             first = false
         }
     }
+
+    def isIdentifierPart(c: Char) =
+        Character.isLetter(c) || Character.isDigit(c) || c == '_'
+
+    def isIdentifierStart(c: Char) =
+        Character.isLetter(c) || c == '_'
 }
