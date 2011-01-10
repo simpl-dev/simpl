@@ -264,7 +264,7 @@ class NormalRule(pName: String, pTree: List[Any], symbols: SymbolTable)
 
         for (p <- params) {
             if (!rules.contains(p.rule)) {
-                error(tree, "Invalid rule reference: " + name + "." +
+                error(tree.head, "Invalid rule reference: " + name + "." +
                         p.name)
             }
 
