@@ -23,20 +23,25 @@ tokens {
 }
 
 grammarDef  : header ruleDef+ EOF!;
-header      : packageDef (optionDef | scalaHeader)*;
+header      : packageDef (optionDef | scalaHeader | lexerStates)*;
 packageDef  : 'grammar'^ dottedId ';'!;
 optionDef   : 'options'^ '('! optionList ')'!;
 optionList  : option*;
 option      : ID '=' ID ';' -> ^(ID ID);
 dottedId    : ID ('.' ID)*;
 scalaHeader : 'scalaheader'^ CODE;
+lexerStates : 'lexer-states'^ '('! ID (',' ID)* ')'!;
 
 ruleDef:
-      ('hidden'?) 'terminal'^ ID body? ':'! termAltList ';'!
-    | 'fragment'^ ID ':'! termAltList ';'!
+      ('hidden'?) 'terminal'^ ID body? stateOp? ':'! termAltList ';'!
+    | 'fragment'^ ID stateOp? ':'! termAltList ';'!
     | 'option'^ ID body? returnType? ':'! ID ('|'! ID)* ';'!
     | ID body? returnType? ':'^ altList ';'!;
 
+stateOp     : enterState | exitState | checkState;
+enterState  : 'enter-state'^ '('! ID ')'!;
+exitState  : 'exit-state'^ '('! ID (',' ID)* ')'!;
+checkState  : 'check-state'^ '('! ID (',' ID)* ')'!;
 body        : CODE -> ^(BODY CODE);
 returnType  : 'returns'^ dottedId? body?;
 altList     : matchList ('|'! matchList)*;

@@ -34,6 +34,8 @@ class Gen2(pGetPos: (Any) => List[Int]) {
     /** Header for generated Scala code. */
     private var scalaHeader = ""
 
+    private var lexerStates = new ArrayBuffer[String]()
+
     private var firstRule: String = null
 
     val error = GrammarUtils.error(pGetPos)_
@@ -153,6 +155,15 @@ class Gen2(pGetPos: (Any) => List[Int]) {
             matchGrammarOptions(rest)
         case ("scalaheader" :: header :: Nil) :: rest =>
             scalaHeader = header.toString
+            matchGrammarOptions(rest)
+        case ("lexer-states" :: states) :: rest =>
+            for (s <- states) {
+                if (lexerStates.contains(s.toString)) {
+                    error(s, "Duplicate lexer state: " + s)
+                } else {
+                    lexerStates += s.toString
+                }
+            }
             matchGrammarOptions(rest)
         case rules: List[Any] =>
             rules
@@ -303,7 +314,10 @@ class Gen2(pGetPos: (Any) => List[Int]) {
             "import ee.cyber.simplicitas.SourceLocation;\n" +
             "import ee.cyber.simplicitas.parse.TokenLocation;\n" +
         "}\n" +
-        "@lexer::header { package " + grammarPackage + """; }
+        "@lexer::header {\n" +
+            "    package " + grammarPackage + ";" +
+            "    import ee.cyber.simplicitas.parse.LexerState;\n" +
+            """}
 @lexer::members {
     private ee.cyber.simplicitas.parse.ErrorHandler handler = null;
     public void reportError(RecognitionException ex) {
@@ -323,6 +337,10 @@ class Gen2(pGetPos: (Any) => List[Int]) {
             RecognitionException e) {
         emitErrorMessage(getErrorMessage(e, tokenNames));
     }
-}
-"""
+""" +
+    (if (lexerStates.isEmpty)
+        ""
+    else
+        "    LexerState __lexerState = new LexerState();") +
+    "}"
 }
