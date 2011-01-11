@@ -3,11 +3,11 @@ package ee.cyber.simplicitas.parse
 import collection.mutable.ArrayBuffer
 
 class LexerState {
-    def enter(state: Int): Unit = {
+    def enter(state: Int) {
         stack += state
     }
 
-    def exit(state: Array[Int]): Unit = {
+    def exit(state: Array[Int]) {
         while (!stack.isEmpty) {
             if (state.contains(top)) {
                 pop
@@ -18,15 +18,13 @@ class LexerState {
         }
     }
 
-    def check(state: Array[Int]): Boolean = {
+    def check(state: Array[Int]) =
         state.contains(top)
-    }
 
-    private def top: Int = {
-        return stack(stack.size - 1)
-    }
+    private def top: Int =
+        stack(stack.size - 1)
 
-    private def pop: Unit = {
+    private def pop {
         stack.remove(stack.size - 1)
     }
 

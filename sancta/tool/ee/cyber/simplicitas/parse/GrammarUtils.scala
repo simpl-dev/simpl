@@ -31,6 +31,9 @@ trait SymbolTable {
       * to identifier representing the corresponding lexer rule. */
     def keywords: collection.mutable.Map[String, String]
 
+    /** List of all supported lexer states. */
+    def lexerStates: IndexedSeq[String]
+
     /** Returns position of the given node.
       * Strictly does not belong to symbol table, but it is convenient to
       * pass it around along with other global-ish information. */

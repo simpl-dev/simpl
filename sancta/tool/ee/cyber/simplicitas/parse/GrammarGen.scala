@@ -11,6 +11,7 @@ class Gen2(pGetPos: (Any) => List[Int]) {
         val classes = collection.mutable.Map[String, RuleClass]()
         val actions = new ActionSet
         val keywords = collection.mutable.Map[String, String]()
+        val lexerStates = new ArrayBuffer[String]()
 
         private var idVal = 0
 
@@ -33,8 +34,6 @@ class Gen2(pGetPos: (Any) => List[Int]) {
 
     /** Header for generated Scala code. */
     private var scalaHeader = ""
-
-    private var lexerStates = new ArrayBuffer[String]()
 
     private var firstRule: String = null
 
