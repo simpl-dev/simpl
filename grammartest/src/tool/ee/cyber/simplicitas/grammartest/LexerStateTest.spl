@@ -12,8 +12,8 @@ option Bar1: Aa | Bb;
 Aa: Bar;
 Bb: Baz;
 
-terminal Bar check-state(mode1): 'bar' | 'baz';
-terminal Baz check-state(mode2): 'bar';
+terminal Bar check-any(mode1): 'bar' | 'baz';
+terminal Baz check-any(mode2): 'bar';
 
 fragment ML_COMMENT: '/*' (~'*' | '*' ~'/')* '*/';
 fragment SL_COMMENT: '//' ~('\n'|'\r')*;

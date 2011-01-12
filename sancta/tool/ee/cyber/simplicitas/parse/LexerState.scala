@@ -4,7 +4,7 @@ import collection.mutable.ArrayBuffer
 
 class LexerState {
     def enter(state: Int) {
-        if (top != state) {
+        if (stack.isEmpty || (top != state)) {
             stack += state
         }
     }
@@ -20,8 +20,11 @@ class LexerState {
         }
     }
 
-    def check(state: Array[Int]) =
-        state.contains(top)
+    def checkTop(state: Array[Int]) =
+        !stack.isEmpty && stack.contains(top)
+
+    def checkAny(state: Array[Int]) =
+        state.exists(stack.contains)
 
     private def top: Int =
         stack(stack.size - 1)

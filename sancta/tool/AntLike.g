@@ -33,15 +33,16 @@ scalaHeader : 'scalaheader'^ CODE;
 lexerStates : 'lexer-states'^ '('! ID (','! ID)* ')'!;
 
 ruleDef:
-      ('hidden'?) 'terminal'^ ID body? stateOp? ':'! termAltList ';'!
-    | 'fragment'^ ID stateOp? ':'! termAltList ';'!
+      ('hidden'?) 'terminal'^ ID body? stateOp* ':'! termAltList ';'!
+    | 'fragment'^ ID stateOp* ':'! termAltList ';'!
     | 'option'^ ID body? returnType? ':'! ID ('|'! ID)* ';'!
     | ID body? returnType? ':'^ altList ';'!;
 
-stateOp     : enterState | exitState | checkState;
+stateOp     : enterState | exitState | checkLast | checkAny;
 enterState  : 'enter-state'^ '('! ID ')'!;
-exitState  : 'exit-state'^ '('! ID (','! ID)* ')'!;
-checkState  : 'check-state'^ '('! ID (','! ID)* ')'!;
+exitState   : 'exit-state'^ '('! ID (','! ID)* ')'!;
+checkLast    : 'check-Last'^ '('! ID (','! ID)* ')'!;
+checkAny    : 'check-any'^ '('! ID (','! ID)* ')'!;
 body        : CODE -> ^(BODY CODE);
 returnType  : 'returns'^ dottedId? body?;
 altList     : matchList ('|'! matchList)*;

@@ -5,11 +5,12 @@ import GrammarUtils._
 
 /* This file contains classes for terminal and fragment rules. */
 
-trait StateOp;
-case class NoStateOp() extends StateOp
-case class EnterState(state: Int) extends StateOp
-case class ExitState(states: List[Int]) extends StateOp
-case class CheckState(states: List[Int]) extends StateOp
+abstract class StateOp(val method: String, val states: List[Int])
+case class NoStateOp() extends StateOp(null, null)
+case class EnterState(s: Int) extends StateOp("enter", List(s))
+case class ExitState(s: List[Int]) extends StateOp("exit", s)
+case class CheckTop(s: List[Int]) extends StateOp("checkTop", s)
+case class CheckAny(s: List[Int]) extends StateOp("checkAny", s)
 
 /** Base class for terminal and fragment, but not for literal rules.
  * Such is life. */
@@ -17,7 +18,7 @@ abstract class TerminalFragment(pName: String, pTree: List[Any], symbols: Symbol
         extends Rule(pName, pTree, symbols) {
     import symbols._
 
-    var stateOp: StateOp = NoStateOp()
+    var stateOps: Set[StateOp] = Set.empty
 
     override def antlrName = name.capitalize
 
@@ -32,21 +33,25 @@ abstract class TerminalFragment(pName: String, pTree: List[Any], symbols: Symbol
         matchStateOps()
     }
 
-
     def matchStateOps() {
-        tree match {
+        def loop(node: List[Any]): List[Any] = node match {
             case List("enter-state", state) :: rest =>
-                stateOp = EnterState(stateIndex(state))
-                tree = rest
+                stateOps += EnterState(stateIndex(state))
+                loop(rest)
             case ("exit-state" :: states) :: rest =>
-                stateOp = ExitState(states.map(stateIndex))
-                tree = rest
-            case ("check-state" :: states) :: rest =>
-                stateOp = CheckState(states.map(stateIndex))
-                tree = rest
+                stateOps += ExitState(states.map(stateIndex))
+                loop(rest)
+            case ("check-last" :: states) :: rest =>
+                stateOps += CheckTop(states.map(stateIndex))
+                loop(rest)
+            case ("check-any" :: states) :: rest =>
+                stateOps += CheckAny(states.map(stateIndex))
+                loop(rest)
             case _ =>
-                ()
+                node
         }
+
+        tree = loop(tree)
     }
 
     private def stateIndex(st: Any) = {
@@ -95,28 +100,39 @@ abstract class TerminalFragment(pName: String, pTree: List[Any], symbols: Symbol
         // TODO: do not generate these arrays each time, instead use
         // predefined static variables.
 
-        stateOp match {
-            case NoStateOp() =>
-                doOptionList(matchTerminal, tree)
-            case EnterState(state) =>
-                buf += "("
-                doOptionList(matchTerminal, tree)
-                buf += ") "
-                buf += "{__lexerState.enter(" + state + ");}"
-            case ExitState(states) =>
-                buf += "("
-                doOptionList(matchTerminal, tree)
-                buf += ")"
-                buf += "{__lexerState.exit(new int[] {" +
-                        states.mkString(",") + "})}"
-            case CheckState(states) =>
-                buf += "{__lexerState.check(new int[] {" +
-                        states.mkString(",") + "})}?=> "
-                buf += "("
-                doOptionList(matchTerminal, tree)
-                buf += ")"
+        val checkOp = getCheckOp
+        if (checkOp != None) {
+            buf += "{__lexerState." + checkOp.get.method + "(new int[] {" +
+                    checkOp.get.states.mkString(",") + "})}?=> "
+        }
+
+        buf += "("
+        doOptionList(matchTerminal, tree)
+        buf += ")"
+
+        val exitOp = getExitOp
+        if (exitOp != None) {
+            buf += "{__lexerState.exit(new int[] {" +
+                    exitOp.get.states.mkString(",") + "});}"
+        }
+        val enterOp = getEnterOp
+        if (enterOp != None) {
+            buf += "{__lexerState.enter(" + enterOp.get.states.head + ");}"
         }
     }
+
+    private def getCheckOp =
+        stateOps.find(
+            (o: StateOp) => o match {
+                case CheckAny(_) | CheckTop(_) => true
+                case _ => false
+            })
+
+    private def getEnterOp =
+        stateOps.find(_.isInstanceOf[EnterState])
+
+    private def getExitOp =
+        stateOps.find(_.isInstanceOf[ExitState])
 }
 
 /** Fragment rules. */
