@@ -1,0 +1,20 @@
+grammar ee.cyber.simplicitas.grammartest.lexerstatetest.Lexerstatetest;
+
+lexer-states (mode1, mode2)
+
+Foo	: A Bar1 | B Bar1;
+
+terminal A enter-state(mode1): 'a';
+terminal B enter-state(mode2): 'b';
+
+option Bar1: Aa | Bb;
+
+Aa: Bar;
+Bb: Baz;
+
+terminal Bar check-state(mode1): 'bar' | 'baz';
+terminal Baz check-state(mode2): 'bar';
+
+fragment ML_COMMENT: '/*' (~'*' | '*' ~'/')* '*/';
+fragment SL_COMMENT: '//' ~('\n'|'\r')*;
+hidden terminal WS: (' '|'\t'|'\r'|'\n'|SL_COMMENT|ML_COMMENT)+;

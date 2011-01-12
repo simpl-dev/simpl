@@ -1,0 +1,7 @@
+0:0:Foo {
+  a=(null)
+  b=0:0:B {
+    text="b"
+  }
+  bar1=(null)
+}
