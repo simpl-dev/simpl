@@ -4,7 +4,9 @@ import collection.mutable.ArrayBuffer
 
 class LexerState {
     def enter(state: Int) {
-        stack += state
+        if (top != state) {
+            stack += state
+        }
     }
 
     def exit(state: Array[Int]) {
