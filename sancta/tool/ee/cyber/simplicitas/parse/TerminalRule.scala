@@ -36,15 +36,27 @@ abstract class TerminalFragment(pName: String, pTree: List[Any], symbols: Symbol
     def matchStateOps() {
         def loop(node: List[Any]): List[Any] = node match {
             case List("enter-state", state) :: rest =>
+                if (getEnterOp != None) {
+                    error(node(0), "Duplicated enter-state directive")
+                }
                 stateOps += EnterState(stateIndex(state))
                 loop(rest)
             case ("exit-state" :: states) :: rest =>
+                if (getExitOp != None) {
+                    error(node(0), "Duplicated exit-state directive")
+                }
                 stateOps += ExitState(states.map(stateIndex))
                 loop(rest)
             case ("check-last" :: states) :: rest =>
+                if (getCheckOp != None) {
+                    error(node(0), "Duplicated check-any or check-last directive")
+                }
                 stateOps += CheckTop(states.map(stateIndex))
                 loop(rest)
             case ("check-any" :: states) :: rest =>
+                if (getCheckOp != None) {
+                    error(node(0), "Duplicated check-any or check-last directive")
+                }
                 stateOps += CheckAny(states.map(stateIndex))
                 loop(rest)
             case _ =>
