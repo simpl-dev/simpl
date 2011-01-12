@@ -27,6 +27,12 @@ abstract class TerminalFragment(pName: String, pTree: List[Any], symbols: Symbol
 
     def isTerminalRule = true
 
+    override def analyze() {
+        matchBody()
+        matchStateOps()
+    }
+
+
     def matchStateOps() {
         tree match {
             case List("enter-state", state) :: rest =>

@@ -102,7 +102,7 @@ abstract class Rule(val name: String, var tree: List[Any],
     }
 
     /** Checks for code that will be inserted to generated Scala class. */
-    private def matchBody() {
+    protected def matchBody() {
         tree match {
             case List("BODY", b: String) :: rest =>
                 body = b

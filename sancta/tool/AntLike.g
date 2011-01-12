@@ -30,7 +30,7 @@ optionList  : option*;
 option      : ID '=' ID ';' -> ^(ID ID);
 dottedId    : ID ('.' ID)*;
 scalaHeader : 'scalaheader'^ CODE;
-lexerStates : 'lexer-states'^ '('! ID (',' ID)* ')'!;
+lexerStates : 'lexer-states'^ '('! ID (','! ID)* ')'!;
 
 ruleDef:
       ('hidden'?) 'terminal'^ ID body? stateOp? ':'! termAltList ';'!
@@ -40,8 +40,8 @@ ruleDef:
 
 stateOp     : enterState | exitState | checkState;
 enterState  : 'enter-state'^ '('! ID ')'!;
-exitState  : 'exit-state'^ '('! ID (',' ID)* ')'!;
-checkState  : 'check-state'^ '('! ID (',' ID)* ')'!;
+exitState  : 'exit-state'^ '('! ID (','! ID)* ')'!;
+checkState  : 'check-state'^ '('! ID (','! ID)* ')'!;
 body        : CODE -> ^(BODY CODE);
 returnType  : 'returns'^ dottedId? body?;
 altList     : matchList ('|'! matchList)*;
