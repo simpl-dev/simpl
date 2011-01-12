@@ -9,7 +9,7 @@ abstract class StateOp(val method: String, val states: List[Int])
 case class NoStateOp() extends StateOp(null, null)
 case class EnterState(s: List[Int]) extends StateOp("enter", s)
 case class ExitState(s: List[Int]) extends StateOp("exit", s)
-case class CheckTop(s: List[Int]) extends StateOp("checkTop", s)
+case class CheckAll(s: List[Int]) extends StateOp("checkAll", s)
 case class CheckAny(s: List[Int]) extends StateOp("checkAny", s)
 
 /** Base class for terminal and fragment, but not for literal rules.
@@ -47,15 +47,17 @@ abstract class TerminalFragment(pName: String, pTree: List[Any], symbols: Symbol
                 }
                 stateOps += ExitState(states.map(stateIndex))
                 loop(rest)
-            case ("check-last" :: states) :: rest =>
+            case ("check-all" :: states) :: rest =>
                 if (getCheckOp != None) {
-                    error(node(0), "Duplicated check-any or check-last directive")
+                    error(node(0),
+                        "Duplicated check-any or check-all directive")
                 }
-                stateOps += CheckTop(states.map(stateIndex))
+                stateOps += CheckAll(states.map(stateIndex))
                 loop(rest)
             case ("check-any" :: states) :: rest =>
                 if (getCheckOp != None) {
-                    error(node(0), "Duplicated check-any or check-last directive")
+                    error(node(0),
+                        "Duplicated check-any or check-all directive")
                 }
                 stateOps += CheckAny(states.map(stateIndex))
                 loop(rest)
@@ -137,7 +139,7 @@ abstract class TerminalFragment(pName: String, pTree: List[Any], symbols: Symbol
     private def getCheckOp =
         stateOps.find(
             (o: StateOp) => o match {
-                case CheckAny(_) | CheckTop(_) => true
+                case CheckAny(_) | CheckAll(_) => true
                 case _ => false
             })
 

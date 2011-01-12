@@ -19,8 +19,8 @@ class LexerState {
         }
     }
 
-    def checkTop(state: Array[Int]) =
-        !stack.isEmpty && stack.contains(top)
+    def checkAll(state: Array[Int]) =
+        state.forall(stack.contains)
 
     def checkAny(state: Array[Int]) =
         state.exists(stack.contains)

@@ -38,10 +38,10 @@ ruleDef:
     | 'option'^ ID body? returnType? ':'! ID ('|'! ID)* ';'!
     | ID body? returnType? ':'^ altList ';'!;
 
-stateOp     : enterState | exitState | checkLast | checkAny;
+stateOp     : enterState | exitState | checkAll | checkAny;
 enterState  : 'enter-state'^ '('! ID (','! ID)* ')'!;
 exitState   : 'exit-state'^ '('! ID (','! ID)* ')'!;
-checkLast    : 'check-Last'^ '('! ID (','! ID)* ')'!;
+checkAll    : 'check-all'^ '('! ID (','! ID)* ')'!;
 checkAny    : 'check-any'^ '('! ID (','! ID)* ')'!;
 body        : CODE -> ^(BODY CODE);
 returnType  : 'returns'^ dottedId? body?;
