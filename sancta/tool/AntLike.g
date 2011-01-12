@@ -39,7 +39,7 @@ ruleDef:
     | ID body? returnType? ':'^ altList ';'!;
 
 stateOp     : enterState | exitState | checkLast | checkAny;
-enterState  : 'enter-state'^ '('! ID ')'!;
+enterState  : 'enter-state'^ '('! ID (','! ID)* ')'!;
 exitState   : 'exit-state'^ '('! ID (','! ID)* ')'!;
 checkLast    : 'check-Last'^ '('! ID (','! ID)* ')'!;
 checkAny    : 'check-any'^ '('! ID (','! ID)* ')'!;

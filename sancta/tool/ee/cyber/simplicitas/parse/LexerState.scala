@@ -3,10 +3,9 @@ package ee.cyber.simplicitas.parse
 import collection.mutable.ArrayBuffer
 
 class LexerState {
-    def enter(state: Int) {
-        if (stack.isEmpty || (top != state)) {
-            stack += state
-        }
+    def enter(state: Array[Int]) {
+        // TODO: check for duplicates.
+        stack ++= state
     }
 
     def exit(state: Array[Int]) {

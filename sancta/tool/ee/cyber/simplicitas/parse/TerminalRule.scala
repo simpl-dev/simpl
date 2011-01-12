@@ -7,7 +7,7 @@ import GrammarUtils._
 
 abstract class StateOp(val method: String, val states: List[Int])
 case class NoStateOp() extends StateOp(null, null)
-case class EnterState(s: Int) extends StateOp("enter", List(s))
+case class EnterState(s: List[Int]) extends StateOp("enter", s)
 case class ExitState(s: List[Int]) extends StateOp("exit", s)
 case class CheckTop(s: List[Int]) extends StateOp("checkTop", s)
 case class CheckAny(s: List[Int]) extends StateOp("checkAny", s)
@@ -35,11 +35,11 @@ abstract class TerminalFragment(pName: String, pTree: List[Any], symbols: Symbol
 
     def matchStateOps() {
         def loop(node: List[Any]): List[Any] = node match {
-            case List("enter-state", state) :: rest =>
+            case ("enter-state" :: states) :: rest =>
                 if (getEnterOp != None) {
                     error(node(0), "Duplicated enter-state directive")
                 }
-                stateOps += EnterState(stateIndex(state))
+                stateOps += EnterState(states.map(stateIndex))
                 loop(rest)
             case ("exit-state" :: states) :: rest =>
                 if (getExitOp != None) {
@@ -129,7 +129,8 @@ abstract class TerminalFragment(pName: String, pTree: List[Any], symbols: Symbol
         }
         val enterOp = getEnterOp
         if (enterOp != None) {
-            buf += "{__lexerState.enter(" + enterOp.get.states.head + ");}"
+            buf += "{__lexerState.enter(new int[] {" +
+                    enterOp.get.states.mkString(",") + "});}"
         }
     }
 

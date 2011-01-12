@@ -1,10 +1,10 @@
 grammar ee.cyber.simplicitas.grammartest.lexerstatetest.Lexerstatetest;
 
-lexer-states (mode1, mode2)
+lexer-states (mode1, mode2, modex)
 
 Foo	: A Bar1 | B Bar1;
 
-terminal A enter-state(mode1): 'a';
+terminal A enter-state(mode1, modex): 'a';
 terminal B enter-state(mode2): 'b';
 
 option Bar1: Aa | Bb;
