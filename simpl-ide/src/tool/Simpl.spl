@@ -41,8 +41,16 @@ option RuleDef {
     The hidden keyword specifies that the matched token is hidden from
     non-terminal rules. It should be used to mark white space, comments, etc.
 */
-TerminalDef: 'hidden'? 'terminal' name=Id body=Code? ':'
+TerminalDef: 'hidden'? 'terminal' name=Id body=Code? stateOps=StateOp* ':'
     pattern=Pattern ';';
+
+option StateOp: EnterState | ExitState | CheckAll | CheckAny;
+EnterState: "enter-state" "(" IdList ")";
+ExitState: "exit-state" "(" IdList ")";
+CheckAll: "check-all" "(" IdList ")";
+CheckAny: "check-any" "(" IdList ")";
+
+IdList: first=Id ("," rest=Id)*;
 
 /** Base class for references, not part of the actual grammar. */
 option Ref {
