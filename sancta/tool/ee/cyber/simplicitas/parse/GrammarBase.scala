@@ -26,8 +26,8 @@ abstract class GrammarBase[Node <: CommonNode, Kind]
     def tree: Node = nodeTree.get
     def hasTree = nodeTree != None
 
-    def tokens: RandomAccessSeq[CommonToken[Kind]] = tokenList
-    def errors: RandomAccessSeq[SourceMessage] = errorHandler.errors
+    def tokens: IndexedSeq[CommonToken[Kind]] = tokenList
+    def errors: IndexedSeq[SourceMessage] = errorHandler.errors
 
     def parse(source: CharStream): Unit = {
         errorHandler = new ErrorHandler()
@@ -56,7 +56,7 @@ class ErrorHandler {
         if (lastError.token ne null) {
             val t = lastError.token.asInstanceOf[
                 org.antlr.runtime.CommonToken]
-            errors += new SourceMessage(message, SourceMessage.Error, 
+            errors += new SourceMessage(message, SourceMessage.Error,
                                     t.getStartIndex, t.getStopIndex,
                                     t.getLine, t.getCharPositionInLine)
         } else {
