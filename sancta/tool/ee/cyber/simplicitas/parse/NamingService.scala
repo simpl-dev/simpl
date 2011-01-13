@@ -11,7 +11,7 @@ object NamingService {
         if (!isTerminal && !name.charAt(0).isLetter)
             Some(typeName + " name must start with a letter: \"" +
                 name + "\"")
-        else if (isTerminal && !name.charAt(0).isUpperCase)
+        else if (isTerminal && !name.charAt(0).isUpper)
             Some(typeName + " name must start with an uppercase letter: \"" +
                 name + "\"")
         else if (reservedParserKeywords.contains(name))

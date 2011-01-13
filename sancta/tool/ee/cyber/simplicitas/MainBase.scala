@@ -53,19 +53,19 @@ class MainBase {
   }
 
   /** If the error list is not empty, print the errors and exit the program. */
-  def checkErrors(errors: Collection[SourceMessage]) {
+  def checkErrors(errors: Iterable[SourceMessage]) {
      if (!errors.isEmpty) {
         Console.err.println("Messages")
         errors foreach (Console.err.println)
         exit(1)
       }
    }
-  
+
   def invalidOption(opt: String) {
     Console.err.println("Invalid option: " + opt)
     usage()
   }
- 
+
   /** Prints message explaining command-line options. */
   def usage() {
     Console.err.println(
