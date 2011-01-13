@@ -20,9 +20,9 @@ abstract class GenericGrammar {
     def hasTree: Boolean
 
     /** Returns list of tokens in the DSL program. */
-    def tokens: RandomAccessSeq[GenericToken]
+    def tokens: IndexedSeq[GenericToken]
     /** Returns list of errors encountered during parsing. */
-    def errors: RandomAccessSeq[SourceMessage]
+    def errors: IndexedSeq[SourceMessage]
     /** Returns all the known keywords in this language. */
     def keywords: Seq[String]
 
