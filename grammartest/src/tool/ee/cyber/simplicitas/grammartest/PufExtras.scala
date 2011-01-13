@@ -10,7 +10,7 @@ case class Binary(op: BinaryOp.Type, left: Expr, right: Expr) extends Expr {
     def childrenNames = Array("op", "left", "right")
 }
 
-case class ListNil extends Expr {
+case class ListNil() extends Expr {
     def childrenNames = Array.empty
 }
 
@@ -35,6 +35,8 @@ object PufExtras {
                         rt, ot)
                 case (Nil, Nil) =>
                     left
+                case _ =>
+                    throw new Exception("Cannot happen")
             }
 
         loop(args.head, args.tail,

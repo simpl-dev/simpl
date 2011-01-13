@@ -11,7 +11,7 @@ object Dump {
         buf.toString
     }
 
-    def dumpNode(buf: StringBuilder, obj: Any, 
+    def dumpNode(buf: StringBuilder, obj: Any,
             prefix: String) {
         obj match {
             case node: CommonNode =>
@@ -31,7 +31,7 @@ object Dump {
                 buf.append("\n")
         }
     }
-    
+
     def dumpCommonNode(buf: StringBuilder, node: CommonNode,
             prefix: String) {
         // Write node header.
