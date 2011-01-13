@@ -1,3 +1,5 @@
+// Copyright (c) 2010 Cybernetica AS / STACC
+
 package ee.cyber.simplicitas.parse
 
 import scala.collection.mutable.ArrayBuffer
@@ -5,7 +7,9 @@ import scala.collection.mutable.ArrayBuffer
 import GrammarUtils._
 import Actions._
 
-class Gen2(pGetPos: (Any) => List[Int]) {
+/** This is the main program for grammar generation. */
+class GrammarGen(pGetPos: (Any) => List[Int]) {
+    /** My implementation of symbol table. */
     object Symbols extends SymbolTable {
         val rules = collection.mutable.LinkedHashMap[String, Rule]()
         val classes = collection.mutable.Map[String, RuleClass]()
@@ -35,10 +39,15 @@ class Gen2(pGetPos: (Any) => List[Int]) {
     /** Header for generated Scala code. */
     private var scalaHeader = ""
 
+    /** Name of the first grammar rule. This will become top-level
+     * node in the AST. */
     private var firstRule: String = null
 
+    /** Error-reporting function. */
     val error = GrammarUtils.error(pGetPos)_
 
+    /** Main entry point -- generates grammar and Scala source file for
+     * given parsed Simpl grammar. */
     def grammargen(tree: Any) {
         tree match {
             case ("grammar" :: nameParts) :: rest =>
@@ -61,11 +70,12 @@ class Gen2(pGetPos: (Any) => List[Int]) {
             aSet.foreach(_(classes(r)))
         }
 
+        // Simplify the inheritance graph.
         cleanupExtends()
     }
 
     /** Adds rule to symbol table. */
-    def addRule(rule: Any) = rule match {
+    private def addRule(rule: Any) = rule match {
         case "terminal" :: "hidden" :: (name: String) :: rest =>
             checkDuplicates(name, rule)
             rules(name) = new TerminalRule(name, true, rest, Symbols)
@@ -145,7 +155,8 @@ class Gen2(pGetPos: (Any) => List[Int]) {
         }
     }
 
-    /** Parses grammar-level "options(foo = bar;)" declaration. */
+    /** Parses grammar-level declarations: options, scalaheader,
+     * lexer-states. */
     def matchGrammarOptions(tree: Any): List[Any] = tree match {
         case ("options" :: opts) :: rest =>
             for (List(name, value) <- opts) {
@@ -168,24 +179,30 @@ class Gen2(pGetPos: (Any) => List[Int]) {
             rules
     }
 
-    def getTreeSource = {
+    /** Constructs source for the accompanying Scala program. */
+    def getScalaSource = {
         val ret = new StringBuilder()
 
-        ret.append(treeHeader)
+        ret.append(scalaFileHeader)
 
+        // Generate AST classes
         for (c <- classes.values) {
             c.generate(ret)
         }
 
+        // Generate token kind enumeration.
         tokenKind(ret)
+
+        // Generate grammar class.
         grammarClass(ret)
 
+        // Generate methods for snippets with "returns" keyword.
         returnsCode(ret)
 
         ret.toString
     }
 
-    def treeHeader =
+    private def scalaFileHeader =
         "package " + grammarPackage + ";\n\n" +
         "import ee.cyber.simplicitas." +
             "{CommonNode, CommonToken, TerminalNode, LiteralNode}\n" +
@@ -193,7 +210,7 @@ class Gen2(pGetPos: (Any) => List[Int]) {
             "{ErrorHandler}\n\n" +
         stripQuotes(scalaHeader) + "\n\n"
 
-    def tokenKind(buf: StringBuilder) {
+    private def tokenKind(buf: StringBuilder) {
         buf.append("\nobject " + grammarName +
                         "Kind extends Enumeration {\n  type Kind = Value;\n")
         for (r <- rules.values if r.isInstanceOf[TerminalRule] ||
@@ -204,7 +221,7 @@ class Gen2(pGetPos: (Any) => List[Int]) {
         buf.append("}\n")
     }
 
-    def grammarClass(buf: StringBuilder) {
+    private def grammarClass(buf: StringBuilder) {
         buf.append(
             "\nclass " + grammarName + "Grammar extends " +
                 "ee.cyber.simplicitas.parse.GrammarBase[" +
@@ -262,11 +279,14 @@ class Gen2(pGetPos: (Any) => List[Int]) {
         buf.append("}\n")
     }
 
+    /** Returns source code for the ANTLR grammar. */
     def getGrammarSource = {
         val ret = new StringBuilder()
 
         ret.append(grammarHeader)
 
+        // Creates synthetic rule "toplevel" that will become parser's entry
+        // point.
         ret.append(getFirstRule)
 
         for (r <- rules.values if !r.isTerminalRule) {

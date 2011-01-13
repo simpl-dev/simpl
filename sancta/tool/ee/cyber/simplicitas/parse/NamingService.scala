@@ -2,20 +2,23 @@
 
 package ee.cyber.simplicitas.parse
 
+/**Checks whether some strings can be used as identifiers (rule names,
+ * parameter names, etc.). Mainly tries to avoid ANTLR or Scala keywords
+ * and very common classes, such as String etc. */
 object NamingService {
-    def validateRuleName(name: String, typeName: String, 
+    def validateRuleName(name: String, typeName: String,
             isTerminal: Boolean): Option[String] =
         if (!isTerminal && !name.charAt(0).isLetter)
-            Some(typeName + " name must start with a letter: \"" + 
+            Some(typeName + " name must start with a letter: \"" +
                 name + "\"")
-        else if (isTerminal && !name.charAt(0).isUpperCase) 
+        else if (isTerminal && !name.charAt(0).isUpperCase)
             Some(typeName + " name must start with an uppercase letter: \"" +
                 name + "\"")
         else if (reservedParserKeywords.contains(name))
-            Some(typeName + " name causes an error in generated parser code: \"" + 
+            Some(typeName + " name causes an error in generated parser code: \"" +
                 name + "\"")
         else if (reservedASTKeywords.contains(name) || scalaKeywords.contains(name))
-            Some(typeName + " name causes an error in generated AST code: \"" + 
+            Some(typeName + " name causes an error in generated AST code: \"" +
                 name + "\"")
         else
             None

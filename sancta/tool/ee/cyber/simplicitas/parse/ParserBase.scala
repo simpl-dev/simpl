@@ -7,6 +7,7 @@ import ee.cyber.simplicitas.CommonNode
 import org.antlr.runtime.{Token, TokenStream, RecognizerSharedState,
                           RecognitionException}
 
+/** Base class for generated ANTLR parsers. */
 class ParserBase(input: TokenStream, state: RecognizerSharedState)
         extends org.antlr.runtime.Parser(input, state) {
     def setTokenPos(node: CommonNode, token: Token): CommonNode = {

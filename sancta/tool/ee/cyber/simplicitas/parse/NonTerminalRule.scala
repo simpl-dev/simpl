@@ -1,3 +1,5 @@
+// Copyright (c) 2010 Cybernetica AS / STACC
+
 package ee.cyber.simplicitas.parse
 
 import scala.collection.mutable.ArrayBuffer
@@ -235,15 +237,15 @@ class NormalRule(pName: String, pTree: List[Any], symbols: SymbolTable)
                 if (currentBranch.conflictsWith(other.branch)) {
                     // There are two rule calls with the same name in the
                     // same branch.
-                    error(tree,
+                    error(varName,
                         "Rule contains several calls with the same parameter name: " +
                             varName)
                 } else if (other.rule != np.rule) {
                     // There is rule call with same name and it has different
                     // type. Hence, we cannot generate meaningful
                     // AST classes and grammar.
-                    error(tree, "Parameter " + varName +
-                            " is to call different rules: " + np.rule +
+                    error(varName, "Parameter " + varName +
+                            " is used to call different rules: " + np.rule +
                             " and " + other.rule)
                 } else {
                     // Rule call with same name exists, but it has compatible
@@ -264,7 +266,7 @@ class NormalRule(pName: String, pTree: List[Any], symbols: SymbolTable)
 
         for (p <- params) {
             if (!rules.contains(p.rule)) {
-                error(tree.head, "Invalid rule reference: " + name + "." +
+                error(name, "Invalid rule reference: " + name + "." +
                         p.name)
             }
 
@@ -331,8 +333,6 @@ class NormalRule(pName: String, pTree: List[Any], symbols: SymbolTable)
                 return
             }
 
-//            val patternVar = newId
-//
             val paramName = getParamName(name, pattern)
             val param = getParamByName(paramName)
 

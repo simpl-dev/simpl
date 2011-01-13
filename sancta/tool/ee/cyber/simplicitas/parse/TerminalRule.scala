@@ -1,3 +1,5 @@
+// Copyright (c) 2010 Cybernetica AS / STACC
+
 package ee.cyber.simplicitas.parse
 
 import scala.collection.mutable.ArrayBuffer
@@ -5,6 +7,7 @@ import GrammarUtils._
 
 /* This file contains classes for terminal and fragment rules. */
 
+/** Classes for storing operations on lexer states. */
 abstract class StateOp(val method: String, val states: List[Int])
 case class NoStateOp() extends StateOp(null, null)
 case class EnterState(s: List[Int]) extends StateOp("enter", s)
@@ -18,6 +21,7 @@ abstract class TerminalFragment(pName: String, pTree: List[Any], symbols: Symbol
         extends Rule(pName, pTree, symbols) {
     import symbols._
 
+    /** List of lexer state manipulation commands. */
     var stateOps: Set[StateOp] = Set.empty
 
     override def antlrName = name.capitalize
@@ -28,35 +32,39 @@ abstract class TerminalFragment(pName: String, pTree: List[Any], symbols: Symbol
 
     def isTerminalRule = true
 
+    // The terminal rules do not have parameters. Also, terminal rules also
+    // need to match the state operations in the beginning of the rule.
     override def analyze() {
         matchBody()
         matchStateOps()
     }
 
-    def matchStateOps() {
+    /** Processes the lexer state manipulation commands in the beginning
+     * of the rule. */
+    private def matchStateOps() {
         def loop(node: List[Any]): List[Any] = node match {
             case ("enter-state" :: states) :: rest =>
                 if (getEnterOp != None) {
-                    error(node(0), "Duplicated enter-state directive")
+                    error(node.head, "Duplicated enter-state directive")
                 }
                 stateOps += EnterState(states.map(stateIndex))
                 loop(rest)
             case ("exit-state" :: states) :: rest =>
                 if (getExitOp != None) {
-                    error(node(0), "Duplicated exit-state directive")
+                    error(node.head, "Duplicated exit-state directive")
                 }
                 stateOps += ExitState(states.map(stateIndex))
                 loop(rest)
             case ("check-all" :: states) :: rest =>
                 if (getCheckOp != None) {
-                    error(node(0),
+                    error(node.head,
                         "Duplicated check-any or check-all directive")
                 }
                 stateOps += CheckAll(states.map(stateIndex))
                 loop(rest)
             case ("check-any" :: states) :: rest =>
                 if (getCheckOp != None) {
-                    error(node(0),
+                    error(node.head,
                         "Duplicated check-any or check-all directive")
                 }
                 stateOps += CheckAny(states.map(stateIndex))
@@ -68,6 +76,7 @@ abstract class TerminalFragment(pName: String, pTree: List[Any], symbols: Symbol
         tree = loop(tree)
     }
 
+    /** Returns index of state with given name. */
     private def stateIndex(st: Any) = {
         val idx = lexerStates.indexOf(st.toString)
         if (idx < 0) {
@@ -135,6 +144,8 @@ abstract class TerminalFragment(pName: String, pTree: List[Any], symbols: Symbol
                     enterOp.get.states.mkString(",") + "});}"
         }
     }
+
+    // Helper functions to find state operations with given type.
 
     private def getCheckOp =
         stateOps.find(

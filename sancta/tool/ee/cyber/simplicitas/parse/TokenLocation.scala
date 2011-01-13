@@ -5,6 +5,7 @@ package ee.cyber.simplicitas.parse
 import org.antlr.runtime.Token
 import ee.cyber.simplicitas.SourceLocation
 
+/** Implements the SourceLocation interface using ANTLR tokens. */
 class TokenLocation(token: Token) extends SourceLocation {
     private val t = token.asInstanceOf[org.antlr.runtime.CommonToken]
 

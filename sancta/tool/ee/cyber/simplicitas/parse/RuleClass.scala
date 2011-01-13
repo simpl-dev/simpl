@@ -1,3 +1,5 @@
+// Copyright (c) 2010 Cybernetica AS / STACC
+
 package ee.cyber.simplicitas.parse
 
 import scala.collection.mutable.ArrayBuffer

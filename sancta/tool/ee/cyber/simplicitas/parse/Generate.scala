@@ -82,9 +82,9 @@ class Generator {
             if (p == null) Nil else List(p.getLine, p.getCharPositionInLine + 1)
         }
 
-        val gen = new Gen2(getPos)
+        val gen = new GrammarGen(getPos)
         gen.grammargen(gtree)
-        writeFile(gen.grammarName + ".scala", gen.getTreeSource)
+        writeFile(gen.grammarName + ".scala", gen.getScalaSource)
         val grammarFile = gen.grammarName + ".g"
         writeFile(grammarFile, gen.getGrammarSource)
 
@@ -135,6 +135,7 @@ object Generate {
     }
 }
 
+/** Ant task for compiling Simpl grammars. */
 class GrammarTask extends org.apache.tools.ant.Task {
     private var destDir = ""
     private var src = ""
