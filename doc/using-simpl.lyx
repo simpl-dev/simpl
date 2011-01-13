@@ -2527,6 +2527,63 @@ CommonToken
 \end_layout
 
 \begin_layout Subsection
+Shaping the Generated Abstract Representation
+\end_layout
+
+\begin_layout Subsubsection
+Using Return Types
+\end_layout
+
+\begin_layout Standard
+Use this to:
+\end_layout
+
+\begin_layout Itemize
+Make the type of the parameter to be more abstract
+\end_layout
+
+\begin_layout Itemize
+Create base classes without using 
+\emph on
+option
+\emph default
+ keyword.
+\end_layout
+
+\begin_layout Itemize
+Return from the rule something else than the AST class for this rule.
+\end_layout
+
+\begin_layout Standard
+Note: the generated AST class for the rule will extend the return type (otherwis
+e it is impossible to ensure that the grammar will be type-correct).
+ Therefore, the return type should be supertype of the rule.
+\end_layout
+
+\begin_layout Subsubsection
+Using Return Expressions
+\end_layout
+
+\begin_layout Standard
+Use to modify the returned AST:
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Quotes eld
+\end_inset
+
+wrapper rules
+\begin_inset Quotes erd
+\end_inset
+
+ (parenthesees, etc.)
+\end_layout
+
+\begin_layout Itemize
+Arithmetics
+\end_layout
+
+\begin_layout Subsection
 ANTLR Grammar Options
 \end_layout
 
@@ -3435,6 +3492,46 @@ Code Completion
 
 \begin_layout Subsection
 Running Code Generator
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Note Note
+status open
+
+\begin_layout Section
+Various Topics
+\end_layout
+
+\begin_layout Subsection
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Parsing-Arithmetic-Expressions"
+
+\end_inset
+
+Parsing Arithmetic Expressions
+\end_layout
+
+\begin_layout Plain Layout
+Issues:
+\end_layout
+
+\begin_layout Itemize
+Operator precedence
+\end_layout
+
+\begin_layout Itemize
+Getting good-looking AST.
+\end_layout
+
+\begin_layout Itemize
+Left-associative vs.
+ right-associative expressions.
 \end_layout
 
 \end_inset
