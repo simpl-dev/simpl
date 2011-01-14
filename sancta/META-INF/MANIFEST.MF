@@ -4,7 +4,7 @@ Created-By: 16.2-b04 (Sun Microsystems Inc.)
 Bundle-ManifestVersion: 2
 Bundle-Name: Simplicitas plugin
 Bundle-SymbolicName: simplicitas-plugin;singleton:=true
-Bundle-Version: 1.0.1
+Bundle-Version: 1.1.0
 Bundle-Activator: ee.cyber.simplicitas.eclipse.Activator
 Eclipse-BuddyPolicy: registered
 Require-Bundle: org.eclipse.ui,
