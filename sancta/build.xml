@@ -27,7 +27,7 @@
 
     <target name="tool-lib" depends="tool-antlr">
         <mkdir dir="${target}/tool-classes"/>
-        <scalac destdir="${target}/tool-classes">
+        <scalac destdir="${target}/tool-classes" deprecation="true" unchecked="yes">
             <src location="${target}/tool-java"/>
             <src location="${basedir}/tool"/>
             <classpath>
@@ -43,7 +43,7 @@
             <manifest>
                 <attribute name="Bundle-name" value="Simplicitas tool"/>
                 <attribute name="Bundle-SymbolicName" value="simplicitas-tool;singleton:=true"/>
-                <attribute name="Bundle-Version" value="1.0.1"/>
+                <attribute name="Bundle-Version" value="1.1.0"/>
                 <attribute name="Eclipse-LazyStart" value="true"/>
                 <attribute name="Export-Package" value="ee.cyber.simplicitas,ee.cyber.simplicitas.parse,org.antlr,org.antlr.runtime,org.antlr.runtime.tree,org.antlr.stringtemplate"/>
                 <attribute name="Require-Bundle" value="org.scala-ide.scala.library"/>
