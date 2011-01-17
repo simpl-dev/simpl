@@ -2530,57 +2530,228 @@ CommonToken
 Shaping the Generated Abstract Representation
 \end_layout
 
-\begin_layout Subsubsection
-Using Return Types
-\end_layout
-
 \begin_layout Standard
-Use this to:
-\end_layout
-
-\begin_layout Itemize
-Make the type of the parameter to be more abstract
-\end_layout
-
-\begin_layout Itemize
-Create base classes without using 
+Simpl uses the 
 \emph on
-option
+returns 
 \emph default
- keyword.
-\end_layout
-
-\begin_layout Itemize
-Return from the rule something else than the AST class for this rule.
-\end_layout
-
-\begin_layout Standard
-Note: the generated AST class for the rule will extend the return type (otherwis
-e it is impossible to ensure that the grammar will be type-correct).
- Therefore, the return type should be supertype of the rule.
+keyword to influence the AST that is created by the parser.
+ The 
+\emph on
+returns
+\emph default
+ keyword can be followed by return type, return code block, or both.
 \end_layout
 
 \begin_layout Subsubsection
-Using Return Expressions
+Using Return Type
 \end_layout
 
 \begin_layout Standard
-Use to modify the returned AST:
+One can specify the return type of the rule using returns keyword, followed
+ by the type.
+ For example:
 \end_layout
 
-\begin_layout Itemize
+\begin_layout LyX-Code
+Plus returns Expr: left=Num 
 \begin_inset Quotes eld
 \end_inset
 
-wrapper rules
++
 \begin_inset Quotes erd
 \end_inset
 
- (parenthesees, etc.)
+ right=Num;
+\end_layout
+
+\begin_layout Standard
+This has the following effects.
 \end_layout
 
 \begin_layout Itemize
-Arithmetics
+The class 
+\emph on
+Plus 
+\emph default
+will be generated exactly as before, containing two constructor parameters
+ 
+\emph on
+left 
+\emph default
+and 
+\emph on
+right
+\emph default
+.
+\end_layout
+
+\begin_layout Itemize
+The generated AST class 
+\emph on
+Plus 
+\emph default
+will extend class
+\emph on
+ Expr
+\emph default
+.
+\end_layout
+
+\begin_layout Itemize
+If the grammar does not contain rule named 
+\emph on
+Expr
+\emph default
+, then a new abstract class is created:
+\end_layout
+
+\begin_deeper
+\begin_layout LyX-Code
+trait Expr extends CommonNode
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+If some rule calls rule 
+\emph on
+Plus
+\emph default
+, then type of the parameter will be 
+\emph on
+Expr
+\emph default
+, instead of 
+\emph on
+Plus
+\emph default
+.
+ For example, take the following rule.
+\end_layout
+
+\begin_deeper
+\begin_layout LyX-Code
+UsesPlus: 
+\begin_inset Quotes eld
+\end_inset
+
+eval
+\begin_inset Quotes erd
+\end_inset
+
+ expr=Plus;
+\end_layout
+
+\begin_layout Standard
+This generates the following class.
+ Note that constructor parameter 
+\emph on
+expr
+\emph default
+ has type 
+\emph on
+Expr
+\emph default
+, not 
+\emph on
+Plus
+\emph default
+.
+\end_layout
+
+\begin_layout LyX-Code
+case class UsesPlus(var expr: Expr) extends CommonNode
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+The return type is intended to be used for making the rule return a more
+ general type (i.e., supertype).
+ It cannot be used to change the return type -- make the rule return some
+ type that is not related to the rule class.
+\end_layout
+
+\begin_layout Subsubsection
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Using-Return-Code"
+
+\end_inset
+
+Using Return Code Blocks
+\end_layout
+
+\begin_layout Standard
+In addition to changing the return type of the rule, it is also possible
+ to modify the AST node returned by the rule using return code blocks (or
+ return expressions).
+ Return code block is a Scala expression that returns an object corresponding
+ to AST node.
+ Note that the type of the returned object must match return type of the
+ grammar rule (if not explicitly specified with the 
+\emph on
+returns 
+\emph default
+keyword, then class named after the rule).
+\end_layout
+
+\begin_layout Standard
+Return code block is executed in the scope that contains all the parameters
+ of the rule.
+ The AST node corresponding to the rule itself is also accessible using
+ identifier 
+\emph on
+_self
+\emph default
+.
+\end_layout
+
+\begin_layout Standard
+TODO: 
+\end_layout
+
+\begin_layout Itemize
+scala-header directive
+\end_layout
+
+\begin_layout Itemize
+_self
+\end_layout
+
+\begin_layout Subsubsection
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:returns-Usage-Scenarios"
+
+\end_inset
+
+Usage Scenarios
+\end_layout
+
+\begin_layout Standard
+The main reasons to use return types and return code blocks are the following.
+\end_layout
+
+\begin_layout Itemize
+Return types can be used to introduce abstract base classes without using
+ artificial option rule.
+\end_layout
+
+\begin_layout Itemize
+Return code blocks can be used to remove unnecessary AST nodes (e.g., parentheses
+ rules).
+\end_layout
+
+\begin_layout Itemize
+Use return code blocks to implement arithmetic operators.
+ See 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Parsing-Arithmetic-Expressions"
+
+\end_inset
+
+ for longer description.
 \end_layout
 
 \begin_layout Subsection
@@ -3499,7 +3670,7 @@ Running Code Generator
 
 \end_layout
 
-\begin_layout Plain Layout
+\begin_layout Standard
 \begin_inset Note Note
 status open
 
