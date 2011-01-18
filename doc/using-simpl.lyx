@@ -2687,6 +2687,19 @@ In addition to changing the return type of the rule, it is also possible
  return expressions).
  Return code block is a Scala expression that returns an object corresponding
  to AST node.
+ The expression must be surrounded with curly brackets (
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+{}
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+).
  Note that the type of the returned object must match return type of the
  grammar rule (if not explicitly specified with the 
 \emph on
@@ -2704,20 +2717,492 @@ Return code block is executed in the scope that contains all the parameters
 _self
 \emph default
 .
+ For example, the following rule matches parenthesized expressions.
+\end_layout
+
+\begin_layout LyX-Code
+ParenExpression 
+\end_layout
+
+\begin_layout LyX-Code
+    returns Expression {expr}
+\end_layout
+
+\begin_layout LyX-Code
+    : 
+\begin_inset Quotes eld
+\end_inset
+
+(
+\begin_inset Quotes erd
+\end_inset
+
+ expr=Expression 
+\begin_inset Quotes eld
+\end_inset
+
+)
+\begin_inset Quotes erd
+\end_inset
+
+;
 \end_layout
 
 \begin_layout Standard
-TODO: 
+The code block in this example cleans up the resulting AST.
+ Without the code block, 
+\family typewriter
+
+\begin_inset Quotes eld
+\end_inset
+
+(1)
+\begin_inset Quotes erd
+\end_inset
+
+
+\family default
+ would parse as 
+\family typewriter
+ParenExpression(Num(
+\begin_inset Quotes eld
+\end_inset
+
+1
+\begin_inset Quotes erd
+\end_inset
+
+))
+\family default
+.
+ With code block this expression parses as 
+\family typewriter
+Num(
+\begin_inset Quotes eld
+\end_inset
+
+1
+\begin_inset Quotes erd
+\end_inset
+
+)
+\family default
+.
+\end_layout
+
+\begin_layout Standard
+Another example is ML-style function application.
+ Function 
+\emph on
+f
+\emph default
+ applied to parameters 
+\emph on
+a
+\emph default
+, 
+\emph on
+b
+\emph default
+ and 
+\emph on
+c
+\emph default
+ is written as 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+f a b c
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ However, simply 
+\emph on
+
+\begin_inset Quotes eld
+\end_inset
+
+f
+\begin_inset Quotes erd
+\end_inset
+
+
+\emph default
+ is just a variable reference.
+ This construct can be parsed with the following rule.
+\end_layout
+
+\begin_layout LyX-Code
+ApplyExpression
+\end_layout
+
+\begin_layout LyX-Code
+    returns Expression
+\end_layout
+
+\begin_layout LyX-Code
+        {if (params.isEmpty) fun else _self}
+\end_layout
+
+\begin_layout LyX-Code
+    : fun=PrimaryExpr (params=PrimaryExpr)*;
+\end_layout
+
+\begin_layout Standard
+The following table shows AST for different input strings with and without
+ using the return expression.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Tabular
+<lyxtabular version="3" rows="3" columns="3">
+<features>
+<column alignment="left" valignment="top" width="0">
+<column alignment="left" valignment="top" width="40text%">
+<column alignment="left" valignment="top" width="40text%">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Input string
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Without return expression
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+With return expression
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+f
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+ApplyExpression(
+\begin_inset Newline newline
+\end_inset
+
+ Id(
+\begin_inset Quotes eld
+\end_inset
+
+f
+\begin_inset Quotes erd
+\end_inset
+
+),
+\begin_inset Newline newline
+\end_inset
+
+ List())
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+Id(
+\begin_inset Quotes eld
+\end_inset
+
+f
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+f a b
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+ApplyExpression(
+\begin_inset Newline newline
+\end_inset
+
+ Id(
+\begin_inset Quotes eld
+\end_inset
+
+f
+\begin_inset Quotes erd
+\end_inset
+
+),
+\begin_inset Newline newline
+\end_inset
+
+ List(Id(
+\begin_inset Quotes eld
+\end_inset
+
+a
+\begin_inset Quotes erd
+\end_inset
+
+), Id(
+\begin_inset Quotes eld
+\end_inset
+
+a
+\begin_inset Quotes erd
+\end_inset
+
+)))
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\noindent
+\align left
+
+\family typewriter
+ApplyExpression(
+\begin_inset Newline newline
+\end_inset
+
+  Id(
+\begin_inset Quotes eld
+\end_inset
+
+f
+\begin_inset Quotes erd
+\end_inset
+
+),
+\begin_inset Newline newline
+\end_inset
+
+  List(Id(
+\begin_inset Quotes eld
+\end_inset
+
+a
+\begin_inset Quotes erd
+\end_inset
+
+), Id(
+\begin_inset Quotes eld
+\end_inset
+
+a
+\begin_inset Quotes erd
+\end_inset
+
+)))
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In general, it is a good idea to keep the return expressions short in order
+ to keep the grammar file readable.
+ It is recommended to put the longer code in a separate Scala file and leave
+ only function calls to return expressions.
+ In order to make code in grammar shorter, the 
+\emph on
+scalaheader
+\emph default
+ directive (followed by block of code in curly brackets) can be used to
+ add import statements to the generated Scala code.
+ For example, the following example makes all the members of 
+\emph on
+GrammarUtils
+\emph default
+ object accessible from the return code blocks.
+\end_layout
+
+\begin_layout LyX-Code
+scalaheader {
+\end_layout
+
+\begin_layout LyX-Code
+import GrammarUtils._
+\end_layout
+
+\begin_layout LyX-Code
+}
+\end_layout
+
+\begin_layout Standard
+Objects returned by the return expressions are not limited to AST nodes
+ generated from the grammar.
+ It is possible to define new AST classes and use them from the return expressio
+ns.
+ However, this has some restrictions.
 \end_layout
 
 \begin_layout Itemize
-scala-header directive
+AST classes must be subclasses of 
+\emph on
+CommonNode
+\emph default
+.
 \end_layout
 
 \begin_layout Itemize
-_self
+AST node returned from return expressions must belong to subclass of the
+ return type of the rule.
+ If AST node is not subclass of the AST class created for this rule, the
+ return type of the rule must be used.
 \end_layout
 
+\begin_layout Itemize
+When constructing nested AST nodes, the inner nodes must be manually assigned
+ node locations.
+ All the AST nodes contain location of the node in the source file (starting
+ and ending character position, see the documentation of 
+\emph on
+CommonNode
+\emph default
+ class for further details).
+ The top-level object returned by return expression is automatically assigned
+ a location.
+ However, for the nodes inside the top-level object the programmer must
+ manually set the location of the node.
+ The following example code parses C-style array access operator 
+\emph on
+X[Y]
+\emph default
+ and constructs expression containing pointer arithmetic: 
+\emph on
+*(X + Y)
+\emph default
+.
+\end_layout
+
+\begin_deeper
+\begin_layout LyX-Code
+ArrayDeref
+\end_layout
+
+\begin_layout LyX-Code
+    returns Expression
+\end_layout
+
+\begin_layout LyX-Code
+        { Deref(
+\end_layout
+
+\begin_layout LyX-Code
+            Plus(array, index).setLocation(_self)
+\end_layout
+
+\begin_layout LyX-Code
+          ) }
+\end_layout
+
+\begin_layout LyX-Code
+    : array=Expression 
+\begin_inset Quotes eld
+\end_inset
+
+[
+\begin_inset Quotes eld
+\end_inset
+
+ index=Expression 
+\begin_inset Quotes erd
+\end_inset
+
+]
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Here the 
+\emph on
+setLocation(_self)
+\emph default
+ is used to set the source location of the 
+\emph on
+Plus
+\emph default
+ AST node.
+ The location does not have to be copied entirely from a single node.
+ The methods 
+\emph on
+setStart
+\emph default
+ and 
+\emph on
+setEnd
+\emph default
+ can be used to copy starting point from one node and ending point from
+ another node.
+\end_layout
+
+\end_deeper
 \begin_layout Subsubsection
 \begin_inset CommandInset label
 LatexCommand label
