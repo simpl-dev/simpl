@@ -3176,7 +3176,7 @@ ArrayDeref
 \begin_inset Quotes erd
 \end_inset
 
-
+;
 \end_layout
 
 \begin_layout Standard
@@ -3214,7 +3214,8 @@ Usage Scenarios
 \end_layout
 
 \begin_layout Standard
-The main reasons to use return types and return code blocks are the following.
+The main reasons to use return types and return code blocks are the following
+ purposes.
 \end_layout
 
 \begin_layout Itemize
@@ -3223,12 +3224,13 @@ Return types can be used to introduce abstract base classes without using
 \end_layout
 
 \begin_layout Itemize
-Return code blocks can be used to remove unnecessary AST nodes (e.g., parentheses
- rules).
+Return code blocks can be used to remove unnecessary AST nodes (e.g., rules
+ corresponding to parentheses).
 \end_layout
 
 \begin_layout Itemize
-Use return code blocks to implement arithmetic operators.
+Return code blocks can be used to generate nice-looking AST for arithmetic
+ operators.
  See 
 \begin_inset CommandInset ref
 LatexCommand ref
