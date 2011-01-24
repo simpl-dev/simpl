@@ -72,5 +72,5 @@ class RuleClass(val name: String, val classType: String, body: String) {
 
 /** Constructor parameter for rule class. */
 class RuleClassParam(val name: String, val pType: String) {
-    override def toString = name + ": " + pType
+    override def toString = "var " + name + ": " + pType
 }
