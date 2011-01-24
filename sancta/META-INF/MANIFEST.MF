@@ -18,7 +18,7 @@ Require-Bundle: org.eclipse.ui,
  org.apache.ant,
  org.eclipse.ui.editors,
  simplicitas-tool,
- org.scala-ide.scala.library
+ org.scala-ide.scala.library;bundle-version="2.8.1"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: ee.cyber.simplicitas.eclipse,ee.cyber.simplicitas.imp,
