@@ -1,5 +1,0 @@
-group PufGenerator;
-
-program() ::= <<
-generated <id>
->>

@@ -1,14 +1,12 @@
 package ee.cyber.simplicitas.puf;
 
 import ee.cyber.simplicitas.{GeneratorBase, MainBase}
+import ee.cyber.simplicitas.PrettyPrint._
 
 class PufGenerator(destDir: String) 
         extends GeneratorBase(destDir) {
-  val templates = getTemplates("Puf.stg")
-    
   def generate(tree: Program) {
-    val args = tree.toJavaMap()
-    writeFile("GeneratedProgram.java", templates.getInstanceOf("program", args))
+      println(prettyPrint(tree))
   }
 }
   
