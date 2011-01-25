@@ -1,0 +1,5 @@
+maven.repo.local=${user.home}/.m2/repository
+eclipse=${user.home}/eclipse
+
+maven.repo.remote=http://research.cyber.ee/simpl/m2/repository
+

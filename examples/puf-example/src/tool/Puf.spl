@@ -1,0 +1,121 @@
+grammar ee.cyber.simplicitas.puf.Puf;
+
+scalaheader {
+import PufExtras._
+}
+
+Program: Include? decls=FunDecl+;
+
+Include: "#" "include" file=Id ".puf";
+
+option Decl {
+    def left: DeclLeft
+    def expr: Expr
+    // TODO: unapply for pattern matching.
+}: TupleDecl | FunDecl;
+
+TupleDecl returns Decl: left=TupleLeft "=" expr=Expr ";";
+FunDecl returns Decl: left=FunLeft "=" expr=Expr ";";
+option DeclLeft: FunLeft | TupleLeft;
+FunLeft returns DeclLeft: Id+;
+TupleLeft returns DeclLeft: "(" h=Id ("," t=Id)* ")";
+
+option Expr:
+CaseExpr
+| LetrecExpr
+| LetExpr
+| FunExpr
+| IfExpr
+| OrExpr;
+
+CaseExpr: "case" expr=Expr "of" nilAlt=NilAlt ";" consAlt=ConsAlt;
+NilAlt: "[" "]" "->" expr=Expr;
+ConsAlt: head=Id ":" tail=Id "->" expr=Expr;
+LetrecExpr: "letrec" decl=FunDecl+ "in" Expr;
+LetExpr: "let" decl=Decl+ "in" Expr;
+FunExpr: "fn" params=Id+ "->" Expr;
+IfExpr: "if" cond=Expr "then" ifThen=Expr "else" ifElse=Expr;
+
+OrExpr
+    returns Expr {makeBinaryOp(BinaryOp.Or, left :: rest)}
+    : left=AndExpr ("||" rest=AndExpr)*;
+AndExpr returns Expr {makeBinaryOp(BinaryOp.And, left :: rest)}
+    : left=EqExpr ("&&" rest=EqExpr)*;
+
+EqExpr
+    returns Expr {makeBinaryOp(op, left, right)}
+    : left=CompareExpr (op=EqOp right=CompareExpr)?;
+terminal EqOp: "==" | "/=";
+
+CompareExpr
+    returns Expr {makeBinaryOp(op, left, right)}
+    : left=ConsExpr (op=CompareOp right=ConsExpr)?;
+terminal CompareOp: "<" | "<=" | ">" | ">=";
+
+ConsExpr
+    returns Expr {if (right eq null) left else _self}
+    : left=PlusExpr (":" right=ConsExpr)?;
+
+PlusExpr
+    returns Expr {makeBinaryOp(left :: rest, op)}
+    : left=MulExpr (op=PlusExprOp rest=MulExpr)*;
+option PlusExprOp {
+    def text: String
+}: PlusOp | MinusOp;
+terminal PlusOp: "+";
+// There must be special terminal because unary negation also uses the minus
+// token.
+terminal MinusOp: "-";
+
+MulExpr
+    returns Expr {makeBinaryOp(left :: rest, op)}
+    : left=UnaryExpr (op=MulExprOp rest=UnaryExpr)*;
+terminal MulExprOp: "*" | "/" | "%";
+
+option UnaryExpr returns Expr:
+    NegExpr
+    | NotExpr
+    | SelectExpr
+    | ApplyExpr;
+NegExpr
+    returns Expr {Unary(UnaryOp.Neg, expr)}
+    : MinusOp expr=PrimaryExpr;
+NotExpr
+    returns Expr {Unary(UnaryOp.Not, expr)}
+    : "not" expr=PrimaryExpr;
+ApplyExpr
+    returns Expr {if (params.isEmpty) fun else _self}
+    : fun=PrimaryExpr (params=PrimaryExpr)*;
+SelectExpr: "#" sel=Num tuple=PrimaryExpr;
+
+option PrimaryExpr returns Expr:
+    Id
+    | Num
+    | TupleLiteral
+    | ListLiteral
+    ;
+TupleLiteral
+    {def items = if (first eq null) Nil else first :: rest}
+    returns Expr {
+        // Expression "(foo)" is actually not a tuple but parenthesised
+        // expression.
+        if ((first ne null) && rest.isEmpty)
+            first
+        else
+            _self
+    }
+    : "(" ")"
+    | "(" first=Expr ("," rest=Expr)* ")";
+ListLiteral
+    {def items = first :: rest}
+    returns Expr {if (first eq null) ListNil() else _self}
+    : "[" "]"
+    | "[" first=Expr ("," rest=Expr)+ "]";
+
+terminal Id: ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')*;
+terminal Num
+    {def value = text.toInt}
+    : ('0'..'9')+;
+fragment MlComment: '/*' (~'*' | '*' ~'/')* '*/';
+fragment SlComment: '//' ~('\n'|'\r')*;
+hidden terminal Ws: (' '|'\t'|'\r'|'\n'|MlComment|SlComment)+;
