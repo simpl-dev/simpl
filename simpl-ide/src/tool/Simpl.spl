@@ -6,7 +6,7 @@ options (backtrack=true; memoize=true;)
     consists of header and list of rule definitions. */
 GrammarDef:
     header=PackageDef ';'
-    (opts=OptionList | scalaHeaders=ScalaHeader)*
+    (opts=OptionList | scalaHeaders=ScalaHeader | lexerStates=LexerStates)*
     rules=RuleDef+;
 
 /** Standard header for grammar, indicates package name where the
@@ -20,6 +20,8 @@ OptionList: "options" "(" (name=Id "=" value=Id ";")* ")";
     Scala file. Useful for importing classes that can be used in "returns"
     blocks. */
 ScalaHeader: 'scalaheader' Code;
+
+LexerStates: "lexer-states" "(" IdList ")";
 
 /** Java-style identifier in the style of foo.bar.baz */
 DottedId {
