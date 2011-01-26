@@ -49,9 +49,10 @@ class PufConfig extends APluginConfig {
     }
 
     def treeLabel(node: CommonNode) = node match {
-        case FunDecl(FunLeft(Id(funName) :: params), _)
-                if (!params.isEmpty || isToplevelDef(node)) =>
+        case FunDecl(IdLeft(Id(funName)), FunExpr(_, _)) =>
             funName
+        case FunDecl(IdLeft(Id(varName)), _) if isToplevelDef(node) =>
+            varName
         case FunExpr(_, _) =>
             "(anon)"
         case _ =>
@@ -66,9 +67,9 @@ class PufConfig extends APluginConfig {
         node.endLine - node.startLine
 
     override def treeImage(node: CommonNode) = node match {
-        case FunDecl(FunLeft(_ :: _ :: _), _) =>
+        case FunDecl(_, FunExpr(_, _)) =>
             Images.function
-        case FunDecl(FunLeft(_ :: Nil), _) =>
+        case FunDecl(_, _) =>
             Images.variable
         case FunExpr(_, _) =>
             Images.function

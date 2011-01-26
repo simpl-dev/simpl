@@ -15,18 +15,17 @@ option Decl {
 }: TupleDecl | FunDecl;
 
 TupleDecl returns Decl: left=TupleLeft "=" expr=Expr ";";
-FunDecl returns Decl: left=FunLeft "=" expr=Expr ";";
-option DeclLeft: FunLeft | TupleLeft;
-FunLeft returns DeclLeft: Id+;
+FunDecl returns Decl {makeFunDecl(left, expr)}: left=FunLeft "=" expr=Expr ";";
+FunLeft returns DeclLeft: ids=Id+;
 TupleLeft returns DeclLeft: "(" h=Id ("," t=Id)* ")";
 
 option Expr:
-CaseExpr
-| LetrecExpr
-| LetExpr
-| FunExpr
-| IfExpr
-| OrExpr;
+    CaseExpr
+    | LetrecExpr
+    | LetExpr
+    | FunExpr
+    | IfExpr
+    | OrExpr;
 
 CaseExpr: "case" expr=Expr "of" nilAlt=NilAlt ";" consAlt=ConsAlt;
 NilAlt: "[" "]" "->" expr=Expr;
@@ -112,7 +111,9 @@ ListLiteral
     : "[" "]"
     | "[" first=Expr ("," rest=Expr)+ "]";
 
-terminal Id: ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')*;
+terminal Id
+    {var target: CommonNode = null}
+    : ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')*;
 terminal Num
     {def value = text.toInt}
     : ('0'..'9')+;

@@ -14,9 +14,26 @@ case class ListNil() extends Expr {
     def childrenNames = Array.empty
 }
 
+case class IdLeft(id: Id) extends DeclLeft {
+    def childrenNames = Array("id")
+}
+
 object PufExtras {
     type WithText = {
         def text: String
+    }
+
+    def makeFunDecl(left: DeclLeft, expr: Expr) = left match {
+        case FunLeft(id :: Nil) =>
+            FunDecl(IdLeft(id).setLocation(id), expr)
+        case FunLeft(fun :: params) =>
+            val lambda = FunExpr(params, expr)
+            lambda.setStart(params.head)
+            lambda.setEnd(expr)
+
+            FunDecl(IdLeft(fun).setLocation(fun), lambda)
+        case _ =>
+            throw new IllegalArgumentException("Invalid fundecl: " + left)
     }
 
     def makeBinaryOp(op: TerminalNode, left: Expr, right: Expr) =

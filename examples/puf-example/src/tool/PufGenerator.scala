@@ -18,6 +18,9 @@ object PufMain extends MainBase {
             grammar.parseFile(arg)
             checkErrors(grammar.errors)
 
+            val checkerErrors = PufChecker.process(grammar.tree)
+            checkErrors(checkerErrors)
+
             new PufGenerator(destDir).generate(grammar.tree)
         }
     }
