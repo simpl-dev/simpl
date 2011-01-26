@@ -62,6 +62,9 @@ class PufConfig extends APluginConfig {
         node.parent.isInstanceOf[Program]
     }
 
+    def lineCount(node: CommonNode) =
+        node.endLine - node.startLine
+
     override def treeImage(node: CommonNode) = node match {
         case FunDecl(FunLeft(_ :: _ :: _), _) =>
             Images.function
@@ -71,6 +74,14 @@ class PufConfig extends APluginConfig {
             Images.function
         case _ =>
             null
+    }
+
+    override def isFoldable(node: CommonNode) = node match {
+        case FunDecl(FunLeft(_ :: _ :: _), _)
+                | FunExpr(_, _) if lineCount(node) > 3 =>
+            true
+        case _ =>
+            false
     }
 
     override def runGenerator(dir: String, file: String) {
