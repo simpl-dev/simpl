@@ -89,8 +89,7 @@
         <jar destfile="${target}/puf-lang-plugin.jar" basedir="${target}/plugin"
              manifest="${basedir}/META-INF/MANIFEST.MF">
             <fileset dir="${basedir}" includes="plugin.xml"/>
-            <!-- Include this if the project starts to contain icons.
-             fileset dir="${basedir}" includes="icons/*"/ -->
+            <fileset dir="${basedir}" includes="icons/*"/>
             <zipfileset src="${tool-jar}"/>
         </jar>
     </target>

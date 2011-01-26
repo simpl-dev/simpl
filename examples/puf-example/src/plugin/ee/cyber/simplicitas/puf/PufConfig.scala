@@ -30,26 +30,19 @@ object PufConfig {
      * plugin's ImageRegistry. The image objects are declared in this object
      * and initialized in the <code>initializeImages</code> method. */
     object Images {
-        /* var imageX: Image = null */
+        var variable: Image = null
+        var function: Image = null
     }
 
-    /** Load images that will be used as icons in the <code>treeImage</code>
-     * and <code>fileImage</code> methods.
-     * This method is passed two-argument function <code>addFun</code>
-     * that is used to actually load images. It takes two arguments.
-     * The first argument is key that is used in the plugin's ImageRegistry.
-     * (you do not need to do anything with they key except ensure that every
-     * image has unique key). The second argument is relative path to the
-     * image file. The path is relative to root of the plugin's jar.
-     * The function returns Image object that can later be used in
-     * <code>treeImage</code> and <code>fileImage</code> methods.
-     */
     def initializeImages(addFun: (String, String) => Image) {
-        /* Images.imageX = addFun("imageX", "icons/imageX.gif") */
+        Images.variable = addFun("variable", "icons/variable.gif")
+        Images.function = addFun("function", "icons/function.gif")
     }
 }
 
 class PufConfig extends APluginConfig {
+    import PufConfig.Images
+
     /** Parses the input using the correct grammar. */
     def parse(ctx: ParseCtx) {
         ctx parse new PufGrammar()
@@ -67,6 +60,17 @@ class PufConfig extends APluginConfig {
 
     def isToplevelDef(node: CommonNode) = {
         node.parent.isInstanceOf[Program]
+    }
+
+    override def treeImage(node: CommonNode) = node match {
+        case FunDecl(FunLeft(_ :: _ :: _), _) =>
+            Images.function
+        case FunDecl(FunLeft(_ :: Nil), _) if isToplevelDef(node) =>
+            Images.variable
+        case FunExpr(_, _) =>
+            Images.function
+        case _ =>
+            null
     }
 
     override def runGenerator(dir: String, file: String) {
