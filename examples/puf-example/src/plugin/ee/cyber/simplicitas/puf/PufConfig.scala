@@ -68,7 +68,7 @@ class PufConfig extends APluginConfig {
     override def treeImage(node: CommonNode) = node match {
         case FunDecl(FunLeft(_ :: _ :: _), _) =>
             Images.function
-        case FunDecl(FunLeft(_ :: Nil), _) if isToplevelDef(node) =>
+        case FunDecl(FunLeft(_ :: Nil), _) =>
             Images.variable
         case FunExpr(_, _) =>
             Images.function
@@ -87,4 +87,8 @@ class PufConfig extends APluginConfig {
     override def runGenerator(dir: String, file: String) {
         PufMain.main(Array("--dest", dir, dir + file))
     }
+
+    override def singleLineCommentPrefix = "//"
+
+    override def fences = Array(("(", ")"), ("[", "]"))
 }
