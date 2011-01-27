@@ -45,7 +45,11 @@ class PufConfig extends APluginConfig {
 
     /** Parses the input using the correct grammar. */
     def parse(ctx: ParseCtx) {
-        ctx parse new PufGrammar()
+        val grammar = new PufGrammar()
+
+        if (ctx parse grammar) {
+            ctx.reportErrors(PufChecker.process(grammar.tree))
+        }
     }
 
     def treeLabel(node: CommonNode) = node match {
