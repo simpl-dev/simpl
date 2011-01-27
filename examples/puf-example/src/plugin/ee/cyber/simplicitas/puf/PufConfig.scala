@@ -92,6 +92,12 @@ class PufConfig extends APluginConfig {
             false
     }
 
+
+    override def referenceTarget(node: CommonNode) = node match {
+        case id: Id => id.target
+        case _ => null
+    }
+
     override def runGenerator(dir: String, file: String) {
         PufMain.main(Array("--dest", dir, dir + file))
     }
