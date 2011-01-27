@@ -53,7 +53,7 @@ class PufConfig extends APluginConfig {
             funName
         case FunDecl(IdLeft(Id(varName)), _) if isToplevelDef(node) =>
             varName
-        case FunExpr(_, _) =>
+        case FunExpr(_, _) if !partOfDecl(node) =>
             "(anon)"
         case _ =>
             null
@@ -62,6 +62,9 @@ class PufConfig extends APluginConfig {
     def isToplevelDef(node: CommonNode) = {
         node.parent.isInstanceOf[Program]
     }
+
+    def partOfDecl(node: CommonNode) =
+        node.parent.isInstanceOf[FunDecl]
 
     def lineCount(node: CommonNode) =
         node.endLine - node.startLine
