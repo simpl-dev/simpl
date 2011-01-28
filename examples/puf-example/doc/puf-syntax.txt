@@ -1,0 +1,85 @@
+<program> := <rdecl> ... <rdecl>
+
+<rdecl>   := <flhs> '=' <expr> ';'
+
+<ldecl>   := <flhs> '=' <expr> ';'
+          |  <tlhs> '=' <expr> ';'
+
+<flhs>    := <ident> ... <ident>
+
+<tlhs>    := '(' <ident> ',' ... ',' <ident> ')'
+
+<expr>    := <ident>
+          |  <num>
+          |  '(' <expr> ',' ... ',' <expr> ')'
+          |  '[' <expr> ',' ... ',' <expr> ']'
+          |  <uop> <expr>
+          |  <expr> <bop> <expr>
+          |  'if' <expr> 'then' <expr> 'else' <expr>
+          |  <expr> <expr>
+          |  'fn' <ident> ... <ident> '->' <expr>
+          |  'let' <ldecl> ... <ldecl> 'in' <expr>
+          |  'letrec' <rdecl> ... <rdecl> 'in' <expr>
+          |  'case' <expr> 'of' <nalt> ';' <calt>
+
+<nalt>    := '[]' '->' <expr>
+
+<calt>    := <ident> ':' <ident> '->' <expr>
+
+<uop>     := 'neg' | 'not' | <select>
+
+<bop>     := '*' | '/' | '%'
+          |  '+' | '-'
+          |  ':'
+          |  '<' | '<=' | '>' | '>='
+          |  '==' | '/='
+          |  '&&'
+          |  '||'
+
+<ident>   := <letter> (<digit> | <letter>)*
+
+<num>     := <digit>+
+
+<select>  := '#' <digit>+
+
+A program consists of a sequence of (recursive) declarataions. One of
+the declarations must define a variable 'main'. A program is
+eqiuvalent of a letrec-expression:
+'letrec' <rdecl> ... <rdecl> 'in' 'main';
+
+Deaclarations are equations terminated with semicolon ';'.
+Right-hand-side of declarations is an expression. Left-hand-side
+is either a function pattern or tuple pattern. (Tuple patterns are
+allowed only in let-expressions, and not in letrec-expressions).
+A declaration in a form "f x1 x2 ... xn = exp" is equivalent with
+"f = fn x1 x2 ... xn -> exp".
+
+All expression constructs extend as far to the right as possible.
+
+Expressions "( e1, ... , en )" are tuple expressions for n > 1
+or n = 0. If n = 1, then the expression "( e1 )" is not a tuple, but
+equivalent to "e1" (in this case parenthesis are just delimiters).
+
+Expressions "[ e1, ... , en ]" are list expressions. The expression
+"[]" (ie. n = 0) denotes an empty list constructor. For n > 0, list
+expressions are just shorthand for "e1 : e2 : ... : en : []".
+
+Binary operators are grouped in the grammar by precedences
+(multiplicative operators '*', '/", '%' bind tightest, logical or
+'||' binds weakest). All binary operators are left-associative,
+except list constructor ':', which is right-associative.
+
+Function application and unary operators bind tighter than any 
+binary operator (ie. "f 3 + 4" is equivalent to "(f 3) + 4").
+Application is left-assotiative (ie. "f 3 4" is equivalent to
+"(f 3) 4".
+
+Semantics is call-by-value.
+
+At the beginning of a file there can be include statements in form:
+#include failname.puf
+This includes the contents of the file 'failname.puf' verbatim (like
+include statements in C).
+
+Comments in the language are C/C++ style; ie. normal comments are
+in between /* ... */ and comments till the end-of-line //
