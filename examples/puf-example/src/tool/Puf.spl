@@ -1,9 +1,11 @@
 grammar ee.cyber.simplicitas.puf.Puf;
 
+// Import the helper methods from PufExtras object.
 scalaheader {
 import PufExtras._
 }
 
+/** Top-level program */
 Program: Include? decls=FunDecl+;
 
 Include: "#" "include" file=Id ".puf";
@@ -11,7 +13,6 @@ Include: "#" "include" file=Id ".puf";
 option Decl {
     def left: DeclLeft
     def expr: Expr
-    // TODO: unapply for pattern matching.
 }: TupleDecl | FunDecl;
 
 TupleDecl returns Decl: left=TupleLeft "=" expr=Expr ";";
@@ -112,6 +113,7 @@ ListLiteral
     | "[" first=Expr ("," rest=Expr)+ "]";
 
 terminal Id
+    // Contains the node that defines this identifier.
     {var target: CommonNode = null}
     : ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')*;
 terminal Num

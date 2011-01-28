@@ -6,6 +6,7 @@ import ee.cyber.simplicitas.{GenericToken, CommonNode}
 import org.eclipse.swt.graphics.Image
 import org.eclipse.imp.language.LanguageRegistry
 
+// This file contains the IDE for the PUF.
 
 object PufConfig {
     // These four values serve technical purposes, do not touch them.
@@ -14,15 +15,7 @@ object PufConfig {
     val language = LanguageRegistry.findLanguage(languageId)
     val pluginId = "puf_lang"
 
-    /** Insert here default values by color symbols that will be
-     * returned by the getTokenColor method. Map key is the color
-     * symbol and value is description of the color symbol, consisting of:
-     * - human-readable name of the color that is shown in the preferences
-     *   dialog.
-     * - default value of the color, encoded as "R,G,B"
-     *   (e.g., "255, 255, 0" for yellow).
-     * - font style using SWT constants (e.g, SWT.BOLD | SWT.ITALIC)
-     */
+    /** We rely on default colors. */
     val colors: Map[Symbol, Tuple3[String, String, Number]] =
         Map.empty
 
@@ -30,7 +23,10 @@ object PufConfig {
      * plugin's ImageRegistry. The image objects are declared in this object
      * and initialized in the <code>initializeImages</code> method. */
     object Images {
+        /** Variable outline */
         var variable: Image = null
+
+        /** Function outline. */
         var function: Image = null
     }
 
@@ -48,15 +44,20 @@ class PufConfig extends APluginConfig {
         val grammar = new PufGrammar()
 
         if (ctx parse grammar) {
+            // Invoke PufChecker and report the errors.
             ctx.reportErrors(PufChecker.process(grammar.tree))
         }
     }
 
+    /** Outline view shows all the functions and all the top-level variables. */
     def treeLabel(node: CommonNode) = node match {
+        // Function defined in let or letrec (and therefore has name)
         case FunDecl(IdLeft(Id(funName)), FunExpr(_, _)) =>
             funName
+        // Top-level variable.
         case FunDecl(IdLeft(Id(varName)), _) if isToplevelDef(node) =>
             varName
+        // anonymous function (named functions were matched earlier */
         case FunExpr(_, _) if !partOfDecl(node) =>
             "(anon)"
         case _ =>
@@ -84,15 +85,15 @@ class PufConfig extends APluginConfig {
             null
     }
 
+    /** We fold functions that are longer than 3 lines. */
     override def isFoldable(node: CommonNode) = node match {
-        case FunDecl(FunLeft(_ :: _ :: _), _)
-                | FunExpr(_, _) if lineCount(node) > 3 =>
+        case FunExpr(_, _) if lineCount(node) > 3 =>
             true
         case _ =>
             false
     }
 
-
+    /** The references are previously filled by PufChecker. */
     override def referenceTarget(node: CommonNode) = node match {
         case id: Id => id.target
         case _ => null

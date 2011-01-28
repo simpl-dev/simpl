@@ -6,6 +6,7 @@ import ee.cyber.simplicitas.PrettyPrint._
 class PufGenerator(destDir: String)
         extends GeneratorBase(destDir) {
     def generate(tree: Program) {
+        // No generator, just print the syntax tree.
         println(prettyPrint(tree))
     }
 }
@@ -18,6 +19,7 @@ object PufMain extends MainBase {
             grammar.parseFile(arg)
             checkErrors(grammar.errors)
 
+            // Check for unknown identifiers.
             val checkerErrors = PufChecker.process(grammar.tree)
             checkErrors(checkerErrors)
 
