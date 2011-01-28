@@ -1,7 +1,7 @@
 <!-- ex: se sts=4 sw=4 expandtab: -->
 <project name="puf-lang" default="plugin" basedir=".">
     <property file="${basedir}/ant.properties"/>
-    <property name="simpl.version" value="1.1.0"/>
+    <property name="simpl.version" value="1.1.1"/>
 
     <property name="target" value="${basedir}/target"/>
     <property name="tool-jar" value="${target}/puf-lang-tool.jar"/>

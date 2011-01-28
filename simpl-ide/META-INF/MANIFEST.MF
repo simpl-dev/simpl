@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Simplicitas IDE
 Bundle-SymbolicName: simpl_ide;singleton:=true
-Bundle-Version: 1.1.0
+Bundle-Version: 1.1.1
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.core.resources,
@@ -12,8 +12,8 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.ui.editors,
  org.eclipse.ui.workbench.texteditor,
  org.eclipse.imp.preferences,
- simplicitas-plugin;bundle-version="1.1.0",
- simplicitas-tool;bundle-version="1.1.0",
+ simplicitas-plugin;bundle-version="1.1.1",
+ simplicitas-tool;bundle-version="1.1.1",
  org.scala-ide.scala.library;bundle-version="2.8.1"
 Bundle-Activator: ee.cyber.simplicitas.ide.SimplPlugin
 Eclipse-LazyStart: true
