@@ -3,7 +3,11 @@ Contents of the source folders:
 sancta -- main engine
 simpl-ide -- IDE for editing Simpl grammar files
 examples -- example projects using Simpl
-	fowler-dsl -- example project implementing Martin Fowler's
-	              state machine DSL.
+    fowler-example -- example project implementing Martin Fowler's
+                      state machine DSL.
+    puf-example -- implements simple functional language. Demonstrates
+                   how to use Simpl for implementing complex languages
+                   containing arithmetic expressions, user-defined
+                   functions, nested scopes etc.
 doc -- Simpl documentation sources
 update-site -- projects for creating Eclipse update site
