@@ -6,24 +6,24 @@ import ee.cyber.simplicitas._
 
 class SimplCtx(val grammar: SimplGrammar) {
   import collection.mutable.{Map, ArrayBuffer}
-  
+
   val tree = grammar.tree
-  
+
   val nonTerms = Map[String, RuleDef]()
   val options = Map[String, RuleDef]()
   val terminals = Map[String, RuleDef]()
   val fragments = Map[String, RuleDef]()
 
   var errors = new ArrayBuffer[SourceMessage]()
-  
+
   makeSymbolTable()
-  
+
   readDocComments()
-  
+
   def makeSymbolTable() {
     tree.rules foreach makeSymbolTable
   }
-  
+
   def makeSymbolTable(r: RuleDef) {
     r match {
       case nd: NonTerminalDef => nonTerms += (nd.name.text -> nd)
@@ -47,8 +47,9 @@ class SimplCtx(val grammar: SimplGrammar) {
 
   def isDocComment(token: SimplGrammar#Token) =
     token.kind == SimplKind.MlComment &&
+        token.text.length > 4 &&
         token.text.startsWith("/**")
-  
+
   def getComments = {
     val ret = Map[Int, String]()
 
@@ -61,7 +62,7 @@ class SimplCtx(val grammar: SimplGrammar) {
         comment = null
       }
     }
-    
+
     ret
   }
 }
