@@ -12,7 +12,7 @@ public class <name.text> extends StateMachine {
     
     public <name.text>() {
         setInitState(<initState:stateVar()>);
-        <states:stateConstructor(name); separator="\n">
+        <states:stateConstructor(it.name); separator="\n">
     
         <resetEvents:resetEvent(); separator="\n">
     }
