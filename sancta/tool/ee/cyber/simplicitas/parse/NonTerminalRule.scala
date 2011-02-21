@@ -300,10 +300,11 @@ class NormalRule(pName: String, pTree: List[Any], symbols: SymbolTable)
                     else
                         rules(p.rule).paramValue(p)
                     )) + ")") + ";"
+        buf += "if ($r != null) {"
         buf += "$r.setStart(_start);"
         buf += "$r.setEnd(_end==-1?(_start==null?0:_start.endIndex()):_end,"
         buf += "_endLine==-1?(_start==null?0:_start.endLine()):_endLine,"
-        buf += "_endColumn==-1?(_start==null?0:_start.endColumn()):_endColumn);}"
+        buf += "_endColumn==-1?(_start==null?0:_start.endColumn()):_endColumn);}}"
     }
 
     def ruleBody(implicit buf: ArrayBuffer[String]) {
