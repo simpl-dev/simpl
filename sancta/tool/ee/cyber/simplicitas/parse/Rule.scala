@@ -140,7 +140,7 @@ abstract class Rule(val name: String, var tree: List[Any],
         if (returnType ne null) {
             if (!rules.contains(returnType) &&
                     !classes.contains(returnType)) {
-                classes(returnType) = new RuleClass(returnType, "trait", body)
+                classes(returnType) = new RuleClass(returnType, "trait", null)
             }
             classes(name).extend += returnType
         }

@@ -55,6 +55,10 @@ Funny3: (x=Id x2=Id) (x3=Id x4=Id)+;
 // Cycle1 returns Cycle2: Cycle2;
 // Cycle2 returns Cycle1: Cycle1;
 
+//Rule1 returns Rule2 {foox}: foox=Rule3;
+Rule3 {val foo = 42} returns Rule1: "FOO" Id;
+
+
 terminal Id: ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')*;
 fragment STR_BODY: ~('\\'|'"') | '\\' .;
 terminal STRING {var doh = 0}:
