@@ -182,7 +182,7 @@ class NormalRule(pName: String, pTree: List[Any], symbols: SymbolTable)
 
         // Check whether this rule call conflicts with other rule calls
         // with the same name.
-        checkParamNameConflicts(param)
+        checkParamNameConflicts(pattern, param)
     }
 
     /** Processes call to unnamed literal. This literal will not go to AST.
@@ -227,7 +227,7 @@ class NormalRule(pName: String, pTree: List[Any], symbols: SymbolTable)
      * x=foo y=bar x=baz is a conflict.
      * y=bar (x=foo | x=baz) is not because both x's are in different
      * branches. */
-    private def checkParamNameConflicts(np: RuleParam) {
+    private def checkParamNameConflicts(loc: Object, np: RuleParam) {
         val varName = np.name
 
         params find (_.name == varName) match {
@@ -237,16 +237,17 @@ class NormalRule(pName: String, pTree: List[Any], symbols: SymbolTable)
                 if (currentBranch.conflictsWith(other.branch)) {
                     // There are two rule calls with the same name in the
                     // same branch.
-                    error(varName,
-                        "Rule contains several calls with the same parameter name: " +
+                    error(loc,
+                        "Rule \"" + name +
+                            "\" contains several calls with the same parameter name: " +
                             varName)
                 } else if (other.rule != np.rule) {
                     // There is rule call with same name and it has different
                     // type. Hence, we cannot generate meaningful
                     // AST classes and grammar.
-                    error(varName, "Parameter " + varName +
-                            " is used to call different rules: " + np.rule +
-                            " and " + other.rule)
+                    error(loc, "In rule \"" + name + "\", parameter " +
+                            varName + " is used to call different rules: " +
+                            np.rule + " and " + other.rule)
                 } else {
                     // Rule call with same name exists, but it has compatible
                     // type. We are happy and need to do nothing more.
