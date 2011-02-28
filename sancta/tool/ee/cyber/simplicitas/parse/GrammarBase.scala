@@ -15,13 +15,14 @@ abstract class GrammarBase[Node <: CommonNode, Kind]
         extends GenericGrammar with TokenClassifier[Kind] {
     private var tokenList: Array[CommonToken[Kind]] = Array()
     private var nodeTree: Option[Node] = None
-    protected var errorHandler = new ErrorHandler()
+    protected var errorHandler: ErrorHandler = null
 
     // override in generated concrete grammar
     protected def lexer(source: CharStream,
                         errorHandler: ErrorHandler): TokenSource
     protected def doParse(tokens: TokenStream,
                           errorHandler: ErrorHandler): Node
+    protected def tokenNames: Map[Int, String]
 
     def tree: Node = nodeTree.get
     def hasTree = nodeTree != None
@@ -30,7 +31,7 @@ abstract class GrammarBase[Node <: CommonNode, Kind]
     def errors: IndexedSeq[SourceMessage] = errorHandler.errors
 
     def parse(source: CharStream): Unit = {
-        errorHandler = new ErrorHandler()
+        errorHandler = new ErrorHandler(tokenNames)
         val tokenSource =
             new TokenSourceWrapper[Kind](lexer(source, errorHandler), this)
         val tokenStream = new CommonTokenStream(tokenSource)
@@ -48,7 +49,7 @@ abstract class GrammarBase[Node <: CommonNode, Kind]
 
 /** This machinery is needed for reporting parse errors.
     It is not part of the public API. */
-class ErrorHandler {
+class ErrorHandler(val tokenNames: Map[Int, String]) {
     val errors = new ArrayBuffer[SourceMessage]()
     var lastError: RecognitionException = null;
 

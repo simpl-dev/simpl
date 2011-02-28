@@ -221,6 +221,16 @@ class GrammarGen(pGetPos: (Any) => List[Int]) {
         buf.append("}\n")
     }
 
+    private def tokenNames() =
+        "Map(" +
+            join(
+                (for (r <- rules.values
+                        if r.isInstanceOf[TerminalRule] ||
+                                r.isInstanceOf[LiteralRule])
+                    yield "(" + grammarName + "Lexer." + r.name + " -> \""
+                            + r.name + "\")")) +
+        ")"
+
     private def grammarClass(buf: StringBuilder) {
         buf.append(
             "\nclass " + grammarName + "Grammar extends " +
@@ -238,6 +248,7 @@ class GrammarGen(pGetPos: (Any) => List[Int]) {
                 "    parser.errorHandler = errorHandler\n" +
                 "    parser.toplevel()\n" +
                 "  }\n" +
+            "  val tokenNames: Map[Int, String] = " + tokenNames + "\n" +
             "  def tokenType(token: Int): " + grammarName + "Kind.Kind =\n" +
             "    " + grammarName + "Kind(token);\n" +
             "  def tokenKind(token: Int): Int = token match {\n")

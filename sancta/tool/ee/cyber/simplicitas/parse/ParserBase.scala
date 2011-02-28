@@ -46,13 +46,14 @@ class ParserBase(input: TokenStream, state: RecognizerSharedState)
         emitErrorMessage(getErrorMessage(ex, tokenNames))
     }
 
+    // Mostly copypaste from ANTLR sources
     override def getErrorMessage(e: RecognitionException,
                                  tokenNames: Array[String]): String = {
         def tokenName(expecting: Int) =
             if (expecting== Token.EOF)
                 "EOF";
             else
-                tokenNames(expecting)
+                errorHandler.tokenNames(expecting)
 
         e match {
             case ute: UnwantedTokenException =>
