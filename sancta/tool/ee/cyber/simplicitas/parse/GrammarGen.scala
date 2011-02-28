@@ -221,15 +221,26 @@ class GrammarGen(pGetPos: (Any) => List[Int]) {
         buf.append("}\n")
     }
 
-    private def tokenNames() =
-        "Map(" +
-            join(
-                (for (r <- rules.values
-                        if r.isInstanceOf[TerminalRule] ||
-                                r.isInstanceOf[LiteralRule])
-                    yield "(" + grammarName + "Lexer." + r.name + " -> \""
-                            + r.name + "\")")) +
-        ")"
+    private def tokenNames() = {
+        def quote(s: String) =
+            s.replace("\"", "\\\"")
+
+        def getRuleName(r: Rule) = r match {
+            case t: TerminalRule =>
+                t.name
+            case lit: LiteralRule =>
+                quote(lit.text)
+        }
+
+        val ruleNames=
+            for (r <- rules.values
+                 if r.isInstanceOf[TerminalRule] ||
+                         r.isInstanceOf[LiteralRule])
+                yield "(" + grammarName + "Lexer." + r.name + " -> \"" +
+                    getRuleName(r) + "\")"
+
+        "Map(" + join(ruleNames) + ")"
+    }
 
     private def grammarClass(buf: StringBuilder) {
         buf.append(

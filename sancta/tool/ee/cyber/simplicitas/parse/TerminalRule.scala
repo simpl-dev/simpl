@@ -17,7 +17,8 @@ case class CheckAny(s: List[Int]) extends StateOp("checkAny", s)
 
 /** Base class for terminal and fragment, but not for literal rules.
  * Such is life. */
-abstract class TerminalFragment(pName: String, pTree: List[Any], symbols: SymbolTable)
+abstract class TerminalFragment(pName: String, pTree: List[Any],
+                                symbols: SymbolTable)
         extends Rule(pName, pTree, symbols) {
     import symbols._
 
@@ -206,7 +207,7 @@ class TerminalRule(pName: String, hidden: Boolean, pTree: List[Any],
  *
  * @param text The literal string that will be matched by this rule.
  */
-class LiteralRule(pName: String, text: String, symbols: SymbolTable)
+class LiteralRule(pName: String, val text: String, symbols: SymbolTable)
         extends Rule(
                 pName,
                 List(List("NODE", List("MATCH", stripQuotes(text)))),
