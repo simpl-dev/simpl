@@ -227,7 +227,7 @@ class GrammarGen(pGetPos: (Any) => List[Int]) {
 
         def getRuleName(r: Rule) = r match {
             case t: TerminalRule =>
-                t.name
+                t.tokenName
             case lit: LiteralRule =>
                 quote(lit.text)
         }

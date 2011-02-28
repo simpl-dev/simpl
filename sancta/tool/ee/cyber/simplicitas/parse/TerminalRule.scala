@@ -160,6 +160,59 @@ abstract class TerminalFragment(pName: String, pTree: List[Any],
 
     private def getExitOp =
         stateOps.find(_.isInstanceOf[ExitState])
+
+    /** Returns name of the token that is displayed with parser errors. */
+    def tokenName = {
+        /** If the rule pattern is in the form of "foo" | "bar" | "baz",
+          * return list of alternatives. Otherwise return None. */
+        def getAlts: Option[List[String]] = {
+            // This will contain extracted alternatives.
+            val ret = new ArrayBuffer[String]()
+
+            for (alt <- tree) {
+                alt match {
+                    // It is a single string. Add to list.
+                    case List("NODE", List("MATCH", s))
+                            if s.isInstanceOf[String] =>
+                        ret += s.asInstanceOf[String]
+                    // Pattern is more complex than planned. Return "not found".
+                    case _ =>
+                        return None
+                }
+            }
+
+            Some(ret.toList)
+        }
+
+        /** Join alternatives together using construct "A, B, C or D". */
+        def joinAlts(alts: List[String]): String = alts match {
+            case single :: Nil =>
+                single
+            case item :: last :: Nil =>
+                item + " or " + last
+            case item :: rest =>
+                item + ", " + joinAlts(rest)
+            case _ =>
+                // Tree is supposed to contain at least something.
+                throw new IllegalArgumentException(
+                    "Invalid tree at joinAlts: " + tree)
+        }
+
+        tree match {
+            case List(List("NODE", List("MATCH", txt))) =>
+                txt
+            case _ =>
+                // Try to see if the patten has the form: "foo" | "bar"
+                getAlts match {
+                    case Some(alts) =>
+                        joinAlts(alts)
+                    case None =>
+                        // Nope. Just return the name of rule hoping that it
+                        // is meaningful.
+                        name
+                }
+        }
+    }
 }
 
 /** Fragment rules. */
