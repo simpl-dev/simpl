@@ -171,6 +171,8 @@ object GrammarUtils {
                     case _ =>
                         throw new GrammarException("Invalid syntax tree: " + m)
                 }
+                // Separate the rule calls by space. Resolves issue #2
+                buf += " "
             }
 
             first = false
