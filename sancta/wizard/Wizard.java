@@ -23,7 +23,7 @@ public class Wizard {
             super(param.description + " ("
                     + value + ") does not match pattern "
                     + param.regexp);
-            
+
             this.param = param;
             this.value = value;
         }
@@ -51,13 +51,13 @@ public class Wizard {
         { "Example", "" },
         { "extension", "" }
     };
-    
+
     public static class ParamInfo {
         public String id;
         public String description;
         public String defaultValue;
         public String regexp;
-        
+
         public ParamInfo(String id, String description, String defaultValue,
                 String regexp) {
             this.id = id;
@@ -66,7 +66,7 @@ public class Wizard {
             this.regexp = regexp;
         }
     }
-    
+
     public static ParamInfo getParamInfo(String name) {
         System.out.println("getParamInfo(" + name + ")");
         name = name.intern();
@@ -76,7 +76,7 @@ public class Wizard {
                 return PARAM_INFO[i];
             }
         }
-        
+
         throw new IllegalArgumentException("Invalid parameter: " + name);
     }
 
@@ -138,6 +138,7 @@ public class Wizard {
             name = ((Pattern) pathRepl[i][0]).matcher(name)
                                     .replaceFirst((String) pathRepl[i][1]);
         }
+        name.replace('/', File.separatorChar);
         File f = new File(target, name);
         // Check whether hidden (eclipse) files are allowed.
         if (!copyDotFiles && f.getName().startsWith(".")) {
