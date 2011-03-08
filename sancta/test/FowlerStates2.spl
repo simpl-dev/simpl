@@ -61,6 +61,10 @@ Rule3 {val foo = 42} returns Rule1: "FOO" Id;
 terminal FooBar: 'a' 'b' 'c' 'd';
 terminal BarFoo: STR_BODY STR_BODY;
 
+terminal FooFoo: 'helloworld';
+
+FooFooUsage: 'helloworld' Id;
+
 terminal Id: ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')*;
 fragment STR_BODY: ~('\\'|'"') | '\\' .;
 terminal STRING {var doh = 0}:

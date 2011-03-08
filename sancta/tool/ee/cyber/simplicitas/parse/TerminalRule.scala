@@ -27,6 +27,12 @@ abstract class TerminalFragment(pName: String, pTree: List[Any],
 
     override def antlrName = name.capitalize
 
+    // Checks whether this rule consists of string literal, similar to
+    // automatically generated keyword rules. If so, registers the keyword.
+    // This code is run from constructor so that the keywords are all available
+    // when non-terminal rules are analyzed.
+    addKeywords()
+
     def collectParams() {
         // Terminal rules do not have parameters.
     }
@@ -213,6 +219,18 @@ abstract class TerminalFragment(pName: String, pTree: List[Any],
                 }
         }
     }
+
+    /** Adds to keyword map all the keywords that are matched by this rule. */
+    def addKeywords() {
+        tree match {
+            case List(List("NODE", List("MATCH", txt: String))) =>
+                keywords += (txt -> name)
+            // TODO: recognize more versions of string literals.
+            case _ =>
+                ()
+        }
+    }
+
 }
 
 /** Fragment rules. */

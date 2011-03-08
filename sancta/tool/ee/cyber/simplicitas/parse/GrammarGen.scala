@@ -278,6 +278,7 @@ class GrammarGen(pGetPos: (Any) => List[Int]) {
             buf.append("    case " + grammarName + "Lexer." +
                             keywords(kw) + " => " + what + ";\n")
         }
+
         buf.append("    case _ => normal;\n  }\n" +
             "  val keywords: Seq[String] = Array[String](" +
             join(for (kw <- reallyKeywords) yield '"' + kw + '"') +
