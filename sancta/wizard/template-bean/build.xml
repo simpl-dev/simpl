@@ -1,7 +1,7 @@
 <!-- ex: se sts=4 sw=4 expandtab: -->
 <project name="#{name}" default="plugin" basedir=".">
     <property file="${basedir}/ant.properties"/>
-	<property name="simpl.version" value="1.1.1"/>
+	<property name="simpl.version" value="1.1.2"/>
 
     <property name="target" value="${basedir}/target"/>
     <property name="tool-jar" value="${target}/#{name}-tool.jar"/>

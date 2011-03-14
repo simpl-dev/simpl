@@ -5,7 +5,7 @@
     <property name="eclipse-plugins" value="${eclipse}/plugins"/>
     <import file="${basedir}/mvn-ant.xml"/>
     <!-- default values for some properties -->
-    <property name="version" value="1.1.1"/>
+    <property name="version" value="1.1.2"/>
 
     <target name="dependencies" depends="copy-mvn-ant,init-dep,require-antlr,require-scala">
         <loadfile srcfile="${target}/deps" property="dep-path"/>
@@ -43,7 +43,7 @@
             <manifest>
                 <attribute name="Bundle-name" value="Simplicitas tool"/>
                 <attribute name="Bundle-SymbolicName" value="simplicitas-tool;singleton:=true"/>
-                <attribute name="Bundle-Version" value="1.1.1"/>
+                <attribute name="Bundle-Version" value="1.1.2"/>
                 <attribute name="Eclipse-LazyStart" value="true"/>
                 <attribute name="Export-Package" value="ee.cyber.simplicitas,ee.cyber.simplicitas.parse,org.antlr,org.antlr.runtime,org.antlr.runtime.tree,org.antlr.stringtemplate"/>
                 <attribute name="Require-Bundle" value="org.scala-ide.scala.library;bundle-version=&quot;2.8.1&quot;"/>
