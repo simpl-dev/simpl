@@ -39,8 +39,7 @@ option Reference {var ref: NamedItem = null; def id_: Id}:
 option NamedItem {def name: Id;}: Event | Command | State;
 terminal Id: ('a'..'z'|'A'..'Z'|'_')('a'..'z'|'A'..'Z'|'_'|'0'..'9')*;
 fragment StrBody: ~('\\'|'"')|'\\' .;
-terminal Str(value: String = {$_.substring(1, $_.length() - 1)}):
-	'"' StrBody* '"' | '\'' StrBody* '\'';
+terminal Str: '"' StrBody* '"' | '\'' StrBody* '\'';
 fragment MlComment: '/*' (~'*' | '*' ~'/')* '*/';
 fragment SlComment: '//' ~('\n'|'\r')*;
 terminal Ws: (' '|'\t'|'\r'|'\n'|SlComment|MlComment)+ {$channel = HIDDEN;};

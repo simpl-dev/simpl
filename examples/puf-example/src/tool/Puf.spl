@@ -18,7 +18,7 @@ option Decl {
 TupleDecl returns Decl: left=TupleLeft "=" expr=Expr ";";
 FunDecl returns Decl {makeFunDecl(left, expr)}: left=FunLeft "=" expr=Expr ";";
 FunLeft returns DeclLeft: ids=Id+;
-TupleLeft returns DeclLeft: "(" h=Id ("," t=Id)* ")";
+TupleLeft returns DeclLeft: "(" items=Id ("," items=Id)* ")";
 
 option Expr:
     CaseExpr
@@ -37,10 +37,10 @@ FunExpr: "fn" params=Id+ "->" Expr;
 IfExpr: "if" cond=Expr "then" ifThen=Expr "else" ifElse=Expr;
 
 OrExpr
-    returns Expr {makeBinaryOp(BinaryOp.Or, left :: rest)}
-    : left=AndExpr ("||" rest=AndExpr)*;
-AndExpr returns Expr {makeBinaryOp(BinaryOp.And, left :: rest)}
-    : left=EqExpr ("&&" rest=EqExpr)*;
+    returns Expr {makeBinaryOp(BinaryOp.Or, args)}
+    : args=AndExpr ("||" args=AndExpr)*;
+AndExpr returns Expr {makeBinaryOp(BinaryOp.And, args)}
+    : args=EqExpr ("&&" args=EqExpr)*;
 
 EqExpr
     returns Expr {makeBinaryOp(op, left, right)}
@@ -57,8 +57,8 @@ ConsExpr
     : left=PlusExpr (":" right=ConsExpr)?;
 
 PlusExpr
-    returns Expr {makeBinaryOp(left :: rest, op)}
-    : left=MulExpr (op=PlusExprOp rest=MulExpr)*;
+    returns Expr {makeBinaryOp(args, op)}
+    : args=MulExpr (op=PlusExprOp args=MulExpr)*;
 option PlusExprOp {
     def text: String
 }: PlusOp | MinusOp;
@@ -68,8 +68,8 @@ terminal PlusOp: "+";
 terminal MinusOp: "-";
 
 MulExpr
-    returns Expr {makeBinaryOp(left :: rest, op)}
-    : left=UnaryExpr (op=MulExprOp rest=UnaryExpr)*;
+    returns Expr {makeBinaryOp(args, op)}
+    : args=UnaryExpr (op=MulExprOp args=UnaryExpr)*;
 terminal MulExprOp: "*" | "/" | "%";
 
 option UnaryExpr returns Expr:
@@ -95,22 +95,20 @@ option PrimaryExpr returns Expr:
     | ListLiteral
     ;
 TupleLiteral
-    {def items = if (first eq null) Nil else first :: rest}
     returns Expr {
         // Expression "(foo)" is actually not a tuple but parenthesised
         // expression.
-        if ((first ne null) && rest.isEmpty)
-            first
+        if (items.size == 1)
+            items.head
         else
             _self
     }
     : "(" ")"
-    | "(" first=Expr ("," rest=Expr)* ")";
+    | "(" items=Expr ("," items=Expr)* ")";
 ListLiteral
-    {def items = first :: rest}
-    returns Expr {if (first eq null) ListNil() else _self}
+    returns Expr {if (items.isEmpty) ListNil() else _self}
     : "[" "]"
-    | "[" first=Expr ("," rest=Expr)+ "]";
+    | "[" items=Expr ("," items=Expr)+ "]";
 
 terminal Id
     // Contains the node that defines this identifier.

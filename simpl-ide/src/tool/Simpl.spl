@@ -25,8 +25,8 @@ LexerStates: "lexer-states" "(" IdList ")";
 
 /** Java-style identifier in the style of foo.bar.baz */
 DottedId {
-    def text = (head :: tail) map(_.text) mkString(".")
-}: head=Id ('.' tail=Id)*;
+    def text = parts map(_.text) mkString(".")
+}: parts=Id ('.' parts=Id)*;
 
 /** This rule is not part of the actual grammar. Its purpose is to
     define a common base class for all the different rule definitions. */
@@ -52,7 +52,7 @@ ExitState: "exit-state" "(" IdList ")";
 CheckAll: "check-all" "(" IdList ")";
 CheckAny: "check-any" "(" IdList ")";
 
-IdList: first=Id ("," rest=Id)*;
+IdList: item=Id ("," item=Id)*;
 
 /** Base class for references, not part of the actual grammar. */
 option Ref {
@@ -70,7 +70,7 @@ FragmentDef: 'fragment' name=Id ':' pattern=Pattern ';';
 /** Defines an option rule. Option rule defines base class for all the
     alternatives mentioned in the rule. */
 OptionDef: 'option' name=Id body=Code? ret=ReturnType? ':'
-    alts=RuleRef ('|' alts2=RuleRef)* ';';
+    alts=RuleRef ('|' alts=RuleRef)* ';';
 
 /** Defines non-terminal rule. */
 NonTerminalDef: name=Id body=Code? ret=ReturnType? ':' alt=AltList ';';
@@ -78,14 +78,14 @@ NonTerminalDef: name=Id body=Code? ret=ReturnType? ':' alt=AltList ';';
 ReturnType: 'returns' retType=DottedId? body=Code?;
 
 /** List of alternatives, separated by pipe character. */
-AltList: lst=MatchList ('|' lst2=MatchList)*;
+AltList: lst=MatchList ('|' lst=MatchList)*;
 MatchList: m=Match+;
 Match: (name=Id '=')? token=MatchToken modifier=Modifier?;
 terminal Modifier: '?' | '*' | '+';
 MatchToken: '(' alt=AltList ')' | ref=RuleRef | Str;
 
 // terminals
-Pattern: lst=TermList ('|' lst2=TermList)*;
+Pattern: lst=TermList ('|' lst=TermList)*;
 TermList: termMatch=TermMatch+;
 TermMatch: (inv='~')? t=Terminal modifier=Modifier? code=Code*;
 

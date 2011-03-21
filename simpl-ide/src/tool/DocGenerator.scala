@@ -33,10 +33,10 @@ class DocGenerator(destDir: String)
 		}
 		docText.append(text)
 	}
- 
+
 	def addRuleDef(rd: RuleDef) {
 		rd match {
-        	case rule:TerminalDef => 
+        	case rule:TerminalDef =>
         		addTerminalDef(rule)
         	case rule:FragmentDef =>
         		addFragmentDef(rule)
@@ -47,7 +47,7 @@ class DocGenerator(destDir: String)
         	case _ => ()// XXX do something?
 		}
 	}
-  
+
 	def addTerminalDef(t: TerminalDef) {
 		addRuleDef(t.name, t.documentation)
 		appendToDoc(colon)
@@ -65,22 +65,19 @@ class DocGenerator(destDir: String)
 		addSemicolon()
 		appendToDoc(lf)
 	}
-  
+
 	def addOptionDef(o: OptionDef) {
 		addRuleDef(o.name, o.documentation)
 		appendToDoc(colon)
 		addWs()
-		// alts
-		if (o.alts != null) {
-			addDefLink(o.alts.id)
-		}
-		// alts2
-		addRuleList(o.alts2)
+
+        addDefLink(o.alts.head.id)
+		addRuleList(o.alts.tail)
 
 		addSemicolon()
 		appendToDoc(lf)
 	}
-	
+
 	def addRuleList(ruleList: List[CommonNode]) {
 		if (ruleList != null) {
 			if (!ruleList.isEmpty) {
@@ -112,24 +109,19 @@ class DocGenerator(destDir: String)
 	}
 
 	def addAltList(aList: AltList) {
-		if (aList != null) {
-			if (aList.lst != null) {
-				addMatchList(aList.lst)
-			}
-			// lst2
-			addRuleList(aList.lst2)
-		}
+        addMatchList(aList.lst.head)
+        addRuleList(aList.lst.tail)
 	}
-  
+
 	def addMatchList(mList: MatchList) {
 		mList.m.foreach(addMatch)
 	}
-  
+
 	def addMatch(m: Match) {
 		addMatchToken(m.token)
 		addModifier(m.modifier)
 	}
-  
+
 	def addMatchToken(token: MatchToken) {
 		if (token.alt != null && token.alt.length > 0) {
 			appendToDoc(openingBracket)
@@ -147,20 +139,16 @@ class DocGenerator(destDir: String)
 			addWs()
 		}
 	}
-  
+
 	def addPattern(pattern: Pattern) {
-		// lst
-		if (pattern.lst != null) {
-			addTermList(pattern.lst)
-		}
-		// lst2
-		addRuleList(pattern.lst2)
+        addTermList(pattern.lst.head)
+		addRuleList(pattern.lst.tail)
 	}
-  
+
 	def addTermList(lst: TermList) {
 		lst.termMatch.foreach(addTermMatch)
 	}
-  
+
 	def addTermMatch(tMatch: TermMatch) {
 		if (tMatch.inv != null) {
 			addTilde(tMatch.inv)
@@ -171,11 +159,11 @@ class DocGenerator(destDir: String)
 		addModifier(tMatch.modifier)
         addWs()
 	}
-  
+
 	def addTilde(t: LiteralNode) {
 		appendToDoc(t.text)
 	}
-  
+
 	def addTerminal(terminal: Terminal) {
 		terminal match {
         	case t:TerminalList =>
@@ -189,7 +177,7 @@ class DocGenerator(destDir: String)
         	case t:TerminalDot =>
         		addTerminalDot(t)
         	case _ => () // XXX: log something?
-		}    
+		}
 	}
 
 	def addTerminalList(tList: TerminalList) {
@@ -197,7 +185,7 @@ class DocGenerator(destDir: String)
 		addPattern(tList.pattern)
 		appendToDoc(closinBracket)
 	}
-  
+
 	def addTerminalDot(td: TerminalDot) {
 		// XXX dot?
 		appendToDoc(".")
@@ -206,7 +194,7 @@ class DocGenerator(destDir: String)
 	def addTerminalRange(tr: TerminalRange) {
 		appendToDoc(tr.start.text + ".." + tr.end.text)
 	}
-  
+
 	def addFragmentRef(f: FragmentRef) {
 		addDefLink(f.id)
 	}
@@ -216,43 +204,43 @@ class DocGenerator(destDir: String)
                 .replaceAll("""\\""","""\\\\""")
                 .replaceAll("\\*","""\\*"""))
 	}
-  
+
 	def addRuleDef(id: Id, comment: String) {
 		appendToDoc(lf)
 		appendToDoc(".. _" + id.text + ":") // create anchor's ID
 		appendToDoc(lf * 2)
 		if (comment != null) {
-            // RST does not like newlines inside emphasised text.      
+            // RST does not like newlines inside emphasised text.
 			appendToDoc("*" + comment.replace('\n', ' ') + "*")
 			appendToDoc(lf * 2)
 		}
 		appendToDoc(id.text)
 	}
- 
+
 	def addDefLink(id: Id) {
 		addWs()
 		appendToDoc(id.text + "_") // create link
 		addWs()
 	}
- 
+
 	def addModifier(modifier: Modifier) {
 		if (modifier != null) {
 			removeWsFromEnd()
 			appendToDoc(backSlash + modifier.text)
 		}
 	}
- 
+
 	def addSemicolon() {
 		removeWsFromEnd()
 		appendToDoc(semicolon)
 	}
-	
+
 	def removeWsFromEnd() {
 		if (docText.endsWith(ws)) {
 			docText.deleteCharAt(docText.length - 1)
 		}
 	}
-	
+
 	def addWs() {
 		if (!docText.endsWith(ws) && !docText.endsWith(openingBracket)) {
 			appendToDoc(ws)

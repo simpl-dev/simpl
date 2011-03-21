@@ -48,8 +48,8 @@ private class PufChecker(tree: Program) {
             case ConsExpr(left, right) =>
                 resolveLinks(left, env)
                 resolveLinks(right, env)
-            case ListLiteral(first, rest) =>
-                (first :: rest).foreach(resolveLinks(_, env))
+            case ListLiteral(items) =>
+                items.foreach(resolveLinks(_, env))
             case IfExpr(cond, ifThen, ifElse) =>
                 resolveLinks(cond, env)
                 resolveLinks(ifThen, env)
@@ -72,8 +72,8 @@ private class PufChecker(tree: Program) {
                 checkUnique(List(h, t))
             case SelectExpr(sel, tuple) =>
                 resolveLinks(tuple, env)
-            case TupleLiteral(first, rest) =>
-                (first :: rest).foreach(resolveLinks(_, env))
+            case TupleLiteral(items) =>
+                items.foreach(resolveLinks(_, env))
             case ApplyExpr(fun, params) =>
                 (fun :: params).foreach(resolveLinks(_, env))
             case Unary(_, expr) =>
@@ -132,8 +132,8 @@ private class PufChecker(tree: Program) {
     def getIds(decl: Decl) = decl match {
         case FunDecl(IdLeft(id), _) =>
             List(id)
-        case TupleDecl(TupleLeft(h, t), _) =>
-            h :: t
+        case TupleDecl(TupleLeft(items), _) =>
+            items
     }
 
     /** Get variable bindings from list of declarations. */
