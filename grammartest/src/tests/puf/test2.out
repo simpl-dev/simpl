@@ -200,10 +200,10 @@
     }
     295:313:FunDecl {
       expr=301:312:ListLiteral {
-        first=302:302:Num {
-          text="1"
-        }
-        rest=List {
+        items=List {
+          302:302:Num {
+            text="1"
+          }
           305:305:Num {
             text="2"
           }
@@ -225,20 +225,20 @@
     }
     315:370:FunDecl {
       expr=322:369:TupleLiteral {
-        first=328:344:ApplyExpr {
-          fun=328:333:Id {
-            text="mapRec"
-          }
-          params=List {
-            335:340:Id {
-              text="double"
+        items=List {
+          328:344:ApplyExpr {
+            fun=328:333:Id {
+              text="mapRec"
             }
-            342:344:Id {
-              text="lst"
+            params=List {
+              335:340:Id {
+                text="double"
+              }
+              342:344:Id {
+                text="lst"
+              }
             }
           }
-        }
-        rest=List {
           351:368:ApplyExpr {
             fun=351:357:Id {
               text="mapIter"
