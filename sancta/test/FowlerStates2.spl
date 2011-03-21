@@ -65,6 +65,9 @@ terminal FooFoo: 'helloworld';
 
 FooFooUsage: 'helloworld' Id;
 
+FooDouble1: "fd1" Id Id Id;
+FooDouble2: "fd2" Id Id+;
+
 terminal Id: ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')*;
 fragment STR_BODY: ~('\\'|'"') | '\\' .;
 terminal STRING {var doh = 0}:

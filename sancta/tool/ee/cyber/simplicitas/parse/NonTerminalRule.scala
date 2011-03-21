@@ -237,10 +237,19 @@ class NormalRule(pName: String, pTree: List[Any], symbols: SymbolTable)
                 if (currentBranch.conflictsWith(other.branch)) {
                     // There are two rule calls with the same name in the
                     // same branch.
-                    error(loc,
-                        "Rule \"" + name +
-                            "\" contains several calls with the same parameter name: " +
-                            varName)
+
+                    // The parameters have compatible type. Therefore,
+                    // we can make the parameter a list and thus accommodate
+                    // both of these calls.
+                    if (other.rule == np.rule) {
+                        other.makeList()
+                    } else {
+                        // Parameters are incompatible. Issue an error.
+                        error(loc,
+                            "Rule \"" + name +
+                                "\" contains several calls with the same parameter name: " +
+                                varName)
+                    }
                 } else if (other.rule != np.rule) {
                     // There is rule call with same name and it has different
                     // type. Hence, we cannot generate meaningful

@@ -15,7 +15,7 @@ import Actions._
  * @param isList Whether the parameter is used in + or * context.
  */
 class RuleParam(val name: String, val rule: String,
-        val branch: BranchIdentifier, val isList: Boolean,
+        val branch: BranchIdentifier, var isList: Boolean,
         symbols: SymbolTable) {
     /** The actual Scala type of the parameter. */
     var paramType: String = null
@@ -25,7 +25,18 @@ class RuleParam(val name: String, val rule: String,
 
     /** Name of the temporary variable used to collect
       * the list elements (used if this parameter is a list). */
-    val listVar: String = if (isList) symbols.newId else null
+    var listVar: String = null
+
+    if (isList) {
+        makeList()
+    }
+
+    def makeList() {
+        isList = true
+        if (listVar eq null) {
+            listVar = symbols.newId
+        }
+    }
 
     override def toString = name + ": " +
         (if (paramType eq null) rule else paramType + "(" + rule + ")") +
