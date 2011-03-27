@@ -115,7 +115,7 @@ public class Wizard {
             throw new RuntimeException(ex);
         }
         if (key == PACKAGE) {
-            set("package-path", value.replace('.', File.separatorChar));
+            set("package-path", value.replace('.', '/'));
         } else if (key == "package-path") {
             pathRepl[0][1] = value;
         } else if (key == CLASS) {
