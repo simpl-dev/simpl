@@ -1,7 +1,7 @@
 <!-- ex: se sts=4 sw=4 expandtab: -->
 <project name="simpl-ide" default="plugin" basedir=".">
     <property file="${basedir}/ant.properties"/>
-	<property name="simpl.version" value="1.1.2"/>
+	<property name="simpl.version" value="1.2.0"/>
 
     <available file="${maven.repo.local}/simplicitas/mvn-ant/${simpl.version}/mvn-ant-${simpl.version}.xml"
         property="include_file"
