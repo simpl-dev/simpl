@@ -2,7 +2,7 @@
 <feature
       id="simplicitas_prerequisites"
       label="Simplicitas Prerequisites"
-      version="1.1.2"
+      version="1.2.0"
       provider-name="Simplicitas">
 
    <description url="http://research.cyber.ee/simpl/">

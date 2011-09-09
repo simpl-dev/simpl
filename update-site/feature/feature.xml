@@ -2,7 +2,7 @@
 <feature
       id="simplicitas_feature"
       label="Simpl"
-      version="1.1.2">
+      version="1.2.0">
 
    <description url="http://research.cyber.ee/simpl/">
       Simpl plugins
@@ -199,8 +199,8 @@ Library.
       <import plugin="org.eclipse.ui.editors"/>
       <import plugin="org.scala-ide.scala.library" version="2.8.1" match="greaterOrEqual"/>
       <import plugin="org.eclipse.ui.workbench.texteditor"/>
-      <import plugin="simplicitas-plugin" version="1.1.2" match="greaterOrEqual"/>
-      <import plugin="simplicitas-tool" version="1.1.2" match="greaterOrEqual"/>
+      <import plugin="simplicitas-plugin" version="1.2.0" match="greaterOrEqual"/>
+      <import plugin="simplicitas-tool" version="1.2.0" match="greaterOrEqual"/>
    </requires>
 
    <plugin
