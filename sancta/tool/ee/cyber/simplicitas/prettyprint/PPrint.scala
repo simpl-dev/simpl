@@ -77,14 +77,14 @@ object Doc {
         case lst => lst.reduceLeft(f)
     }
 
-    def punctuate(sep: Doc , items: List[Doc]): List[Doc] = items match {
+    def punctuate(sep: Doc, items: List[Doc]): List[Doc] = items match {
         case Nil => Nil
         case List(x) => List(x)
         case h :: t => (h :: sep) :: punctuate(sep, t)
     }
 
     def withCommas(lst: List[Doc]): Doc =
-        cat(punctuate(comma :: space, lst))
+        cat(punctuate(comma, lst))
 
     val softline = group(line)
     val softbreak = group(linebreak)
