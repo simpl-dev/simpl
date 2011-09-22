@@ -1,26 +1,18 @@
 package ee.cyber.simplicitas
 
-import scala.text.Document
-import Document._
+import prettyprint.Doc
+import Doc._
 
 /** Pretty-prints the AST node. */
 object PrettyPrint {
-    private val indent = "  "
-
     def prettyPrint(node: CommonNode): String = {
         val doc = format(node)
-        val writer = new java.io.StringWriter
-        doc.format(60, writer)
-        writer.flush()
-        writer.toString
+        doc.toString
     }
 
-    private def format(obj: Any): Document = obj match {
+    private def format(obj: Any): Doc = obj match {
         case lst: List[Any] =>
-            group(
-                text("[") :/:
-                        docToDoc(lst.map(format).map(nest(2, _))) :/:
-                        text("]"))
+            brackets(docToDoc(lst.map(format)))
         case node: Product =>
             formatCommonNode(node)
         case null =>
@@ -29,15 +21,13 @@ object PrettyPrint {
             text("\"" + obj.toString + "\"")
     }
 
-    private def docToDoc(lst: Seq[Document]) =
-        lst.reduceRightOption(_ :: "," :/: _).getOrElse(Document.empty)
+    private def docToDoc(lst: List[Doc]) =
+        align(withCommas(lst))
 
-    private def formatCommonNode(node: Product): Document = {
-        group(
-            text(baseName(node.getClass.getName) + "(") :/:
-                    docToDoc(getChildren(node).map(format).map(nest(2, _))) :/:
-                    text(")"))
-    }
+    private def formatCommonNode(node: Product): Doc =
+        baseName(node.getClass.getName) ::
+                parens(
+                    docToDoc(getChildren(node).map(format)))
 
     private def getChildren(node: Product) =
         node.productIterator.toList
