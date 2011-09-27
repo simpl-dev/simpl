@@ -1,0 +1,9 @@
+grammar test.Imported;
+
+import "InnerImport.spl";
+
+// override
+Bar: "barimport" Id;
+
+// new
+Baz: "baz" Id;

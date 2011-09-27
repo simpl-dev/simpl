@@ -43,10 +43,14 @@ class GrammarParser(baseDir: String, encoding: String) {
         }
 
         val atree = parse_result.getTree.asInstanceOf[CommonTree]
-        convertTree(fileName, atree)
+        val converted = convertTree(fileName, atree)
+        val withImports = resolveImports(converted)
+        println("resolved imports: " + withImports)
+        withImports
     }
 
-    def convertTree(fileName: String, t: BaseTree, a: ArrayBuffer[Object]) {
+    private def convertTree(fileName: String, t: BaseTree,
+                            a: ArrayBuffer[Object]) {
         def addChildren(t: BaseTree, a: ArrayBuffer[Object]) =
             for (i <- 0 to t.getChildCount - 1) {
                 convertTree(fileName, (t getChild i).asInstanceOf[BaseTree], a)
@@ -69,12 +73,36 @@ class GrammarParser(baseDir: String, encoding: String) {
         }
     }
 
-    def convertTree(fileName: String, t: BaseTree): Object = {
+    private def convertTree(fileName: String, t: BaseTree): Object = {
         val result = new ArrayBuffer[Object]()
         convertTree(fileName, t, result)
-        (result toList) match {
+        result.toList match {
             case List(tree: Object) => tree
             case tree => tree
+        }
+    }
+
+    private def resolveImports(tree: Object): Object = {
+        def readContents(inputFile: String): Object = {
+            val fullPath = baseDir + "/" +
+                    GrammarUtils.stripQuotes(inputFile)
+
+            parseImpl(fullPath,
+                new ANTLRFileStream(fullPath, encoding))
+        }
+
+        def tryImport(t: List[Any]): List[Any] = t match {
+            case List("import", file: String) :: rest =>
+                List("import", readContents(file)) :: tryImport(rest)
+            case other =>
+                other
+        }
+
+        tree match {
+            case (packageDef @ ("grammar" :: _)) :: rest =>
+                packageDef :: tryImport(rest)
+            case _ =>
+                tree
         }
     }
 }

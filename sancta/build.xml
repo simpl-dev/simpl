@@ -27,14 +27,14 @@
 
     <target name="tool-lib" depends="tool-antlr">
         <mkdir dir="${target}/tool-classes"/>
-        <scalac destdir="${target}/tool-classes" deprecation="true" unchecked="yes">
+        <fsc destdir="${target}/tool-classes" deprecation="true" unchecked="yes">
             <src location="${target}/tool-java"/>
             <src location="${basedir}/tool"/>
             <classpath>
                 <path refid="basecp"/>
                 <pathelement path="${java.class.path}"/>
             </classpath>
-        </scalac>
+        </fsc>
         <javac destdir="${target}/tool-classes" srcdir="${target}/tool-java"
                source="1.4" encoding="UTF-8" classpathref="basecp"
                includeantruntime="false"/>
@@ -67,13 +67,14 @@
         <taskdef name="grammar" classpathref="parselib"
                  classname="ee.cyber.simplicitas.parse.GrammarTask"/>
         <grammar src="test/FowlerStates2.spl" destdir="${target}/test-java"/>
+        <grammar src="test/Imports.spl" destdir="${target}/test-java"/>
         <grammar src="test/Puf.spl" destdir="${target}/test-java"/>
         <mkdir dir="${target}/test-classes"/>
-        <scalac destdir="${target}/test-classes" classpathref="parselib"
+        <fsc destdir="${target}/test-classes" classpathref="parselib"
                 unchecked="yes">
             <src location="${target}/test-java"/>
             <src location="test"/>
-        </scalac>
+        </fsc>
         <javac destdir="${target}/test-classes"
                source="1.4" encoding="UTF-8" classpathref="parselib"
                includeantruntime="false">
@@ -113,10 +114,10 @@
             <fileset dir="${eclipse-plugins}" includes="**/*.jar"/>
         </path>
         <mkdir dir="${target}/plugin-classes"/>
-        <scalac destdir="${target}/plugin-classes" classpathref="plugin-deps"
+        <fsc destdir="${target}/plugin-classes" classpathref="plugin-deps"
                 unchecked="yes">
             <src location="${basedir}/plugin"/>
-        </scalac>
+        </fsc>
         <javac destdir="${target}/plugin-classes" srcdir="${basedir}/plugin"
                includeantruntime="false" source="1.6" target="1.6"
                encoding="UTF-8" classpathref="plugin-deps"/>

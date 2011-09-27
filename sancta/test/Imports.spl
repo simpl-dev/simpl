@@ -1,0 +1,9 @@
+grammar test.Imports;
+
+import "Imported.spl";
+
+// New rule.
+Foo: "foo" Id Baz;
+
+// override imported rule:
+Bar: "bar" Id;

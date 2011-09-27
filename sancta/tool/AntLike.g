@@ -23,7 +23,7 @@ tokens {
 }
 
 grammarDef  : header ruleDef+ EOF!;
-header      : packageDef (optionDef | scalaHeader | lexerStates)*;
+header      : packageDef importFile* (optionDef | scalaHeader | lexerStates)*;
 packageDef  : 'grammar'^ dottedId ';'!;
 optionDef   : 'options'^ '('! optionList ')'!;
 optionList  : option*;
@@ -31,6 +31,7 @@ option      : ID '=' ID ';' -> ^(ID ID);
 dottedId    : ID ('.' ID)*;
 scalaHeader : 'scalaheader'^ CODE;
 lexerStates : 'lexer-states'^ '('! ID (','! ID)* ')'!;
+importFile  : 'import'^ STR ';'!;
 
 ruleDef:
       ('hidden'?) 'terminal'^ ID body? stateOp* ':'! termAltList ';'!
