@@ -8,7 +8,7 @@ import GrammarUtils._
 import Actions._
 
 /** This is the main program for grammar generation. */
-class GrammarGen(pGetPos: (Any) => List[Int]) {
+class GrammarGen(pGetPos: (Any) => Option[(Int, Int)]) {
     /** My implementation of symbol table. */
     object Symbols extends SymbolTable {
         val rules = collection.mutable.LinkedHashMap[String, Rule]()

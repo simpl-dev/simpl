@@ -77,9 +77,12 @@ class Generator {
         val atree = parse_result.getTree.asInstanceOf[CommonTree]
         val pm = new posmap()
         val gtree = convertTree(atree, pm)
-        def getPos(node: Any): List[Int] = {
+        def getPos(node: Any): Option[(Int, Int)] = {
             val p = pm.get(node)
-            if (p eq null) Nil else List(p.getLine, p.getCharPositionInLine + 1)
+            if (p eq null)
+                None
+            else
+                Some((p.getLine, p.getCharPositionInLine + 1))
         }
 
         val gen = new GrammarGen(getPos)

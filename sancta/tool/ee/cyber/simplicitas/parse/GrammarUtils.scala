@@ -37,7 +37,7 @@ trait SymbolTable {
     /** Returns position of the given node.
       * Strictly does not belong to symbol table, but it is convenient to
       * pass it around along with other global-ish information. */
-    def getPos: (Any) => List[Int]
+    def getPos: (Any) => Option[(Int, Int)]
 
     /** Name of the grammar. Also here for convenience. */
     def getGrammarName: String
@@ -111,11 +111,11 @@ class BranchIdentifier(val branch: List[Int]) {
 /** Various utility methods useful for grammar generation. */
 object GrammarUtils {
     /** Report an error related to node. */
-    def error(posMap: Any => List[Int])(node: Any, what: String) =
+    def error(posMap: Any => Option[(Int, Int)])(node: Any, what: String) =
         throw new GrammarException(posMap(node) match {
-                case List(line, col) =>
+                case Some((line, col)) =>
                     line + ":" + col + ": " + what
-                case _ =>
+                case None =>
                     what
             })
 
