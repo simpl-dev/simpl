@@ -12,6 +12,73 @@ import org.apache.tools.ant.BuildException
 import scala.collection.mutable.ArrayBuffer
 
 
+class GrammarParser(baseDir: String, encoding: String) {
+    type posMapType = java.util.IdentityHashMap[Any, (String, BaseTree)]
+
+    private var posMap: posMapType = null
+    var tree: Object = null
+
+    def parse(inputFile: String) {
+        posMap = new posMapType()
+        tree = parseImpl(inputFile,
+            new ANTLRFileStream(inputFile, encoding))
+    }
+
+    def getPos(node: Any): Option[(String, Int, Int)] = {
+        val p = posMap.get(node)
+        if (p eq null)
+            None
+        else
+            Some((p._1, p._2.getLine, p._2.getCharPositionInLine + 1))
+    }
+
+    private def parseImpl(fileName: String, input: CharStream) = {
+        val lexer = new AntLikeLexer(input)
+        val tokens = new CommonTokenStream(lexer)
+        val parser = new AntLikeParser(tokens)
+        val parse_result = parser.grammarDef
+        if (parser.getNumberOfSyntaxErrors != 0) {
+            throw new GrammarException(
+                "Syntax errors found in the grammar file")
+        }
+
+        val atree = parse_result.getTree.asInstanceOf[CommonTree]
+        convertTree(fileName, atree)
+    }
+
+    def convertTree(fileName: String, t: BaseTree, a: ArrayBuffer[Object]) {
+        def addChildren(t: BaseTree, a: ArrayBuffer[Object]) =
+            for (i <- 0 to t.getChildCount - 1) {
+                convertTree(fileName, (t getChild i).asInstanceOf[BaseTree], a)
+            }
+
+        if (t isNil) {
+            addChildren(t, a)
+        } else if (t.getChildCount == 0) {
+            val id = t.toString
+            a += id
+            posMap.put(id, (fileName, t))
+        } else {
+            val items = new ArrayBuffer[Object]
+            items += t.toString
+            posMap.put(items(0), (fileName, t))
+            addChildren(t, items)
+            val itemList: List[Any] = items.toList
+            a += itemList
+            posMap.put(itemList, (fileName, t))
+        }
+    }
+
+    def convertTree(fileName: String, t: BaseTree): Object = {
+        val result = new ArrayBuffer[Object]()
+        convertTree(fileName, t, result)
+        (result toList) match {
+            case List(tree: Object) => tree
+            case tree => tree
+        }
+    }
+}
+
 class Generator {
     var outputDir = "."
     var runANTLR = true
@@ -24,69 +91,15 @@ class Generator {
         writer.close()
     }
 
-    type posmap = java.util.IdentityHashMap[Any, BaseTree]
-
-    def convertTree(t: BaseTree, a: ArrayBuffer[Object], pm: posmap) {
-        def addChildren(t: BaseTree, a: ArrayBuffer[Object]) =
-            for (i <- 0 to t.getChildCount - 1)
-                convertTree((t getChild i).asInstanceOf[BaseTree], a, pm)
-
-        if (t isNil) {
-            addChildren(t, a)
-        } else if (t.getChildCount == 0) {
-            val id = t.toString
-            a += id
-            pm.put(id, t)
-        } else {
-            val items = new ArrayBuffer[Object]
-            items += t.toString
-            pm.put(items(0), t)
-            addChildren(t, items)
-            val itemList: List[Any] = items.toList
-            a += itemList
-            pm.put(itemList, t)
-        }
-    }
-
-    def convertTree(t: BaseTree, pm: posmap): Object = {
-        val result = new ArrayBuffer[Object]()
-        convertTree(t, result, pm)
-        (result toList) match {
-            case List(tree: Object) => tree
-            case tree => tree
-        }
-    }
-
     def generate(inputFile: String, encoding: String) {
-        generate(inputFile, new ANTLRFileStream(inputFile, encoding))
-    }
+        val parser = new GrammarParser(baseName(inputFile), encoding)
 
-    def generate(input: java.io.Reader) {
-        generate("unknown", new ANTLRReaderStream(input))
-    }
+        parser.parse(inputFile)
 
-    def generate(fileName: String, input: CharStream) {
-        val lexer = new AntLikeLexer(input)
-        val tokens = new CommonTokenStream(lexer)
-        val parser = new AntLikeParser(tokens)
-        val parse_result = parser.grammarDef
-        if (parser.getNumberOfSyntaxErrors != 0) {
-            throw new GrammarException(
-                "Syntax errors found in the grammar file")
-        }
-        val atree = parse_result.getTree.asInstanceOf[CommonTree]
-        val pm = new posmap()
-        val gtree = convertTree(atree, pm)
-        def getPos(node: Any): Option[(String, Int, Int)] = {
-            val p = pm.get(node)
-            if (p eq null)
-                None
-            else
-                Some((fileName, p.getLine, p.getCharPositionInLine + 1))
-        }
+//        println(parser.tree)
+        val gen = new GrammarGen(parser.getPos)
+        gen.grammargen(parser.tree)
 
-        val gen = new GrammarGen(getPos)
-        gen.grammargen(gtree)
         writeFile(gen.grammarName + ".scala", gen.getScalaSource)
         val grammarFile = gen.grammarName + ".g"
         writeFile(grammarFile, gen.getGrammarSource)
@@ -99,6 +112,11 @@ class Generator {
             if (org.antlr.tool.ErrorManager.getNumErrors > 0)
                 throw new GrammarException("ANTLR failed")
         }
+    }
+
+    def baseName(file: String) = {
+        val p = new java.io.File(file).getParent
+        if (p ne null) p else "."
     }
 }
 
