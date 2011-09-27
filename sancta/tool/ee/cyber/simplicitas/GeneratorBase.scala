@@ -12,7 +12,7 @@ class StringRenderer extends AttributeRenderer {
 
     def toString(v: Object, formatName: String): String = {
         val str = v.asInstanceOf[String]
-        if (str == null || str == "") {
+        if ((str eq null) || str == "") {
             return ""
         }
         formatName match {

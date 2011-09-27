@@ -79,7 +79,7 @@ class Generator {
         val gtree = convertTree(atree, pm)
         def getPos(node: Any): List[Int] = {
             val p = pm.get(node)
-            if (p == null) Nil else List(p.getLine, p.getCharPositionInLine + 1)
+            if (p eq null) Nil else List(p.getLine, p.getCharPositionInLine + 1)
         }
 
         val gen = new GrammarGen(getPos)

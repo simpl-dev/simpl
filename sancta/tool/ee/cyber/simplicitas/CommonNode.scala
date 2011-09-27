@@ -180,7 +180,7 @@ trait CommonNode extends Product with SourceLocation {
                 }
                 entries.add(entry)
                 val res = byName.put(key, entry)
-                if (res == null)
+                if (res eq null)
                     null
                 else
                     res.getValue

@@ -163,7 +163,7 @@ class SimplicitasPreferencePage(pluginFactory: () => SimplicitasPlugin)
                 docProvider.connect(editor.getEditorInput)
                 val doc = docProvider.getDocument(editor.getEditorInput)
                 val wasDirty = editor.isDirty
-                if (doc != null) {
+                if (doc ne null) {
                     doc.set(doc.get)
                     if (!wasDirty) {
                         editor.doSave(null)                 

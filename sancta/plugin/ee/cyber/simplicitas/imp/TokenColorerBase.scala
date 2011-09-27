@@ -21,7 +21,7 @@ class TokenColorerBase(pluginFactory: () => SimplicitasPlugin,
                        config: APluginConfig)
     extends ITokenColorer {
   lazy val plugin = pluginFactory()
-      
+
   /** Colors are cached so that each color is allocated only once
       to conserve system resources.*/
   override def getColoring(controller: IParseController,
@@ -43,7 +43,7 @@ class TokenColorerBase(pluginFactory: () => SimplicitasPlugin,
     else
       null
   }
-  
+
   /** In general, you do not need to touch this. */
   override def calculateDamageExtent(seed: IRegion,
                                      ctlr: IParseController): IRegion =
@@ -55,25 +55,25 @@ class TokenColorerBase(pluginFactory: () => SimplicitasPlugin,
     if (plugin.colorCache.contains(id))
       return plugin.colorCache(id)
     else {
-      val attr = new TextAttribute(new Color(Display.getDefault, 
+      val attr = new TextAttribute(new Color(Display.getDefault,
           StringConverter.asRGB(findColor(id))), null, getStyle(id))
       plugin.colorCache += (id -> attr)
       return attr
     }
   }
-  
+
   def getStyle(id: Symbol): Int = {
     val styleKey = plugin.styleKey(id)
 
     if (plugin.getPreferenceStore.contains(styleKey)) {
       return plugin.getPreferenceStore.getInt(styleKey)
-    } else if (plugin.colorDefs != null && plugin.colorDefs.contains(id)) {
+    } else if ((plugin.colorDefs ne null) && plugin.colorDefs.contains(id)) {
        plugin.colorDefs(id)._3.intValue
     } else {
       NORMAL
     }
   }
-  
+
   def findColor(id: Symbol): String = {
     val colorKey = plugin.colorKey(id)
 

@@ -2,7 +2,7 @@
 
 package ee.cyber.simplicitas.imp
 
-import org.eclipse.imp.parser.IParseController 
+import org.eclipse.imp.parser.IParseController
 import org.eclipse.imp.services.IContentProposer
 import org.eclipse.imp.editor.SourceProposal
 import org.eclipse.jface.text.{ITextViewer, IRegion}
@@ -26,7 +26,7 @@ class SimplicitasContentProposer(config: APluginConfig)
     if (tokenx eq null) {
       return new Array[ICompletionProposal](0)
     }
-    val prefixStr = 
+    val prefixStr =
       if (canBeCompleted(ctlr, tokenx))
         tokenx.text.substring(0, offsetx - tokenx.startIndex)
       else
@@ -40,7 +40,7 @@ class SimplicitasContentProposer(config: APluginConfig)
 
     if (astNode eq null)
         println("No node...")
-   
+
     val proposals = new ArrayBuffer[SourceProposal]()
     val ctx = new ProposalCtx() {
         def node = astNode.asInstanceOf[CommonNode]
@@ -52,7 +52,7 @@ class SimplicitasContentProposer(config: APluginConfig)
             proposals += proposal
         }
     }
-    
+
     config propose ctx
     val propArray = proposals.toArray
     util.Sorting.stableSort[SourceProposal, String](propArray,
@@ -67,18 +67,20 @@ class SimplicitasContentProposer(config: APluginConfig)
     def getLength(): Int = 0
     def getOffset(): Int = offset
   }
-  
+
   private def getToken(ctlr: SimplicitasParseController,
                        offset: Int): GenericToken = {
     def atEndOfWord(token: GenericToken): Boolean =
       token.startIndex == offset
-    
+
     val token = ctlr.getTokenAt(offset)
-    if (token == null || atEndOfWord(token)) {
+    if ((token eq null) || atEndOfWord(token)) {
       // Check, whether previous token is better
       val prevToken = ctlr.getTokenAt(offset - 1)
 
-      if (token == null || token.isHidden || canBeCompleted(ctlr, prevToken)) {
+      if ((token eq null) ||
+              token.isHidden ||
+              canBeCompleted(ctlr, prevToken)) {
         return prevToken
       }
     }

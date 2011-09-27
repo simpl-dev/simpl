@@ -88,13 +88,13 @@ class GrammarGen(pGetPos: (Any) => List[Int]) {
         case "option" :: (name: String) :: rest =>
             checkDuplicates(name, rule)
             rules(name) = new OptionRule(name, rest, Symbols)
-            if (firstRule == null) {
+            if (firstRule eq null) {
                 firstRule = name
             }
         case ":" :: (name: String) :: rest =>
             checkDuplicates(name, rule)
             rules(name) = new NormalRule(name, rest, Symbols)
-            if (firstRule == null) {
+            if (firstRule eq null) {
                 firstRule = name
             }
         case _ =>
