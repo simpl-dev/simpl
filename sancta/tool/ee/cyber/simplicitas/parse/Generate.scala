@@ -58,14 +58,14 @@ class Generator {
     }
 
     def generate(inputFile: String, encoding: String) {
-        generate(new ANTLRFileStream(inputFile, encoding))
+        generate(inputFile, new ANTLRFileStream(inputFile, encoding))
     }
 
     def generate(input: java.io.Reader) {
-        generate(new ANTLRReaderStream(input))
+        generate("unknown", new ANTLRReaderStream(input))
     }
 
-    def generate(input: CharStream) {
+    def generate(fileName: String, input: CharStream) {
         val lexer = new AntLikeLexer(input)
         val tokens = new CommonTokenStream(lexer)
         val parser = new AntLikeParser(tokens)
@@ -77,12 +77,12 @@ class Generator {
         val atree = parse_result.getTree.asInstanceOf[CommonTree]
         val pm = new posmap()
         val gtree = convertTree(atree, pm)
-        def getPos(node: Any): Option[(Int, Int)] = {
+        def getPos(node: Any): Option[(String, Int, Int)] = {
             val p = pm.get(node)
             if (p eq null)
                 None
             else
-                Some((p.getLine, p.getCharPositionInLine + 1))
+                Some((fileName, p.getLine, p.getCharPositionInLine + 1))
         }
 
         val gen = new GrammarGen(getPos)
@@ -169,7 +169,7 @@ class GrammarTask extends org.apache.tools.ant.Task {
             gen.generate(src, "UTF-8")
         } catch {
             case e: GrammarException =>
-                throw new BuildException(src + ":" + e.getMessage)
+                throw new BuildException(e.getMessage)
         }
     }
 }
