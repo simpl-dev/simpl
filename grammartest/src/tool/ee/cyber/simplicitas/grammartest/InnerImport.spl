@@ -1,0 +1,9 @@
+grammar ee.cyber.simplicitas.grammartest.imports.InnerImport;
+
+// new
+Bag: "bag" Id;
+
+// to be overriden:
+Bar: "innerbar" Id;
+
+terminal Id: ('a'..'z')+;

@@ -41,7 +41,10 @@ object Main extends Assert {
                 grammar.errors.foreach(println)
 //                Assert.fail("Parse errors found")
             }
-            val dumped = dumpNode(grammar.tree)
+            val dumped = if (grammar.hasTree)
+                dumpNode(grammar.tree)
+            else
+                ""
 
             // Write file to target dir so that it can later be examined
             // if things go wrong.

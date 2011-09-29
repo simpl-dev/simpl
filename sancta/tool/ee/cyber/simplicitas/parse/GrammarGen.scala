@@ -54,11 +54,16 @@ class GrammarGen(pGetPos: (Any) => Option[(String, Int, Int)]) {
     /** Main entry point -- generates grammar and Scala source file for
      * given parsed Simpl grammar. */
     def grammargen(grammarFile: String, tree: Any) {
+        firstRule = null
         tree match {
             case ("grammar" :: nameParts) :: rest =>
                 matchGrammarName(nameParts, tree)
                 val afterImports = matchImports(rest)
                 val ruleList = matchGrammarOptions(afterImports)
+                // This is necessary because processing of the import rules
+                // might have messed up the topmost rule.
+                firstRule = null
+
                 ruleList.foreach(addRule(grammarFile))
         }
 

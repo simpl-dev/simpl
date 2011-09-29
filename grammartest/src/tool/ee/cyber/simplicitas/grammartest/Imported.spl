@@ -1,0 +1,11 @@
+grammar ee.cyber.simplicitas.grammartest.imports.Imported;
+
+import "InnerImport.spl";
+
+// override
+Bar: "barimport" Id;
+
+// new
+Baz: "baz" Id;
+
+hidden terminal WS: (' '|'\t'|'\r'|'\n')+;

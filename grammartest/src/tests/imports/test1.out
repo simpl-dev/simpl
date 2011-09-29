@@ -1,0 +1,10 @@
+0:12:Foo {
+  baz=7:12:Baz {
+    id=11:12:Id {
+      text="bb"
+    }
+  }
+  id=4:5:Id {
+    text="aa"
+  }
+}

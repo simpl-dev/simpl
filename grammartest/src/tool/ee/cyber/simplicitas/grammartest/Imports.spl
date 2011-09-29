@@ -1,0 +1,11 @@
+grammar ee.cyber.simplicitas.grammartest.imports.Imports;
+
+import "Imported.spl";
+
+option Top: Foo | Bar | Baz | Bag;
+
+// New rule.
+Foo: "foo" Id Baz;
+
+// override imported rule:
+Bar: "bar" Id;

@@ -46,6 +46,8 @@
                  destdir="${target}/gen/ee/cyber/simplicitas/grammartest"/>
         <grammar src="${basedir}/src/tool/ee/cyber/simplicitas/grammartest/LexerStateTest.spl"
                  destdir="${target}/gen/ee/cyber/simplicitas/grammartest"/>
+        <grammar src="${basedir}/src/tool/ee/cyber/simplicitas/grammartest/Imports.spl"
+                 destdir="${target}/gen/ee/cyber/simplicitas/grammartest"/>
 
         <!-- compile sources (together with the generated grammar) -->
         <mkdir dir="${target}/classes"/>
