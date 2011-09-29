@@ -6,4 +6,4 @@ Bag: "bag" Id;
 // to be overriden:
 Bar: "innerbar" Id;
 
-terminal Id: [a-z]+;
+terminal Id: ('a'..'z')+;
