@@ -84,16 +84,17 @@ class GrammarParser(baseDir: String, encoding: String) {
 
     private def resolveImports(tree: Object): Object = {
         def readContents(inputFile: String): Object = {
-            val fullPath = baseDir + "/" +
-                    GrammarUtils.stripQuotes(inputFile)
-
-            parseImpl(fullPath,
-                new ANTLRFileStream(fullPath, encoding))
+            parseImpl(inputFile,
+                new ANTLRFileStream(inputFile, encoding))
         }
 
         def tryImport(t: List[Any]): List[Any] = t match {
             case List("import", file: String) :: rest =>
-                List("import", readContents(file)) :: tryImport(rest)
+                val fullPath = baseDir + "/" +
+                        GrammarUtils.stripQuotes(file)
+
+                List("import", fullPath, readContents(fullPath)) ::
+                        tryImport(rest)
             case other =>
                 other
         }
@@ -123,10 +124,8 @@ class Generator {
         val parser = new GrammarParser(baseName(inputFile), encoding)
 
         parser.parse(inputFile)
-
-//        println(parser.tree)
         val gen = new GrammarGen(parser.getPos)
-        gen.grammargen(parser.tree)
+        gen.grammargen(inputFile, parser.tree)
 
         writeFile(gen.grammarName + ".scala", gen.getScalaSource)
         val grammarFile = gen.grammarName + ".g"
@@ -149,7 +148,6 @@ class Generator {
 }
 
 object Generate {
-
     def main(argv: Array[String]) {
         if (argv.length != 2 && argv.length != 4)
             usage()

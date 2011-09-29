@@ -46,14 +46,20 @@ class GrammarGen(pGetPos: (Any) => Option[(String, Int, Int)]) {
     /** Error-reporting function. */
     val error = GrammarUtils.error(pGetPos)_
 
+    /** What is the source file of the rule? Used for checking
+      * for duplicate rules. Rules override similar rules from imported
+      * files, but conflict with rules from the same file. */
+    val ruleSource = collection.mutable.Map[String, String]()
+
     /** Main entry point -- generates grammar and Scala source file for
      * given parsed Simpl grammar. */
-    def grammargen(tree: Any) {
+    def grammargen(grammarFile: String, tree: Any) {
         tree match {
             case ("grammar" :: nameParts) :: rest =>
                 matchGrammarName(nameParts, tree)
-                val ruleList = matchGrammarOptions(rest)
-                ruleList.foreach(addRule)
+                val afterImports = matchImports(rest)
+                val ruleList = matchGrammarOptions(afterImports)
+                ruleList.foreach(addRule(grammarFile))
         }
 
         // toSet is necessary because in the analysis step some additional
@@ -75,25 +81,30 @@ class GrammarGen(pGetPos: (Any) => Option[(String, Int, Int)]) {
     }
 
     /** Adds rule to symbol table. */
-    private def addRule(rule: Any) = rule match {
+    private def addRule(fileName: String)(rule: Any) = rule match {
         case "terminal" :: "hidden" :: (name: String) :: rest =>
-            checkDuplicates(name, rule)
+            checkDuplicates(fileName, name, rule)
             rules(name) = new TerminalRule(name, true, rest, Symbols)
+            ruleSource(name) = fileName
         case "terminal" :: (name: String) :: rest =>
-            checkDuplicates(name, rule)
+            checkDuplicates(fileName, name, rule)
             rules(name) = new TerminalRule(name, false, rest, Symbols)
+            ruleSource(name) = fileName
         case "fragment" :: (name: String) :: rest =>
-            checkDuplicates(name, rule)
+            checkDuplicates(fileName, name, rule)
             rules(name) = new FragmentRule(name, rest, Symbols)
+            ruleSource(name) = fileName
         case "option" :: (name: String) :: rest =>
-            checkDuplicates(name, rule)
+            checkDuplicates(fileName, name, rule)
             rules(name) = new OptionRule(name, rest, Symbols)
+            ruleSource(name) = fileName
             if (firstRule eq null) {
                 firstRule = name
             }
         case ":" :: (name: String) :: rest =>
-            checkDuplicates(name, rule)
+            checkDuplicates(fileName, name, rule)
             rules(name) = new NormalRule(name, rest, Symbols)
+            ruleSource(name) = fileName
             if (firstRule eq null) {
                 firstRule = name
             }
@@ -101,8 +112,8 @@ class GrammarGen(pGetPos: (Any) => Option[(String, Int, Int)]) {
             error(rule, "Malformed rule")
     }
 
-    private def checkDuplicates(rule: String, node: Any) {
-        if (rules.contains(rule)) {
+    private def checkDuplicates(fileName: String, rule: String, node: Any) {
+        if (rules.contains(rule) && (ruleSource(rule) == fileName)) {
             error(node, "Duplicate rule: " + rule)
         }
     }
@@ -177,6 +188,33 @@ class GrammarGen(pGetPos: (Any) => Option[(String, Int, Int)]) {
             matchGrammarOptions(rest)
         case rules: List[Any] =>
             rules
+    }
+
+    def skipGrammarOptions(tree: Any): List[Any] = tree match {
+        case (kw :: _) :: rest
+            if (kw == "options" ||
+                    kw == "scalaheader" ||
+                    kw == "lexer-states") =>
+            skipGrammarOptions(rest)
+        case rules: List[Any] =>
+            rules
+    }
+
+    def processImportedGrammar(fileName: String, tree: Any) {
+        tree match {
+            case ("grammar" :: nameParts) :: rest =>
+                val afterImports = matchImports(rest)
+                val ruleList = skipGrammarOptions(afterImports)
+                ruleList.foreach(addRule(fileName))
+        }
+    }
+
+    def matchImports(tree: Any): List[Any] = tree match {
+        case List("import", fileName: String, imported) :: rest =>
+            processImportedGrammar(fileName, imported)
+            matchImports(rest)
+        case options: List[Any] =>
+            options
     }
 
     /** Constructs source for the accompanying Scala program. */
