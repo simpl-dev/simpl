@@ -35,14 +35,22 @@ abstract class GrammarBase[Node <: CommonNode, Kind]
         val tokenSource =
             new TokenSourceWrapper[Kind](lexer(source, errorHandler), this)
         val tokenStream = new CommonTokenStream(tokenSource)
-        val tree = doParse(tokenStream, errorHandler)
-        if (tree ne null) {
-            for (child <- tree.children if child ne null)
-                child.updateParents(tree)
-            nodeTree = Some(tree)
-        } else {
-            nodeTree = None
+
+        try {
+            val tree = doParse(tokenStream, errorHandler)
+
+            if (tree ne null) {
+                for (child <- tree.children if child ne null)
+                    child.updateParents(tree)
+                nodeTree = Some(tree)
+            } else {
+                nodeTree = None
+            }
+        } catch {
+            case pe: ParseError =>
+                errorHandler.errors += pe.sourceMessage
         }
+
         tokenList = tokenSource.tokens
     }
 }
