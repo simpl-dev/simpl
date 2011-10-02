@@ -45,7 +45,6 @@ class GrammarParser(baseDir: String, encoding: String) {
         val atree = parse_result.getTree.asInstanceOf[CommonTree]
         val converted = convertTree(fileName, atree)
         val withImports = resolveImports(converted)
-        println("resolved imports: " + withImports)
         withImports
     }
 
