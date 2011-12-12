@@ -26,6 +26,7 @@ package ee.cyber.simplicitas.prettyprint
 // advised of the possibility of such damage.
 
 import java.io.Writer
+import Stream.#::
 
 object Doc {
     val empty = Empty
@@ -151,9 +152,7 @@ object Doc {
 
     // Renderers
     private def renderPretty(ribbonFrac: Double, width: Int,
-                             doc: Doc): SimpleDoc = {
-        import Stream.#::
-
+                             doc: Doc): Stream[SimpleDoc] = {
         //r :: the ribbon width in characters
         val ribbon = 0 max (width min ((width * ribbonFrac) round).toInt)
 
@@ -161,7 +160,8 @@ object Doc {
         //           x and y, the (simple) documents to chose from.
         //           precondition: first lines of x are longer than the
         //           first lines of y.
-        def nicest(n: Int, k: Int, x: SimpleDoc, y: SimpleDoc) = {
+        def nicest(n: Int, k: Int, x: Stream[SimpleDoc],
+                y: Stream[SimpleDoc]) = {
             val w = (width - k) min (ribbon - k + n)
 
             if (fits(w, x))
@@ -173,14 +173,15 @@ object Doc {
         // best :: n = indentation of current line
         //         k = current column
         //         (ie. (k >= n) && (k - n == count of inserted characters)
-        def best(n: Int, k: Int, d: Stream[SDoc]): SimpleDoc = d match {
-            case Stream.Empty => SEmpty
+        def best(n: Int, k: Int, d: Stream[SDoc]): Stream[SimpleDoc] = d match {
+            case Stream.Empty => Stream.Empty
             case SDoc(indent, doc) #:: ds => doc match {
                 case Empty => best(n, k, ds)
-                case DChar(c) => SChar(c, best(n, k + 1, ds))
-                case Text(s) => SText(s, best(n, k + s.length, ds))
-                case Line(_) => SLine(indent, best(indent, indent, ds))
-                case Cat(x, y) => best(n, k, SDoc(indent, x) #:: SDoc(indent, y) #:: ds)
+                case DChar(c) => SChar(c) #:: best(n, k + 1, ds)
+                case Text(s) => SText(s) #:: best(n, k + s.length, ds)
+                case Line(_) => SLine(indent) #:: best(indent, indent, ds)
+                case Cat(x, y) => best(n, k,
+                    SDoc(indent, x) #:: SDoc(indent, y) #:: ds)
                 case Nest(j, x) => best(n, k, SDoc(indent + j, x) #:: ds)
                 case Union(x, y) =>
                     nicest(n, k,
@@ -194,14 +195,14 @@ object Doc {
         best(0, 0, Stream(SDoc(0, doc)))
     }
 
-    private def fits(w: Int, x: SimpleDoc): Boolean =
+    private def fits(w: Int, x: Stream[SimpleDoc]): Boolean =
         if (w < 0)
             false
         else x match {
-            case SEmpty => true
-            case SChar(c, x) => fits(w - 1, x)
-            case SText(s, x) => fits(w - s.length, x)
-            case SLine(_, _) => true
+            case Stream.Empty => true
+            case SChar(_) #:: x => fits(w - 1, x)
+            case SText(s) #:: x => fits(w - s.length, x)
+            case SLine(_) #:: _ => true
         }
 
     def show(doc: Doc, width: Int): String = {
@@ -211,15 +212,15 @@ object Doc {
     }
 
     def show(doc: Doc, rfrac: Double, width: Int, writer: Writer) {
-        def display(d: SimpleDoc): Unit = d match {
-            case SEmpty => ()
-            case SChar(c, x) =>
+        def display(d: Stream[SimpleDoc]): Unit = d match {
+            case Stream.Empty => ()
+            case SChar(c) #:: x =>
                 writer.write(c)
                 display(x)
-            case SText(s, x) =>
+            case SText(s) #:: x =>
                 writer.write(s)
                 display(x)
-            case SLine(i, x) =>
+            case SLine(i) #:: x =>
                 writer.write('\n')
                 writer.write(spaces(i))
                 display(x)
@@ -267,9 +268,8 @@ case class Column(f: Int => Doc) extends Doc
 case class Nesting(f: Int => Doc) extends Doc
 
 abstract class SimpleDoc
-case object SEmpty extends SimpleDoc
-case class SChar(c: Char, doc: SimpleDoc) extends SimpleDoc
-case class SText(s: String, doc: SimpleDoc) extends SimpleDoc
-case class SLine(i: Int, doc: SimpleDoc) extends SimpleDoc
+case class SChar(c: Char) extends SimpleDoc
+case class SText(s: String) extends SimpleDoc
+case class SLine(i: Int) extends SimpleDoc
 
 case class SDoc(indent: Int, doc: Doc)
