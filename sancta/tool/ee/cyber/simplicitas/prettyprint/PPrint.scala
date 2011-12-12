@@ -152,6 +152,8 @@ object Doc {
     // Renderers
     private def renderPretty(ribbonFrac: Double, width: Int,
                              doc: Doc): SimpleDoc = {
+        import Stream.#::
+
         //r :: the ribbon width in characters
         val ribbon = 0 max (width min ((width * ribbonFrac) round).toInt)
 
@@ -171,25 +173,25 @@ object Doc {
         // best :: n = indentation of current line
         //         k = current column
         //         (ie. (k >= n) && (k - n == count of inserted characters)
-        def best(n: Int, k: Int, d: Docs): SimpleDoc = d match {
-            case DNil => SEmpty
-            case DCons(indent, doc, ds) => doc match {
+        def best(n: Int, k: Int, d: Stream[SDoc]): SimpleDoc = d match {
+            case Stream.Empty => SEmpty
+            case SDoc(indent, doc) #:: ds => doc match {
                 case Empty => best(n, k, ds)
                 case DChar(c) => SChar(c, best(n, k + 1, ds))
                 case Text(s) => SText(s, best(n, k + s.length, ds))
                 case Line(_) => SLine(indent, best(indent, indent, ds))
-                case Cat(x, y) => best(n, k, DCons(indent, x, DCons(indent, y, ds)))
-                case Nest(j, x) => best(n, k, DCons(indent + j, x, ds))
+                case Cat(x, y) => best(n, k, SDoc(indent, x) #:: SDoc(indent, y) #:: ds)
+                case Nest(j, x) => best(n, k, SDoc(indent + j, x) #:: ds)
                 case Union(x, y) =>
                     nicest(n, k,
-                        best(n, k, DCons(indent, x, ds)),
-                        best(n, k, DCons(indent, y, ds)))
-                case Column(f) => best(n, k, DCons(indent, f(k), ds))
-                case Nesting(f) => best(n, k, DCons(indent, f(indent), ds))
+                        best(n, k, SDoc(indent, x) #:: ds),
+                        best(n, k, SDoc(indent, y) #:: ds))
+                case Column(f) => best(n, k, SDoc(indent, f(k)) #:: ds)
+                case Nesting(f) => best(n, k, SDoc(indent, f(indent)) #:: ds)
             }
         }
 
-        best(0, 0, DCons(0, doc, DNil))
+        best(0, 0, Stream(SDoc(0, doc)))
     }
 
     private def fits(w: Int, x: SimpleDoc): Boolean =
@@ -270,6 +272,4 @@ case class SChar(c: Char, doc: SimpleDoc) extends SimpleDoc
 case class SText(s: String, doc: SimpleDoc) extends SimpleDoc
 case class SLine(i: Int, doc: SimpleDoc) extends SimpleDoc
 
-abstract class Docs
-case object DNil extends Docs
-case class DCons(i: Int, d: Doc, ds: Docs) extends Docs
+case class SDoc(indent: Int, doc: Doc)
