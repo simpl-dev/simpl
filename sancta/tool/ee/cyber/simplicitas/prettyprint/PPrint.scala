@@ -153,7 +153,7 @@ object Doc {
     private def renderPretty(ribbonFrac: Double, width: Int,
                              doc: Doc): SimpleDoc = {
         //r :: the ribbon width in characters
-        val r = 0 max (width min ((width * ribbonFrac) round).toInt)
+        val ribbon = 0 max (width min ((width * ribbonFrac) round).toInt)
 
         // nicest :: r = ribbon width, w = page width,
         //           n = indentation of current line, k = current column
@@ -161,7 +161,7 @@ object Doc {
         //           precondition: first lines of x are longer than the
         //           first lines of y.
         def nicest(n: Int, k: Int, x: SimpleDoc, y: SimpleDoc) = {
-            val w = (width - k) min (r - k + n)
+            val w = (width - k) min (ribbon - k + n)
 
             if (fits(w, x))
                 x
@@ -174,19 +174,19 @@ object Doc {
         //         (ie. (k >= n) && (k - n == count of inserted characters)
         def best(n: Int, k: Int, d: Docs): SimpleDoc = d match {
             case DNil => SEmpty
-            case DCons(i, d, ds) => d match {
+            case DCons(indent, doc, ds) => doc match {
                 case Empty => best(n, k, ds)
                 case DChar(c) => SChar(c, best(n, k + 1, ds))
-                case Text(s) => SText(s, best(n, k + 1, ds))
-                case Line(_) => SLine(i, best(i, i, ds))
-                case Cat(x, y) => best(n, k, DCons(i, x, DCons(i, y, ds)))
-                case Nest(j, x) => best(n, k, DCons(i + j, x, ds))
+                case Text(s) => SText(s, best(n, k + s.length, ds))
+                case Line(_) => SLine(indent, best(indent, indent, ds))
+                case Cat(x, y) => best(n, k, DCons(indent, x, DCons(indent, y, ds)))
+                case Nest(j, x) => best(n, k, DCons(indent + j, x, ds))
                 case Union(x, y) =>
                     nicest(n, k,
-                        best(n, k, DCons(i, x, ds)),
-                        best(n, k, DCons(i, y, ds)))
-                case Column(f) => best(n, k, DCons(i, f(k), ds))
-                case Nesting(f) => best(n, k, DCons(i, f(i), ds))
+                        best(n, k, DCons(indent, x, ds)),
+                        best(n, k, DCons(indent, y, ds)))
+                case Column(f) => best(n, k, DCons(indent, f(k), ds))
+                case Nesting(f) => best(n, k, DCons(indent, f(indent), ds))
             }
         }
 
