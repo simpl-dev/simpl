@@ -155,8 +155,7 @@ object Doc {
         //r :: the ribbon width in characters
         val ribbon = 0 max (width min ((width * ribbonFrac) round).toInt)
 
-        // nicest :: r = ribbon width, w = page width,
-        //           n = indentation of current line, k = current column
+        // nicest :: n = indentation of current line, k = current column
         //           x and y, the (simple) documents to chose from.
         //           precondition: first lines of x are longer than the
         //           first lines of y.
