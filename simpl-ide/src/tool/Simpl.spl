@@ -6,12 +6,16 @@ options (backtrack=true; memoize=true;)
     consists of header and list of rule definitions. */
 GrammarDef:
     header=PackageDef ';'
+    imports=Str*
     (opts=OptionList | scalaHeaders=ScalaHeader | lexerStates=LexerStates)*
     rules=RuleDef+;
 
 /** Standard header for grammar, indicates package name where the
     generated code will reside. */
 PackageDef: 'grammar' DottedId;
+
+/** Import directive. Includes given file as part of grammar. */
+ImportFile: "import" Str ";";
 
 /** This directive can be used to pass grammar-level options to ANTLR. */
 OptionList: "options" "(" (name=Id "=" value=Id ";")* ")";
