@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension point="org.eclipse.imp.runtime.languageDescription">
+      <language extensions="exp" description="Rewriting example with expression language"
+                natureID="ee.cyber.simplicitas.exprewriting" language="exp_rewriting"/>
+   </extension>
+   <extension id="exp_rewriting.parserWrapper"
+              name="Rewriting example with expression language Parser Wrapper"
+              point="org.eclipse.imp.runtime.parser">
+      <parserWrapper
+            class="ee.cyber.simplicitas.exprewriting.ExpParseController"
+            language="exp_rewriting"/>
+   </extension>
+   <extension point="org.eclipse.imp.runtime.tokenColorer">
+      <tokenColorer class="ee.cyber.simplicitas.exprewriting.ExpTokenColorer"
+                    language="exp_rewriting"/>
+   </extension>
+   <extension point="org.eclipse.imp.runtime.modelTreeBuilder">
+      <treeBuilder
+            class="ee.cyber.simplicitas.exprewriting.ExpTreeModelBuilder"
+            language="exp_rewriting">
+      </treeBuilder>
+   </extension>
+   <extension point="org.eclipse.imp.runtime.labelProvider">
+   <labelProvider class="ee.cyber.simplicitas.exprewriting.ExpLabelProvider"
+   language="exp_rewriting"/>
+   </extension>
+   <extension point="org.eclipse.imp.runtime.referenceResolvers">
+   <referenceResolver class="ee.cyber.simplicitas.exprewriting.ExpReferenceResolver"
+   language="exp_rewriting"/>
+   </extension>
+   <extension point="org.eclipse.imp.runtime.foldingUpdater">
+   <foldingUpdater class="ee.cyber.simplicitas.exprewriting.ExpFoldingUpdater"
+   language="exp_rewriting"/>
+   </extension>
+   <extension point="org.eclipse.imp.runtime.documentationProvider">
+   <docProvider class="ee.cyber.simplicitas.exprewriting.ExpDocumentationProvider"
+   language="exp_rewriting"/>
+   </extension>
+   <extension id="exp_rewriting.hoverHelper"
+              name="Rewriting example with expression language Hover Helper"
+              point="org.eclipse.imp.runtime.hoverHelper">
+      <hoverHelper class="ee.cyber.simplicitas.imp.HoverHelper"
+                 language="exp_rewriting"/>
+   </extension>
+   <extension point="org.eclipse.imp.runtime.contentProposer">
+      <proposer class="ee.cyber.simplicitas.exprewriting.ExpContentProposer"
+                language="exp_rewriting"/>
+   </extension>
+   <extension point="org.eclipse.imp.runtime.markOccurrences">
+      <occurrenceMarker class="ee.cyber.simplicitas.exprewriting.ExpOccurrenceMarker"
+                        language="exp_rewriting"/>
+   </extension>
+   
+   <extension point="org.eclipse.ui.preferencePages">
+      <page class="ee.cyber.simplicitas.exprewriting.ExpPreferencePage"
+            id="ee.cyber.simplicitas.exprewriting.ExpPreferencePage"
+            name="Rewriting example with expression language Preferences">
+      </page>
+   </extension>
+   <extension point="org.eclipse.core.runtime.preferences">
+      <initializer class="ee.cyber.simplicitas.exprewriting.ExpPreferenceInitializer"/>
+   </extension>
+   
+   <extension
+          point="org.eclipse.ui.popupMenus">
+       <objectContribution
+             id="exp_rewriting.generatorPopUp"
+             nameFilter="*.exp"
+             objectClass="org.eclipse.core.resources.IFile">
+          <action
+                class="ee.cyber.simplicitas.exprewriting.ExpGenerateAction"
+                enablesFor="1"
+                id="ee.cyber.simplicitas.exprewriting.ExpGenerateAction"
+                label="Generate"
+                menubarPath="additions"
+                tooltip="Generate">
+          </action>
+       </objectContribution>
+    </extension>
+</plugin>
