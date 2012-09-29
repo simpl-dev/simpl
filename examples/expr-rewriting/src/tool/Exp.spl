@@ -1,8 +1,30 @@
 grammar ee.cyber.simplicitas.exprewriting.Exp;
 
-Program: 'program' Id;
+scalaheader {
+import Extras._
+}
+
+// Entry point as a separate rule.
+TopExpr returns Expr {expr}
+    : expr=PlusExpr;
+
+PlusExpr returns Expr {makeExpr(left, op, right)}
+    : left=Term (op=PlusOp right=PlusExpr)?;
+terminal PlusOp: "+" | "-";
+
+Term returns Expr {makeExpr(left, op, right)}
+    : left=Factor (op=MulOp right=Term)?;
+terminal MulOp: "*" | "/";
+
+option Factor returns Expr:
+    Id
+    | NumberLit
+    | ParenExpr;
 
 terminal Id: ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')*;
+terminal NumberLit: ('0' .. '9')+;
+ParenExpr returns Expr {expr}: "(" expr=PlusExpr ")";
+
 fragment MlComment: '/*' (~'*' | '*' ~'/')* '*/';
 fragment SlComment: '//' ~('\n'|'\r')*;
 hidden terminal WS: (' '|'\t'|'\r'|'\n'|SlComment|MlComment)+;

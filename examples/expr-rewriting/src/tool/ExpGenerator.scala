@@ -1,26 +1,19 @@
-package ee.cyber.simplicitas.exprewriting;
+package ee.cyber.simplicitas.exprewriting
 
-import ee.cyber.simplicitas.{GeneratorBase, MainBase}
+import ee.cyber.simplicitas.{MainBase, GeneratorBase}
+;
 
-class ExpGenerator(destDir: String) 
-        extends GeneratorBase(destDir) {
-  val templates = getTemplates("Exp.stg")
-    
-  def generate(tree: Program) {
-    val args = tree.toJavaMap()
-    writeFile("GeneratedProgram.java", templates.getInstanceOf("program", args))
-  }
-}
-  
 object ExpMain extends MainBase {
-  def main(argv: Array[String]) {
-    parseOptions(argv)
-    val grammar = new ExpGrammar()
-    for (arg <- sources) {
-      grammar.parseFile(arg)
-      checkErrors(grammar.errors)
-      
-      new ExpGenerator(destDir).generate(grammar.tree)        
+    def main(argv: Array[String]) {
+        val exprString = argv.mkString(" ")
+
+        val grammar = new ExpGrammar()
+        grammar.parseString(exprString)
+        checkErrors(grammar.errors)
+        simplifyExpression(grammar.tree)
     }
-  }
+
+    def simplifyExpression(expr: Expr) {
+        println(expr)
+    }
 }

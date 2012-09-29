@@ -60,7 +60,7 @@
                 <path refid="tool-deps"/>
                 <path location="${tool-jar}"/>
             </classpath>
-            <arg line="--dest target/test sample.exp"/>
+            <arg line="1 + 2 + 3 * i * 1 + s * (a + 0)"/>
         </java>
     </target>
 
