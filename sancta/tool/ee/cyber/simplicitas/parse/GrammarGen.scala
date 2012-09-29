@@ -292,7 +292,7 @@ class GrammarGen(pGetPos: (Any) => Option[(String, Int, Int)]) {
         buf.append(
             "\nclass " + grammarName + "Grammar extends " +
                 "ee.cyber.simplicitas.parse.GrammarBase[" +
-                firstRule + ", " + grammarName + "Kind.Kind] {\n" +
+                rules(firstRule).actualReturnType + ", " + grammarName + "Kind.Kind] {\n" +
             "  type Token = CommonToken[" + grammarName + "Kind.Kind]\n" +
             "  def lexer(source: org.antlr.runtime.CharStream, errorHandler:" +
                 " ErrorHandler): org.antlr.runtime.TokenSource = {\n" +
@@ -300,7 +300,7 @@ class GrammarGen(pGetPos: (Any) => Option[(String, Int, Int)]) {
                 "    lex.setErrorHandler(errorHandler)\n" +
                 "    lex\n  }\n" +
             "  def doParse(tokens: org.antlr.runtime.TokenStream," +
-                " errorHandler: ErrorHandler): " + firstRule + " = {\n" +
+                " errorHandler: ErrorHandler): " + rules(firstRule).actualReturnType + " = {\n" +
                 "    val parser = new " + grammarName + "Parser(tokens)\n" +
                 "    parser.errorHandler = errorHandler\n" +
                 "    parser.toplevel()\n" +
