@@ -18,11 +18,11 @@ terminal MulOp: "*" | "/";
 
 option Factor returns Expr:
     Id
-    | NumberLit
+    | Num
     | ParenExpr;
 
 terminal Id: ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')*;
-terminal NumberLit: ('0' .. '9')+;
+terminal Num: ('0' .. '9')+;
 ParenExpr returns Expr {expr}: "(" expr=PlusExpr ")";
 
 fragment MlComment: '/*' (~'*' | '*' ~'/')* '*/';
