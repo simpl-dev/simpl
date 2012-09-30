@@ -18,7 +18,22 @@ object Simplify {
         case BinOp(expr, "*", Num("1")) => expr
     }
 
-    val simplifyStrat = bottomup(attempt(simplifyAdd <+ simplifyMul))
+    val evalConstants = rule {
+        case BinOp(Num(left), "+", Num(right)) =>
+            evalOp(left, _ + _, right)
+        case BinOp(Num(left), "-", Num(right)) =>
+            evalOp(left, _ - _, right)
+        case BinOp(Num(left), "*", Num(right)) =>
+            evalOp(left, _ * _, right)
+        case BinOp(Num(left), "/", Num(right)) =>
+            evalOp(left, _ / _, right)
+    }
+
+    def evalOp(left: String, op: (Int, Int) => Int, right: String) =
+        Num(op(left.toInt, right.toInt).toString)
+
+    val simplifyStrat = innermost(
+            simplifyAdd <+ simplifyMul <+ evalConstants)
 
     def simplify(expr: Expr) {
         println("Before:\n" + prettyPrint(expr))
