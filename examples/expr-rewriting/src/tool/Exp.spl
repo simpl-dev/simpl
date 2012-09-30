@@ -8,12 +8,12 @@ import Extras._
 TopExpr returns Expr {expr}
     : expr=PlusExpr;
 
-PlusExpr returns Expr {makeExpr(left, op, right)}
-    : left=Term (op=PlusOp right=PlusExpr)?;
+PlusExpr returns Expr {makeExpr(ops, args)}
+    : args=Term (ops=PlusOp args=Term)*;
 terminal PlusOp: "+" | "-";
 
-Term returns Expr {makeExpr(left, op, right)}
-    : left=Factor (op=MulOp right=Term)?;
+Term returns Expr {makeExpr(ops, args)}
+    : args=Factor (ops=MulOp args=Factor)*;
 terminal MulOp: "*" | "/";
 
 option Factor returns Expr:
