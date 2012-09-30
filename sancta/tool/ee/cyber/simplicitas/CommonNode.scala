@@ -247,7 +247,7 @@ trait CommonNode extends Product with SourceLocation {
 }
 
 /** Parent class for all the terminal nodes. */
-abstract class TerminalNode extends CommonNode {
+trait TerminalNode extends CommonNode {
     override def children = Nil // No children on terminals
 
     /** Returns contents of the terminal node. */
