@@ -11,11 +11,22 @@ object Simplify {
         case BinOp(expr, "+", Num("0")) => expr
     }
 
+    val simplifySub = rule {
+        case BinOp(Num("0"), "-", expr) => expr
+        case BinOp(expr, "-", Num("0")) => expr
+    }
+
     val simplifyMul = rule {
         case BinOp(Num("0"), "*", _) => Num("0")
         case BinOp(_, "*", Num("0")) => Num("0")
         case BinOp(Num("1"), "*", expr) => expr
         case BinOp(expr, "*", Num("1")) => expr
+    }
+
+    val simplifyDiv = rule {
+        case BinOp(Num("0"), "/", _) => Num("0")
+        case BinOp(_, "/", Num("0")) => throw new Exception("Divide by zero")
+        case BinOp(expr, "/", Num("1")) => expr
     }
 
     val evalConstants = rule {
@@ -33,7 +44,11 @@ object Simplify {
         Num(op(left.toInt, right.toInt).toString)
 
     val simplifyStrat = innermost(
-            simplifyAdd <+ simplifyMul <+ evalConstants)
+            simplifyAdd
+            <+ simplifySub
+            <+ simplifyMul
+            <+ simplifyDiv
+            <+ evalConstants)
 
     def simplify(expr: Expr) {
         println("Before:\n" + prettyPrint(expr))
