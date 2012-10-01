@@ -180,7 +180,10 @@ class GrammarGen(pGetPos: (Any) => Option[(String, Int, Int)]) {
             }
             matchGrammarOptions(rest)
         case ("scalaheader" :: header :: Nil) :: rest =>
-            scalaHeader = header.toString
+            if (scalaHeader != "") {
+                scalaHeader += "\n"
+            }
+            scalaHeader += header.toString
             matchGrammarOptions(rest)
         case ("lexer-states" :: states) :: rest =>
             for (s <- states) {
