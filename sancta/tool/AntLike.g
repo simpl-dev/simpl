@@ -23,7 +23,8 @@ tokens {
 }
 
 grammarDef  : header ruleDef+ EOF!;
-header      : packageDef importFile* (optionDef | scalaHeader | lexerStates)*;
+header      : packageDef importFile*
+    (optionDef | scalaHeader | lexerStates | inheritFrom)*;
 packageDef  : 'grammar'^ dottedId ';'!;
 optionDef   : 'options'^ '('! optionList ')'!;
 optionList  : option*;
@@ -31,6 +32,7 @@ option      : ID '=' ID ';' -> ^(ID ID);
 dottedId    : ID ('.' ID)*;
 scalaHeader : 'scalaheader'^ CODE;
 lexerStates : 'lexer-states'^ '('! ID (','! ID)* ')'!;
+inheritFrom : 'inherit-trait'^ dottedId;
 importFile  : 'import'^ STR ';'!;
 
 ruleDef:

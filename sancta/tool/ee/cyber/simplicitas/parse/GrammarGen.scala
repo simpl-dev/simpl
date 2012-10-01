@@ -39,6 +39,8 @@ class GrammarGen(pGetPos: (Any) => Option[(String, Int, Int)]) {
     /** Header for generated Scala code. */
     private var scalaHeader = ""
 
+    private val inheritTrait = new ArrayBuffer[String];
+
     /** Name of the first grammar rule. This will become top-level
      * node in the AST. */
     private var firstRule: String = null
@@ -79,6 +81,11 @@ class GrammarGen(pGetPos: (Any) => Option[(String, Int, Int)]) {
         // Rules are generated, let's run delayed actions
         for ((r, aSet) <- actions) {
             aSet.foreach(_(classes(r)))
+        }
+
+        // Add global inherit-trait directives to the mix.
+        for (c <- classes.values) {
+            c.extend ++= inheritTrait
         }
 
         // Simplify the inheritance graph.
@@ -194,6 +201,9 @@ class GrammarGen(pGetPos: (Any) => Option[(String, Int, Int)]) {
                 }
             }
             matchGrammarOptions(rest)
+        case ("inherit-trait" :: traitName) :: rest =>
+            inheritTrait += (traitName foldLeft "")(_+_)
+            matchGrammarOptions(rest)
         case rules: List[Any] =>
             rules
     }
@@ -202,7 +212,8 @@ class GrammarGen(pGetPos: (Any) => Option[(String, Int, Int)]) {
         case (kw :: _) :: rest
             if (kw == "options" ||
                     kw == "scalaheader" ||
-                    kw == "lexer-states") =>
+                    kw == "lexer-states" ||
+                    kw == "inherit-trait") =>
             skipGrammarOptions(rest)
         case rules: List[Any] =>
             rules
