@@ -7,7 +7,7 @@ object ExpMain extends MainBase {
     def main(argv: Array[String]) {
         val grammar = new ExpGrammar()
 
-        for (val s <- argv) {
+        for (s <- argv) {
             println("\nProcessing: " + s)
             grammar.parseString(s)
             checkErrors(grammar.errors)
