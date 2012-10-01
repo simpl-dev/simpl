@@ -2,6 +2,8 @@
 
 package ee.cyber.simplicitas
 
+import util.parsing.input.Positional
+
 /** This trait represents location in the source file.
   * It contains both the absolute location in source file
   * (attributes startIndex and endIndex) and human-readable
@@ -32,8 +34,10 @@ trait SourceLocation {
 /** Parent class for the nodes in the abstract representation (AST) of
   * DSL program. It provides access to location of the node in the
   * DSL text and also means for iterating over child nodes of this node.  */
-trait CommonNode extends Product with SourceLocation {
+trait CommonNode extends Product with SourceLocation with Positional {
     def childrenNames: Array[String]
+
+    setPos(new MyPosition())
 
     /** Children of the current node. Note that this list
       * only contains AST nodes, not elements corresponding to concrete
@@ -188,7 +192,7 @@ trait CommonNode extends Product with SourceLocation {
         }
     }
 
-    class MapEntry(name: String, index: Int, typeAttr: String)
+    private class MapEntry(name: String, index: Int, typeAttr: String)
             extends java.util.Map.Entry[String, Object] {
         private var old: AnyRef = null
         private var value: Object = null
@@ -228,7 +232,7 @@ trait CommonNode extends Product with SourceLocation {
         }
     }
 
-    class TypeEntry(key: String, obj: Object)
+    private class TypeEntry(key: String, obj: Object)
             extends java.util.Map.Entry[String, Object] {
         def getKey = key
         def getValue = baseName(obj.getClass.getName)
@@ -243,6 +247,12 @@ trait CommonNode extends Product with SourceLocation {
             else
                 s.substring(idx + 1)
         }
+    }
+
+    private class MyPosition extends scala.util.parsing.input.Position {
+        def line = startLine
+        def column = startColumn
+        def lineContents = "NOT IMPLEMENTED"
     }
 }
 
