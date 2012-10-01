@@ -1,5 +1,0 @@
-group ExpGenerator;
-
-program() ::= <<
-generated <id>
->>
