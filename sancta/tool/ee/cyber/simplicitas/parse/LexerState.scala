@@ -41,7 +41,7 @@ class LexerState {
     private def top: Int =
         stack(stack.size - 1)
 
-    private def pop {
+    private def pop() {
         stack.remove(stack.size - 1)
     }
 }
