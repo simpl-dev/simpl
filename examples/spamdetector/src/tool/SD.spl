@@ -1,0 +1,8 @@
+grammar ee.cyber.simplicitas.spamdetector.SD;
+
+Program: 'program' Id;
+
+terminal Id: ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')*;
+fragment MlComment: '/*' (~'*' | '*' ~'/')* '*/';
+fragment SlComment: '//' ~('\n'|'\r')*;
+hidden terminal WS: (' '|'\t'|'\r'|'\n'|SlComment|MlComment)+;

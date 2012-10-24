@@ -1,0 +1,5 @@
+group SDGenerator;
+
+program() ::= <<
+generated <id>
+>>

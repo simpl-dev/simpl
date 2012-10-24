@@ -1,0 +1,104 @@
+<!-- ex: se sts=4 sw=4 expandtab: -->
+<project name="spamdetector" default="plugin" basedir=".">
+    <property file="${basedir}/ant.properties"/>
+    <property name="simpl.version" value="1.3.0"/>
+
+    <property name="target" value="${basedir}/target"/>
+    <property name="tool-jar" value="${target}/spamdetector-tool.jar"/>
+    
+    <available file="${maven.repo.local}/simplicitas/mvn-ant/${simpl.version}/mvn-ant-${simpl.version}.xml"
+        property="include_file"
+        value="file://${maven.repo.local}/simplicitas/mvn-ant/${simpl.version}/mvn-ant-${simpl.version}.xml"/>
+    <property name="include_file"
+        value="${maven.repo.remote}/simplicitas/mvn-ant/${simpl.version}/mvn-ant-${simpl.version}.xml"/>
+    <import>
+        <url url="${include_file}"/>
+    </import>
+
+    <target name="tool-deps" depends="copy-mvn-ant,init-dep,require-antlr,require-scala">
+        <antcall target="require">
+            <param name="artifact" value="simplicitas-tool/${simpl.version}"/>
+        </antcall>
+        <loadfile srcfile="${target}/deps" property="tool-deps"/>
+        <path id="tool-deps" path="${tool-deps}"/>
+    </target>
+
+    <target name="plugin-deps" depends="tool-deps">
+        <antcall target="require">
+            <param name="artifact" value="simplicitas-plugin/${simpl.version}"/>
+        </antcall>
+        <loadfile srcfile="${target}/deps" property="plugin-deps"/>
+        <path id="plugin-deps" path="${plugin-deps}"/>
+    </target>
+
+    <target name="tool" depends="tool-deps">
+        <!-- generate grammar -->
+        <taskdef name="grammar" classpathref="tool-deps"
+                 classname="ee.cyber.simplicitas.parse.GrammarTask"/>
+        <grammar src="${basedir}/src/tool/SD.spl"
+                 destdir="${target}/gen/ee/cyber/simplicitas/spamdetector"/>
+
+        <!-- compile sources (together with the generated grammar) -->
+        <mkdir dir="${target}/classes"/>
+        <scalac destdir="${target}/classes" classpathref="tool-deps">
+            <src location="${target}/gen"/>
+            <src location="${basedir}/src/tool"/>
+        </scalac>
+        <javac destdir="${target}/classes" srcdir="${target}/gen" source="1.4"
+               includeantruntime="false" classpathref="tool-deps" encoding="UTF-8"/>
+
+        <!-- create tool jar -->
+        <jar destfile="${tool-jar}" basedir="${target}/classes">
+            <fileset dir="${basedir}/src/tool" includes="*.stg"/>
+        </jar>
+    </target>
+
+    <target name="tool-run" depends="tool-deps">
+        <!-- test run -->
+        <java classname="ee.cyber.simplicitas.spamdetector.SDMain" fork="true">
+            <classpath>
+                <path refid="tool-deps"/>
+                <path location="${tool-jar}"/>
+            </classpath>
+            <arg line="--dest target/test sample.spam"/>
+        </java>
+    </target>
+
+    <!-- generate documentation -->
+    <target name="grammar-doc" depends="tool">
+        <java classname="ee.cyber.simplicitas.ide.SimplMain" fork="true">
+            <classpath>
+                <path refid="tool-deps"/>
+                <path location="${tool-jar}"/>
+            </classpath>
+            <arg line="--dest target/doc src/tool/SD.spl"/>
+        </java>
+    </target>
+    
+    <!-- builds the plugin -->
+    <target name="plugin" depends="plugin-deps,tool">
+        <mkdir dir="${target}/plugin"/>
+        <scalac destdir="${target}/plugin">
+            <src location="${basedir}/src/plugin"/>
+            <classpath>
+                <path refid="plugin-deps"/>
+                <path location="${tool-jar}"/>
+                <fileset dir="${eclipse}/plugins" includes="**/*.jar"/>
+            </classpath>
+        </scalac>
+        <jar destfile="${target}/spamdetector-plugin.jar" basedir="${target}/plugin"
+             manifest="${basedir}/META-INF/MANIFEST.MF">
+            <fileset dir="${basedir}" includes="plugin.xml"/>
+            <!-- Include this if the project starts to contain icons.
+             fileset dir="${basedir}" includes="icons/*"/ -->
+            <zipfileset src="${tool-jar}"/>
+        </jar>
+    </target>
+
+    <target name="clean">
+        <delete dir="${target}"/>
+    </target>
+
+    <target name="build" depends="plugin"/>
+    <target name="rebuild" depends="clean,build"/>
+</project>
