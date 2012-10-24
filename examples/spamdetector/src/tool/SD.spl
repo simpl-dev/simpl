@@ -1,8 +1,43 @@
 grammar ee.cyber.simplicitas.spamdetector.SD;
 
-Program: 'program' Id;
+Program: Item+;
 
-terminal Id: ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')*;
+option Item: Rule | Condition;
+
+Rule: "rule" Name score=Score ":" Expression;
+
+Condition: "condition" name=Id ":" Expression;
+
+option Primitive:
+      Contains
+    | NotContains
+    | Count
+    | ConditionCall
+    | ParenExpression
+    | NotExpression;
+
+Expression: AndExpression ("or" AndExpression)*;
+AndExpression: Primitive ("and" Primitive)*;
+
+ParenExpression: "(" Expression ")";
+NotExpression: "not" Primitive;
+
+Contains: Id "=" Regexp;
+NotContains: Id "!=" Regexp;
+Count: "count" "(" ExprList ")" "=" Num;
+ExprList: Expression ("," ExprList)?;
+ConditionCall: Id;
+
+terminal Regexp: "/" (~"/")* "/" "i"?;
+terminal Score: "-"? Digit+ "." Digit*;
+terminal Num: Digit+;
+terminal Name: '"' (~'"')* '"';
+fragment Digit: '0'..'9';
+
+terminal Id: IdStart IdNext*;
+fragment IdStart: 'a'..'z'|'A'..'Z'|'_';
+fragment IdNext: IdStart|'0'..'9'|'-';
+
 fragment MlComment: '/*' (~'*' | '*' ~'/')* '*/';
 fragment SlComment: '//' ~('\n'|'\r')*;
 hidden terminal WS: (' '|'\t'|'\r'|'\n'|SlComment|MlComment)+;
