@@ -24,11 +24,11 @@ class LexerState {
     def exit(state: Array[Int]) {
         while (!stack.isEmpty) {
             if (state.contains(top)) {
-                pop
+                pop()
                 return
             }
 
-            pop
+            pop()
         }
     }
 
