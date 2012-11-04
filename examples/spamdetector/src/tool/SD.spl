@@ -4,11 +4,11 @@ Program: Item+;
 
 option Item: Rule | Condition;
 
-Rule: "rule" Name score=Score ":" Expression;
+Rule: "rule" Name score=Score ":" expr=OrExpression;
 
-Condition: "condition" name=Id ":" Expression;
+Condition: "condition" name=Id ":" expr=OrExpression;
 
-option Primitive:
+option Primitive returns Expression:
       Contains
     | NotContains
     | Count
@@ -16,17 +16,22 @@ option Primitive:
     | ParenExpression
     | NotExpression;
 
-Expression: AndExpression ("or" AndExpression)*;
-AndExpression: Primitive ("and" Primitive)*;
+OrExpression returns Expression
+    {if (items.length == 1) items.head else _self}
+    : items=AndExpression ("or" items=AndExpression)*;
+AndExpression returns Expression
+    {if (items.length == 1) items.head else _self}
+    : items=Primitive ("and" items=Primitive)*;
 
-ParenExpression: "(" Expression ")";
-NotExpression: "not" Primitive;
+ParenExpression returns Expression {expr}
+    : "(" expr=OrExpression ")";
+NotExpression: "not" expr=Primitive;
 
-Contains: Id "=" Regexp;
-NotContains: Id "!=" Regexp;
-Count: "count" "(" ExprList ")" "=" Num;
-ExprList: Expression ("," ExprList)?;
-ConditionCall: Id;
+Contains: field=Id "=" Regexp;
+NotContains: field=Id "!=" Regexp;
+Count: "count" "(" items=ExprList ")" "=" count=Num;
+ExprList: items=OrExpression ("," items=OrExpression)*;
+ConditionCall: cond=Id;
 
 terminal Regexp: "/" (~"/")* "/" "i"?;
 terminal Score: "-"? Digit+ "." Digit*;
@@ -34,7 +39,7 @@ terminal Num: Digit+;
 terminal Name: '"' (~'"')* '"';
 fragment Digit: '0'..'9';
 
-terminal Id: IdStart IdNext*;
+terminal Id {var ref: Id = null}: IdStart IdNext*;
 fragment IdStart: 'a'..'z'|'A'..'Z'|'_';
 fragment IdNext: IdStart|'0'..'9'|'-';
 
