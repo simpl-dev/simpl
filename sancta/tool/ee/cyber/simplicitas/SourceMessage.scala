@@ -7,6 +7,13 @@ object SourceMessage extends Enumeration {
     val Error = Value("Error")
     val Warning = Value("Warning")
     val Info = Value("Info")
+
+    def error(message: String, location: SourceLocation) =
+        new SourceMessage(message, Error, location)
+    def warning(message: String, location: SourceLocation) =
+        new SourceMessage(message, Warning, location)
+    def info(message: String, location: SourceLocation) =
+        new SourceMessage(message, Info, location)
 }
 
 /** Message about the DSL program. It contains human-readable text
@@ -19,7 +26,7 @@ class SourceMessage(val message: String, val kind: SourceMessage.Value,
         this(message, kind, location.startIndex, location.endIndex,
              location.startLine, location.startColumn)
     }
-  
+
     override def toString() =
         kind + " (" + startLine + ":" + startColumn + "): " + message
 }
