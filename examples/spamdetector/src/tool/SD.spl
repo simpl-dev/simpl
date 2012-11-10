@@ -1,6 +1,6 @@
 grammar ee.cyber.simplicitas.spamdetector.SD;
 
-Program: Item+;
+Program: items=Item+;
 
 option Item: Rule | Condition;
 

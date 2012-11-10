@@ -1,1 +1,8 @@
-program foo
+rule "Subject contains Viagra" 2.0:
+    Subject = /viagra/i
+
+condition from_mydomain: From = /@mydomain.com/
+rule "Business proposal" 1.5:
+	Subject = /business proposal/i
+	and not from_mydomai
+condition from_mydomain: Foo = /bar/
