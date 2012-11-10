@@ -44,8 +44,8 @@ class RuleClass(val name: String, val classType: String, body: String) {
         buf.append(" {\n")
         if (hasParamList) {
             buf.append("    def childrenNames = Array(")
-            buf.append(params.map("\"" + _.name + "\"").mkString(", "));
-            buf.append(");\n")
+            buf.append(params.map("\"" + _.name + "\"").mkString(", "))
+            buf.append(")\n")
         }
         if (body ne null) {
             // Strip the {} marks from beginning and the end.

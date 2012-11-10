@@ -260,11 +260,10 @@ class GrammarGen(pGetPos: (Any) => Option[(String, Int, Int)]) {
     }
 
     private def scalaFileHeader =
-        "package " + grammarPackage + ";\n\n" +
+        "package " + grammarPackage + "\n\n" +
         "import ee.cyber.simplicitas." +
             "{CommonNode, CommonToken, TerminalNode, LiteralNode}\n" +
-        "import ee.cyber.simplicitas.parse." +
-            "{ErrorHandler}\n\n" +
+        "import ee.cyber.simplicitas.parse.ErrorHandler\n\n" +
         stripQuotes(scalaHeader) + "\n\n"
 
     private def tokenKind(buf: StringBuilder) {
