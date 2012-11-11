@@ -6,3 +6,10 @@ rule "Business proposal" 1.5:
 	Subject = /business proposal/i
 	and not from_mydomai
 condition from_mydomain: Foo = /bar/
+
+condition foo: from_mydomain
+condition bar: from_mydomain
+condition baz: foo or baz
+condition bag: bb
+condition bb: cc or foo
+condition cc: bag

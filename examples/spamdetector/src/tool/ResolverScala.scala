@@ -2,12 +2,13 @@ package ee.cyber.simplicitas.spamdetector
 
 import ee.cyber.simplicitas.SourceMessage
 import collection.mutable.ArrayBuffer
+import collection.mutable.Map
 
 import SourceMessage.error
 
 class ResolverScala {
     val errors = ArrayBuffer[SourceMessage]()
-    val conditions = collection.mutable.Map[String, Id]()
+    val conditions = Map[String, Id]()
 
     def resolveReferences(program: Program) {
         errors.clear()
@@ -15,6 +16,7 @@ class ResolverScala {
 
         collectConditions(program)
         doResolve(program)
+        checkCycles(program)
     }
 
     private def collectConditions(program: Program) {
@@ -41,5 +43,44 @@ class ResolverScala {
                 }
             case _ => ()
         }
+    }
+
+    private def checkCycles(program: Program) {
+        val callGraph = getCallGraph(program)
+
+        def check(condToCheck: String, blacklist: Set[String]) {
+            val called = callGraph(condToCheck)
+            val intersect = called & blacklist
+            if (intersect.isEmpty) {
+                called foreach(check(_, blacklist ++ called + condToCheck))
+            } else {
+                errors += error(
+                    "Condition " + condToCheck + " creates endless loop",
+                    conditions(condToCheck))
+            }
+        }
+
+        callGraph.keys foreach (cond => check(cond, Set(cond)))
+    }
+
+    private def getCallGraph(program: Program) = {
+        val calls = Map[String, Set[String]]()
+
+        program.items foreach {
+            case cond @ Condition(Id(name), _) =>
+                calls += name -> getCallSet(cond)
+            case _ => () // No callsets for rules
+        }
+        calls
+    }
+
+    private def getCallSet(condition: Condition) = {
+        var callSet = Set[String]()
+        condition walkTree {
+            case ConditionCall(Id(calledCond)) =>
+                callSet += calledCond
+            case _ => ()
+        }
+        callSet
     }
 }
