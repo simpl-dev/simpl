@@ -19,12 +19,12 @@ class ResolverScala {
 
     private def collectConditions(program: Program) {
         program.items foreach {
-            case Condition(name, _) =>
-                if (conditions contains name.text) {
-                    errors += error(
-                        "Duplicate condition name: " + name.text, name)
+            case Condition(id @ Id(name), _) =>
+                if (conditions contains name) {
+                    errors += error("Duplicate condition name: " +
+                            name, id)
                 } else {
-                    conditions += name.text -> name
+                    conditions += name -> id
                 }
             case _ => () // Do nothing
         }
@@ -32,11 +32,12 @@ class ResolverScala {
 
     private def doResolve(program: Program) {
         program walkTree {
-            case ConditionCall(name) =>
-                if (conditions contains name.text) {
-                    name.ref = conditions(name.text)
+            case ConditionCall(id @ Id(name)) =>
+                if (conditions contains name) {
+                    id.ref = conditions(name)
                 } else {
-                    errors += error("Condition not found: " + name.text, name)
+                    errors += error("Condition not found: " +
+                            name, id)
                 }
             case _ => ()
         }
