@@ -46,7 +46,7 @@ class ResolverScala {
     }
 
     private def checkCycles(program: Program) {
-        val callGraph = getCallGraph(program)
+        val callGraph = callGraph(program)
 
         def check(condToCheck: String, blacklist: Set[String]) {
             val called = callGraph(condToCheck)
@@ -63,24 +63,24 @@ class ResolverScala {
         callGraph.keys foreach (cond => check(cond, Set(cond)))
     }
 
-    private def getCallGraph(program: Program) = {
+    private def callGraph(program: Program) = {
         val calls = Map[String, Set[String]]()
 
         program.items foreach {
             case cond @ Condition(Id(name), _) =>
-                calls += name -> getCallSet(cond)
+                calls += name -> callSet(cond)
             case _ => () // No callsets for rules
         }
         calls
     }
 
-    private def getCallSet(condition: Condition) = {
-        var callSet = Set[String]()
+    private def callSet(condition: Condition) = {
+        var calls = Set[String]()
         condition walkTree {
             case ConditionCall(Id(calledCond)) =>
-                callSet += calledCond
+                calls += calledCond
             case _ => ()
         }
-        callSet
+        calls
     }
 }

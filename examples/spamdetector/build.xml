@@ -19,6 +19,10 @@
         <antcall target="require">
             <param name="artifact" value="simplicitas-tool/${simpl.version}"/>
         </antcall>
+		<antcall target="require">
+			<param name="group" value="com/googlecode/kiama"/>
+			<param name="artifact" value="kiama_2.9.2/1.3.0"/>
+		</antcall>
         <loadfile srcfile="${target}/deps" property="tool-deps"/>
         <path id="tool-deps" path="${tool-deps}"/>
     </target>
