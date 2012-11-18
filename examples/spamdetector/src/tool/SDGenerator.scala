@@ -6,10 +6,10 @@ class SDGenerator(destDir: String)
         extends GeneratorBase(destDir) {
     val templates = getTemplates("SD.stg")
 
-    def generate(tree: Program) {
-        val args = tree.toJavaMap()
+    def generate(program: Program) {
+        val args = program.toJavaMap("nType")
         writeFile("GeneratedProgram.java",
-            templates.getInstanceOf("program", args))
+                templates.getInstanceOf("program", args))
     }
 }
 
@@ -24,6 +24,8 @@ object SDMain extends MainBase {
             val resolver = new ResolverScala
             resolver.resolveReferences(grammar.tree)
             checkErrors(resolver.errors)
+
+            new SDGenerator(destDir).generate(grammar.tree)
         }
     }
 }

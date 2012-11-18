@@ -1,5 +1,48 @@
 group SDGenerator;
 
-program() ::= <<
-generated <id>
+program() ::= "<detectorClass(...)>"
+
+detectorClass() ::= <<
+class Foobar {
+    <items:{itm | <(defName())(itm)>}>
+
+    public void run() {
+        <items:{itm | <(runName())(itm)>}>
+    }
+}
 >>
+
+defName() ::= "<itm.nType>Definition"
+
+ConditionDefinition(cond) ::= <<
+private boolean <cond.name.text>() {
+    return <expression(cond.expr)>;
+}
+>>
+RuleDefinition(rule) ::= ""
+
+runName() ::= "<itm.nType>Run"
+
+RuleRun(rule) ::=
+<<if (<expression(rule.expr)>) {
+    addMatch(<rule.name.text>, <rule.score.text>);
+}
+
+>>
+ConditionRun(def) ::= ""
+
+expression(expr) ::= "<(expr.nType)(expr)>"
+
+OrExpression(expr) ::=
+    "<expr.items:expression(); separator=\" || \">"
+AndExpression(expr) ::=
+    "<expr.items:expression(); separator=\" && \">"
+ConditionCall(expr) ::= "<expr.cond.text>()"
+Contains(expr) ::=
+    <<fieldContains("<expr.field.text>", "<expr.regexp.text>")>>
+NotContains(expr) ::=
+    <<!fieldContains("<expr.field.text>", "<expr.regexp.text>")>>
+NotExpression(expr) ::= "!(<expression(expr.expr)>)"
+Count(expr) ::=
+"countOf(new boolean[] {<exprList(expr.items)>}) == <expr.count.text>"
+exprList(lst) ::= "< lst.items:expression(); separator=\", \">"

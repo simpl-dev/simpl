@@ -46,10 +46,10 @@ class ResolverScala {
     }
 
     private def checkCycles(program: Program) {
-        val callGraph = callGraph(program)
+        val graph = callGraph(program)
 
         def check(condToCheck: String, blacklist: Set[String]) {
-            val called = callGraph(condToCheck)
+            val called = graph(condToCheck)
             val intersect = called & blacklist
             if (intersect.isEmpty) {
                 called foreach(check(_, blacklist ++ called + condToCheck))
@@ -60,7 +60,7 @@ class ResolverScala {
             }
         }
 
-        callGraph.keys foreach (cond => check(cond, Set(cond)))
+        graph.keys foreach (cond => check(cond, Set(cond)))
     }
 
     private def callGraph(program: Program) = {
