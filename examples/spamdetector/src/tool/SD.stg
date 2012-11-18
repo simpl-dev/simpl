@@ -3,7 +3,7 @@ group SDGenerator;
 program() ::= "<detectorClass(...)>"
 
 detectorClass() ::= <<
-class Foobar {
+class Detector extends DetectorBase {
     <items:{itm | <(defName())(itm)>}>
 
     public void run() {

@@ -25,6 +25,7 @@ object SDMain extends MainBase {
             resolver.resolveReferences(grammar.tree)
             checkErrors(resolver.errors)
 
+            println(CodegenPP.toString(grammar.tree))
             new SDGenerator(destDir).generate(grammar.tree)
         }
     }
