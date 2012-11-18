@@ -1,6 +1,7 @@
 package ee.cyber.simplicitas.spamdetector
 
 import ee.cyber.simplicitas.{GeneratorBase, MainBase}
+import java.io.FileWriter
 
 class SDGenerator(destDir: String)
         extends GeneratorBase(destDir) {
@@ -25,8 +26,14 @@ object SDMain extends MainBase {
             resolver.resolveReferences(grammar.tree)
             checkErrors(resolver.errors)
 
-            println(CodegenPP.toString(grammar.tree))
             new SDGenerator(destDir).generate(grammar.tree)
+            generatePretty(grammar.tree)
         }
+    }
+
+    def generatePretty(program: Program) {
+        val writer = new FileWriter(destDir + "/GeneratedPretty.java")
+        CodegenPP.prettyPrint(program, writer)
+        writer.close()
     }
 }
