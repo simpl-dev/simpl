@@ -17,8 +17,8 @@ object CodegenPP {
 
     private def prettyPrint(program: Program): Doc =
         "class Detector extends DetectorBase {" :#:
-            indent(hcat(program.items map itemDef)) :#:
             indent(
+                hcat(program.items map itemDef) :#:
                 "public void run() {" :#:
                     indent(hcat(program.items map itemCall)) :#:
                 text("}")) :#:
