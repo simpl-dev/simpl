@@ -27,15 +27,15 @@ object CodegenPP {
     private def itemDef(item: Item) = item match {
         case Condition(Id(name), expr) =>
             "private boolean" :+: name :: "() {" :#:
-                indent(hang(8, "return" :+: prettyPrint(expr) :: ";")) :#:
+                indent(hang(4, "return" :+: prettyPrint(expr) :: ";")) :#:
             "}" :: line
         case _ => empty
     }
 
     private def itemCall(item: Item) = item match {
         case Rule(Name(name), Score(score), expr) =>
-            hang(8, "if" :+: parens(prettyPrint(expr)) :+: "{") :#:
-                indent("addMatch(" :: name ::"," :+: score :: ");") :#:
+            hang(4, "if" :+: parens(prettyPrint(expr)) :+: "{") :#:
+                indent(hang(4, "addMatch(" :: name ::"," :|: score :: ");")) :#:
             "}" :: line
         case _ => empty
     }
@@ -45,15 +45,18 @@ object CodegenPP {
         case AndExpression(items) => withOperator(" && ", items)
         case ConditionCall(Id(name)) => text(name) :: text("()")
         case Contains(Id(field), Regexp(regexp)) =>
-            "fieldContains" :: parens(field :: comma :+: text(regexp))
+            hang(4, "fieldContains" :: parens(softbreak :: field :: comma :|:
+                    text(regexp)))
         case NotContains(Id(field), Regexp(regexp)) =>
-            "!fieldContains" :: parens(field :: comma :+: text(regexp))
+            hang(4, "!fieldContains" :: parens(softbreak :: field :: comma :|:
+                    text(regexp)))
         case NotExpression(expr) => "!" :: parens(prettyPrint(expr))
         case Count(ExprList(items), Num(count)) =>
-            "countOf" ::
-                    parens("new boolean[]" :+:
-                        braces(withCommas(items map prettyPrint))) :+:
-                "=" :+: text(count)
+            hang(4, "countOf" ::
+                    hang(4, parens("new boolean[]" :+:
+                        braces(softbreak ::
+                                withCommas(items map prettyPrint)))) :+:
+                    "=" :+: text(count))
         case _ => empty
     }
 
