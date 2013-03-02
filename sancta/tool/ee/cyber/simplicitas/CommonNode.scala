@@ -16,7 +16,7 @@ trait SourceLocation {
     def endIndex: Int
 
     /** Length of the textual representation of this node. */
-    def length = endIndex - startIndex
+    def length = endIndex - startIndex + 1
 
     /** Source line that contains beginning of this node. */
     def startLine: Int
