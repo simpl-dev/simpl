@@ -39,7 +39,7 @@ class GrammarGen(pGetPos: (Any) => Option[(String, Int, Int)]) {
     /** Header for generated Scala code. */
     private var scalaHeader = ""
 
-    private val inheritTrait = new ArrayBuffer[String];
+    private val inheritTrait = new ArrayBuffer[String]
 
     /** Name of the first grammar rule. This will become top-level
      * node in the AST. */
@@ -93,35 +93,46 @@ class GrammarGen(pGetPos: (Any) => Option[(String, Int, Int)]) {
     }
 
     /** Adds rule to symbol table. */
-    private def addRule(fileName: String)(rule: Any) = rule match {
-        case "terminal" :: "hidden" :: (name: String) :: rest =>
-            checkDuplicates(fileName, name, rule)
-            rules(name) = new TerminalRule(name, true, rest, Symbols)
-            ruleSource(name) = fileName
-        case "terminal" :: (name: String) :: rest =>
-            checkDuplicates(fileName, name, rule)
-            rules(name) = new TerminalRule(name, false, rest, Symbols)
-            ruleSource(name) = fileName
-        case "fragment" :: (name: String) :: rest =>
-            checkDuplicates(fileName, name, rule)
-            rules(name) = new FragmentRule(name, rest, Symbols)
-            ruleSource(name) = fileName
-        case "option" :: (name: String) :: rest =>
-            checkDuplicates(fileName, name, rule)
-            rules(name) = new OptionRule(name, rest, Symbols)
-            ruleSource(name) = fileName
-            if (firstRule eq null) {
-                firstRule = name
-            }
-        case ":" :: (name: String) :: rest =>
-            checkDuplicates(fileName, name, rule)
-            rules(name) = new NormalRule(name, rest, Symbols)
-            ruleSource(name) = fileName
-            if (firstRule eq null) {
-                firstRule = name
-            }
-        case _ =>
-            error(rule, "Malformed rule")
+    private def addRule(fileName: String)(rule: Any) {
+        def doAdd(name: String, rule: Rule) {
+            // We first remove the old (imported) rule that is rewritten
+            // This ensures that the rules are ordered logically --
+            // first, the imported rules and then the rules from the
+            // importing grammar
+            rules.remove(name)
+            rules(name) = rule
+        }
+
+        rule match {
+            case "terminal" :: "hidden" :: (name: String) :: rest =>
+                checkDuplicates(fileName, name, rule)
+                doAdd(name, new TerminalRule(name, true, rest, Symbols))
+                ruleSource(name) = fileName
+            case "terminal" :: (name: String) :: rest =>
+                checkDuplicates(fileName, name, rule)
+                doAdd(name, new TerminalRule(name, false, rest, Symbols))
+                ruleSource(name) = fileName
+            case "fragment" :: (name: String) :: rest =>
+                checkDuplicates(fileName, name, rule)
+                doAdd(name, new FragmentRule(name, rest, Symbols))
+                ruleSource(name) = fileName
+            case "option" :: (name: String) :: rest =>
+                checkDuplicates(fileName, name, rule)
+                doAdd(name, new OptionRule(name, rest, Symbols))
+                ruleSource(name) = fileName
+                if (firstRule eq null) {
+                    firstRule = name
+                }
+            case ":" :: (name: String) :: rest =>
+                checkDuplicates(fileName, name, rule)
+                doAdd(name, new NormalRule(name, rest, Symbols))
+                ruleSource(name) = fileName
+                if (firstRule eq null) {
+                    firstRule = name
+                }
+            case _ =>
+                error(rule, "Malformed rule")
+        }
     }
 
     private def checkDuplicates(fileName: String, rule: String, node: Any) {
@@ -443,5 +454,5 @@ class GrammarGen(pGetPos: (Any) => Option[(String, Int, Int)]) {
         ""
     else
         "    LexerState __lexerState = new LexerState();") +
-    "}"
+    "}\n"
 }
