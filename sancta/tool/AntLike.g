@@ -41,11 +41,12 @@ ruleDef:
     | 'option'^ ID body? returnType? ':'! ID ('|'! ID)* ';'!
     | ID body? returnType? ':'^ altList ';'!;
 
-stateOp     : enterState | exitState | checkAll | checkAny;
+stateOp     : enterState | exitState | checkAll | checkAny | checkNone;
 enterState  : 'enter-state'^ '('! ID (','! ID)* ')'!;
 exitState   : 'exit-state'^ '('! ID (','! ID)* ')'!;
 checkAll    : 'check-all'^ '('! ID (','! ID)* ')'!;
 checkAny    : 'check-any'^ '('! ID (','! ID)* ')'!;
+checkNone   : 'check-none'^ '('! ID (','! ID)* ')'!;
 body        : CODE -> ^(BODY CODE);
 returnType  : 'returns'^ dottedId? body?;
 altList     : matchList ('|'! matchList)*;

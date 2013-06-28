@@ -38,6 +38,9 @@ class LexerState {
     def checkAny(state: Array[Int]) =
         state.exists(stack.contains)
 
+    def checkNone(state: Array[Int]) =
+        !checkAny(state)
+
     private def top: Int =
         stack(stack.size - 1)
 

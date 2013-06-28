@@ -14,6 +14,7 @@ case class EnterState(s: List[Int]) extends StateOp("enter", s)
 case class ExitState(s: List[Int]) extends StateOp("exit", s)
 case class CheckAll(s: List[Int]) extends StateOp("checkAll", s)
 case class CheckAny(s: List[Int]) extends StateOp("checkAny", s)
+case class CheckNone(s: List[Int]) extends StateOp("checkNone", s)
 
 /** Base class for terminal and fragment, but not for literal rules.
  * Such is life. */
@@ -65,16 +66,23 @@ abstract class TerminalFragment(pName: String, pTree: List[Any],
             case ("check-all" :: states) :: rest =>
                 if (getCheckOp != None) {
                     error(node.head,
-                        "Duplicated check-any or check-all directive")
+                        "Duplicated check-any, check-all or check-none directive")
                 }
                 stateOps += CheckAll(states.map(stateIndex))
                 loop(rest)
             case ("check-any" :: states) :: rest =>
                 if (getCheckOp != None) {
                     error(node.head,
-                        "Duplicated check-any or check-all directive")
+                        "Duplicated check-any, check-all or check-none directive")
                 }
                 stateOps += CheckAny(states.map(stateIndex))
+                loop(rest)
+            case ("check-none" :: states) :: rest =>
+                if (getCheckOp != None) {
+                    error(node.head,
+                        "Duplicated check-any, check-all or check-none directive")
+                }
+                stateOps += CheckNone(states.map(stateIndex))
                 loop(rest)
             case _ =>
                 node
@@ -157,7 +165,7 @@ abstract class TerminalFragment(pName: String, pTree: List[Any],
     private def getCheckOp =
         stateOps.find(
             (o: StateOp) => o match {
-                case CheckAny(_) | CheckAll(_) => true
+                case CheckAny(_) | CheckAll(_) | CheckNone(_) => true
                 case _ => false
             })
 
