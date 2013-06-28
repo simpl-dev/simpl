@@ -1,0 +1,27 @@
+grammar ee.cyber.simplicitas.spamdetector.lexerstates.LS;
+
+// Import the base grammar
+import "SD.spl";
+
+// Declare the lexer state
+lexer-states (filenameAllowed)
+
+// Add call to Include rule
+Program: Include* Item+;
+
+Include: IncludeStart Filename;
+
+// Keyword 'include' triggers state filenameAllowed
+terminal IncludeStart
+    enter-state(filenameAllowed)
+    : 'include';
+
+// Filename is only applicable in state fileNameAllowed and
+// also it exits this state
+terminal Filename
+    check-any(filenameAllowed)
+    exit-state(filenameAllowed)
+    : ('a'..'z'|'A'..'Z'|'0'..'9'|'_'|'-'|'/'|'.')+;
+
+// Identifiers must have lower priority than "include" keyword
+terminal Id: IdStart IdNext*;

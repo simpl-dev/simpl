@@ -5,7 +5,7 @@
 
     <property name="target" value="${basedir}/target"/>
     <property name="tool-jar" value="${target}/spamdetector-tool.jar"/>
-    
+
     <available file="${maven.repo.local}/simplicitas/mvn-ant/${simpl.version}/mvn-ant-${simpl.version}.xml"
         property="include_file"
         value="file://${maven.repo.local}/simplicitas/mvn-ant/${simpl.version}/mvn-ant-${simpl.version}.xml"/>
@@ -41,6 +41,8 @@
                  classname="ee.cyber.simplicitas.parse.GrammarTask"/>
         <grammar src="${basedir}/src/tool/SD.spl"
                  destdir="${target}/gen/ee/cyber/simplicitas/spamdetector"/>
+        <grammar src="${basedir}/src/tool/LexerStates.spl"
+                 destdir="${target}/gen/ee/cyber/simplicitas/spamdetector"/>
 
         <!-- compile sources (together with the generated grammar) -->
         <mkdir dir="${target}/classes"/>
@@ -68,6 +70,17 @@
         </java>
     </target>
 
+    <target name="lexerstates-run" depends="tool-deps">
+        <!-- test run -->
+        <java classname="ee.cyber.simplicitas.spamdetector.lexerstates.LexerStatesMain" fork="true">
+            <classpath>
+                <path refid="tool-deps"/>
+                <path location="${tool-jar}"/>
+            </classpath>
+            <arg line="--dest target/test sample-lexerstates.spam"/>
+        </java>
+    </target>
+
     <!-- generate documentation -->
     <target name="grammar-doc" depends="tool">
         <java classname="ee.cyber.simplicitas.ide.SimplMain" fork="true">
@@ -78,7 +91,7 @@
             <arg line="--dest target/doc src/tool/SD.spl"/>
         </java>
     </target>
-    
+
     <!-- builds the plugin -->
     <target name="plugin" depends="plugin-deps,tool">
         <mkdir dir="${target}/plugin"/>

@@ -1,0 +1,21 @@
+include foo
+include foo/bar/baz.spam
+
+
+rule "Subject contains Viagra" 2.0:
+    Subject = /viagra/i
+
+condition from_mydomain: From = /@mydomain.com/
+rule "Business proposal" 1.5:
+	Subject = /business proposal/i
+	and not from_mydomain
+
+rule "foobar" 3.0: count(from_mydomain, Foo = /bar/) = 2
+//condition from_mydomain: Foo = /bar/
+
+//condition foo: from_mydomain
+//condition bar: from_mydomain
+//condition baz: foo or baz
+//condition bag: bb
+//condition bb: cc or foo
+//condition cc: bag
