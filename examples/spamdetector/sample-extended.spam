@@ -1,0 +1,6 @@
+rule "Subject contains Viagra" 2.0:
+    Subject = /viagra/i
+
+rule "Random spamness" 1.0:
+    Subject = /spam/ and
+	random 20

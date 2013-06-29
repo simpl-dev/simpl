@@ -1,7 +1,7 @@
 grammar ee.cyber.simplicitas.spamdetector.lexerstates.LS;
 
 // Import the base grammar
-import "SD.spl";
+import "SDplain.spl";
 
 // Declare the lexer state
 lexer-states (filenameAllowed)

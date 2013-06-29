@@ -1,0 +1,16 @@
+grammar ee.cyber.simplicitas.spamdetector.extended.SDExtended;
+
+import "SDplain.spl";
+
+Program: Item+;
+
+option Primitive:
+      Contains
+    | NotContains
+    | Count
+    | ConditionCall
+    | ParenExpression
+    | NotExpression
+    | Random;
+
+Random: "random" Num;

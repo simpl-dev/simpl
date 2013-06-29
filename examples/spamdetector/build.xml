@@ -43,6 +43,8 @@
                  destdir="${target}/gen/ee/cyber/simplicitas/spamdetector"/>
         <grammar src="${basedir}/src/tool/LexerStates.spl"
                  destdir="${target}/gen/ee/cyber/simplicitas/spamdetector"/>
+        <grammar src="${basedir}/src/tool/SDExtended.spl"
+                 destdir="${target}/gen/ee/cyber/simplicitas/spamdetector"/>
 
         <!-- compile sources (together with the generated grammar) -->
         <mkdir dir="${target}/classes"/>
@@ -78,6 +80,17 @@
                 <path location="${tool-jar}"/>
             </classpath>
             <arg line="--dest target/test sample-lexerstates.spam"/>
+        </java>
+    </target>
+
+    <target name="extended-run" depends="tool-deps">
+        <!-- test run -->
+        <java classname="ee.cyber.simplicitas.spamdetector.extended.ExtendedMain" fork="true">
+            <classpath>
+                <path refid="tool-deps"/>
+                <path location="${tool-jar}"/>
+            </classpath>
+            <arg line="--dest target/test sample-extended.spam"/>
         </java>
     </target>
 
