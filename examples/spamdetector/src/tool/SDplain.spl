@@ -1,0 +1,48 @@
+grammar ee.cyber.simplicitas.spamdetector.SD;
+
+Program: items=Item+;
+
+option Item: Rule | Condition;
+
+Rule: "rule" Name score=Score ":" expr=OrExpression;
+
+Condition: "condition" name=Id ":" expr=OrExpression;
+
+option Primitive returns Expression:
+      Contains
+    | NotContains
+    | Count
+    | ConditionCall
+    | ParenExpression
+    | NotExpression;
+
+OrExpression returns Expression
+    {if (items.length == 1) items.head else _self}
+    : items=AndExpression ("or" items=AndExpression)*;
+AndExpression returns Expression
+    {if (items.length == 1) items.head else _self}
+    : items=Primitive ("and" items=Primitive)*;
+
+ParenExpression returns Expression {expr}
+    : "(" expr=OrExpression ")";
+NotExpression: "not" expr=Primitive;
+
+Contains: field=Id "=" Regexp;
+NotContains: field=Id "!=" Regexp;
+Count: "count" "(" items=ExprList ")" "=" count=Num;
+ExprList: items=OrExpression ("," items=OrExpression)*;
+ConditionCall: cond=Id;
+
+terminal Regexp: "/" (~"/")* "/" "i"?;
+terminal Score: "-"? Digit+ "." Digit*;
+terminal Num: Digit+;
+terminal Name: '"' (~'"')* '"';
+fragment Digit: '0'..'9';
+
+terminal Id {var ref: Id = null}: IdStart IdNext*;
+fragment IdStart: 'a'..'z'|'A'..'Z'|'_';
+fragment IdNext: IdStart|'0'..'9'|'-';
+
+fragment MlComment: '/*' (~'*' | '*' ~'/')* '*/';
+fragment SlComment: '//' ~('\n'|'\r')*;
+hidden terminal WS: (' '|'\t'|'\r'|'\n'|SlComment|MlComment)+;
