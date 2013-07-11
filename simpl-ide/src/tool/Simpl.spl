@@ -15,7 +15,7 @@ GrammarDef:
 PackageDef: 'grammar' DottedId;
 
 /** Import directive. Includes given file as part of grammar. */
-ImportFile: "import" Str ";";
+ImportFile: "import" filename=Str ";";
 
 /** This directive can be used to pass grammar-level options to ANTLR. */
 OptionList: "options" "(" (name=Id "=" value=Id ";")* ")";

@@ -2,12 +2,12 @@
 
 package ee.cyber.simplicitas.ide
 
+import java.io.File
 import ee.cyber.simplicitas._
+import parse.GrammarUtils
 
 class SimplCtx(val grammar: SimplGrammar) {
     import collection.mutable.{Map, ArrayBuffer}
-
-    val tree = grammar.tree
 
     val nonTerms = Map[String, RuleDef]()
     val options = Map[String, RuleDef]()
@@ -16,12 +16,35 @@ class SimplCtx(val grammar: SimplGrammar) {
 
     var errors = new ArrayBuffer[SourceMessage]()
 
-    makeSymbolTable()
+    makeSymbolTable(grammar.tree)
 
-    readDocComments()
+    readDocComments(grammar.tree)
 
-    def makeSymbolTable() {
+    def makeSymbolTable(tree: GrammarDef) {
+        tree.imports foreach resolveImport
         tree.rules foreach makeSymbolTable
+    }
+
+    private def resolveImport(importNode: ImportFile) {
+        val importedFrom = new File(grammar.grammarFile)
+        val baseDir = importedFrom.getAbsoluteFile.getParent
+        val fullPath = baseDir + "/" +
+                GrammarUtils.stripQuotes(importNode.filename.text)
+
+        val tree = readContents(fullPath)
+        if (tree ne null) {
+            makeSymbolTable(tree)
+            readDocComments(tree)
+        }
+    }
+
+    private def readContents(path: String) = {
+        val grammar = new SimplGrammar()
+        grammar.parseFile(path)
+        if (grammar.errors.isEmpty)
+            grammar.tree
+        else
+            null
     }
 
     def makeSymbolTable(r: RuleDef) {
@@ -36,7 +59,7 @@ class SimplCtx(val grammar: SimplGrammar) {
     def getDocContent(str: String) =
         str.substring(3, str.length - 2).trim
 
-    def readDocComments() {
+    def readDocComments(tree: GrammarDef) {
         val docComments = getComments
         for (rule <- tree.rules) {
             if (docComments.contains(rule.startIndex)) {

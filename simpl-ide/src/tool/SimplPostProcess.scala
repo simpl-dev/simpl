@@ -8,7 +8,7 @@ import ee.cyber.simplicitas.parse.NamingService
 class SimplPostProcess(val ctx: SimplCtx) {
     def validate() {
         // Resolve links in program.
-        ctx.tree.walkTree(resolve)
+        ctx.grammar.tree.walkTree(resolve)
     }
 
     def uncapitalize(s: String): String =
