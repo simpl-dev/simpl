@@ -3,7 +3,6 @@
 package ee.cyber.simplicitas.parse
 
 import java.io.{OutputStreamWriter, FileOutputStream, File, IOException}
-import java.util.IdentityHashMap
 
 import org.antlr.runtime._
 import org.antlr.runtime.tree._
@@ -50,12 +49,13 @@ class GrammarParser(baseDir: String, encoding: String) {
 
     private def convertTree(fileName: String, t: BaseTree,
                             a: ArrayBuffer[Object]) {
-        def addChildren(t: BaseTree, a: ArrayBuffer[Object]) =
+        def addChildren(t: BaseTree, a: ArrayBuffer[Object]) {
             for (i <- 0 to t.getChildCount - 1) {
                 convertTree(fileName, (t getChild i).asInstanceOf[BaseTree], a)
             }
+        }
 
-        if (t isNil) {
+        if (t.isNil) {
             addChildren(t, a)
         } else if (t.getChildCount == 0) {
             val id = t.toString
@@ -77,7 +77,7 @@ class GrammarParser(baseDir: String, encoding: String) {
         convertTree(fileName, t, result)
         result.toList match {
             case List(tree: Object) => tree
-            case tree => tree
+            case otherTree => otherTree
         }
     }
 
@@ -177,7 +177,7 @@ object Generate {
     def usage() {
         Console.err printf
             "Usage:\nGenerate -in <grammar file> [-dir <output directory>]\n"
-        exit(1)
+        sys.exit(1)
     }
 }
 
@@ -201,7 +201,7 @@ class GrammarTask extends org.apache.tools.ant.Task {
             throw new BuildException("destDir attribute is missing")
         log("Generating parser from " + src + " to " + destDir)
         try {
-            new File(destDir) mkdirs
+            new File(destDir).mkdirs()
         } catch {
             case e: IOException =>
                 throw new BuildException(destDir + ": " + e.getMessage)

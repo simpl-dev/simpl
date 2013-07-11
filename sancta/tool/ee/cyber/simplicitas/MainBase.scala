@@ -3,7 +3,6 @@
 package ee.cyber.simplicitas
 
 import collection.mutable.ArrayBuffer
-import ee.cyber.simplicitas.parse._
 
 /** Base class for DSL generator main program. It is responsible for
   * processing command-line options and contains useful functions, e.g.,
@@ -57,7 +56,7 @@ class MainBase {
      if (!errors.isEmpty) {
         Console.err.println("Messages")
         errors foreach (Console.err.println)
-        exit(1)
+        sys.exit(1)
       }
    }
 
@@ -70,6 +69,6 @@ class MainBase {
   def usage() {
     Console.err.println(
       "Usage: Main [--dest <target directory>] <source files> [-- <generator options>]")
-    exit(2)
+    sys.exit(2)
   }
 }
