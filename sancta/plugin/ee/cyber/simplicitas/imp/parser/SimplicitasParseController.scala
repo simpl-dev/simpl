@@ -8,9 +8,8 @@ import org.eclipse.imp.model.ISourceProject
 import org.eclipse.imp.parser.{IParseController,
                                SimpleAnnotationTypeInfo,
                                IMessageHandler}
-import org.eclipse.imp.services.{IAnnotationTypeInfo, ILanguageSyntaxProperties}
-import org.eclipse.imp.language.{Language, LanguageRegistry}
-import org.eclipse.imp.utils.Pair
+import org.eclipse.imp.services.ILanguageSyntaxProperties
+import org.eclipse.imp.language.Language
 
 import org.eclipse.core.runtime.{IProgressMonitor, IPath}
 import org.eclipse.jface.text.IRegion
@@ -23,13 +22,13 @@ class SimplicitasParseController(language: Language,
                                  config: APluginConfig)
         extends IParseController {
   lazy final val getAnnotationTypeInfo = new SimpleAnnotationTypeInfo()
-  lazy val getSyntaxProperties: ILanguageSyntaxProperties = 
+  lazy val getSyntaxProperties: ILanguageSyntaxProperties =
     new ILanguageSyntaxProperties() {
       def getSingleLineCommentPrefix: String = config.singleLineCommentPrefix
       def getBlockCommentStart: String = null
       def getBlockCommentContinuation: String = null
       def getBlockCommentEnd: String = null
-      def getFences: Array[Array[String]] = 
+      def getFences: Array[Array[String]] =
         for ((x, y) <- config.fences)
           yield Array(x, y)
       def getIdentifierConstituentChars: String = null
@@ -42,12 +41,12 @@ class SimplicitasParseController(language: Language,
   var project: ISourceProject = null
   var handler: IMessageHandler = null
   var tokens: SortedMap[Int, GenericToken] = null
-  
+
   var grammar: GenericGrammar = null
 
   def initialize(path: IPath,
                  project: ISourceProject,
-                 handler: IMessageHandler) = {
+                 handler: IMessageHandler) {
     this.path = path
     this.project = project
     this.handler = handler
@@ -55,22 +54,22 @@ class SimplicitasParseController(language: Language,
     this.grammar = null
     println("INITIALIZE CALLED, handler = " + handler)
   }
-  
-  def getPath() = path
-  def getProject() = project
-  
+
+  def getPath = path
+  def getProject = project
+
   def getTokenIterator(region: IRegion): Iterator[GenericToken] = {
-    val m = tokens.headMap(region.getOffset() + 1)
-    if (m.isEmpty()) {
+    val m = tokens.headMap(region.getOffset + 1)
+    if (m.isEmpty) {
         println("getTokenIterator: no tokens available")
         return Collections.emptySet().iterator()
     }
     new ArrayList[GenericToken](
       tokens.subMap(m.lastKey(),
-                    region.getOffset() + region.getLength()).values).iterator
+                    region.getOffset + region.getLength).values).iterator
   }
 
-  def getCurrentAst() =
+  def getCurrentAst =
     if (grammar hasTree)
         grammar.tree
     else
@@ -111,16 +110,15 @@ class SimplicitasParseController(language: Language,
 
   def getTokenAt(offset: Int): GenericToken = {
     val head = tokens.headMap(offset + 1)
-    
+
     if (head.isEmpty) {
       // empty file
       return null
     }
     val token = head.get(head.lastKey)
-    if (token.startIndex <= offset && token.endIndex >= offset) {
-      return token
-    } else {
-      return null
-    }
+    if (token.startIndex <= offset && token.endIndex >= offset)
+      token
+    else
+      null
   }
 }

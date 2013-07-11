@@ -49,8 +49,6 @@ class RuleParam(val name: String, val rule: String,
  * The main work is done in subclasses of Rule.
  *
  * @param name Name of the rule.
- * @param tree
- * @param symbols
  */
 abstract class Rule(val name: String, var tree: List[Any],
                     symbols: SymbolTable) {
@@ -98,8 +96,8 @@ abstract class Rule(val name: String, var tree: List[Any],
             arg match {
                 case rt: String =>
                     returnType = rt
-                case List("BODY", body) =>
-                    returnCode = body.toString
+                case List("BODY", returnBody) =>
+                    returnCode = returnBody.toString
                 case _ =>
                     ()
             }
@@ -127,7 +125,7 @@ abstract class Rule(val name: String, var tree: List[Any],
 
     /** Analyse the rule body to find all the calls to other rules.
      * The concrete implementation depends on the type of rule. */
-    protected def collectParams(): Unit
+    protected def collectParams()
 
     /** Generate RuleClass objects and insert them to the symbol table.
      * This includes also modifications to existing classes (e.g., adding
