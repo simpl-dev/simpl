@@ -5,7 +5,6 @@ package ee.cyber.simplicitas
 import org.antlr.runtime._
 import java.io.InputStream
 import java.io.Reader
-import collection.mutable.ArrayBuffer
 
 /** Provides access to DSL grammar. In general, all the grammar-related
   * classes are automatically generated. */
@@ -26,22 +25,29 @@ abstract class GenericGrammar {
     /** Returns all the known keywords in this language. */
     def keywords: Seq[String]
 
+    /** Name of the file that contained the parsed program. */
+    def grammarFile: String
+
     /** Read DSL program from file and parse to syntax tree. */
-    def parseFile(filename: String) =
-        parse(new ANTLRFileStream(filename))
+    def parseFile(filename: String) {
+        parse(new ANTLRFileStream(filename), filename)
+    }
 
     /** Read DSL program from string and parse to syntax tree. */
-    def parseString(source: String) =
-        parse(new ANTLRStringStream(source))
+    def parseString(source: String, filename: String = null) {
+        parse(new ANTLRStringStream(source), filename)
+    }
 
     /** Read DSL program and parse to syntax tree. */
-    def parse(source: InputStream): Unit =
-        parse(new ANTLRInputStream(source))
+    def parseInputStream(source: InputStream, filename: String = null) {
+        parse(new ANTLRInputStream(source), filename)
+    }
 
     /** Read DSL program and parse to syntax tree. */
-    def parse(source: Reader): Unit =
-        parse(new ANTLRReaderStream(source))
+    def parseReader(source: Reader, filename: String = null) {
+        parse(new ANTLRReaderStream(source), filename)
+    }
 
     /** Read DSL program and parse to syntax tree. */
-    def parse(source: CharStream): Unit
+    def parse(source: CharStream, filename: String)
 }

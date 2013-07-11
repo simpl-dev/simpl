@@ -4,8 +4,6 @@ package ee.cyber.simplicitas.parse
 
 import org.antlr.runtime.{CharStream, TokenSource, TokenStream,
                           CommonTokenStream, RecognitionException}
-import java.io.InputStream
-import java.io.Reader
 import collection.mutable.ArrayBuffer
 import ee.cyber.simplicitas._
 
@@ -16,6 +14,7 @@ abstract class GrammarBase[Node <: CommonNode, Kind]
     private var tokenList: Array[CommonToken[Kind]] = Array()
     private var nodeTree: Option[Node] = None
     protected var errorHandler: ErrorHandler = null
+    var grammarFile: String = null
 
     // override in generated concrete grammar
     protected def lexer(source: CharStream,
@@ -30,7 +29,8 @@ abstract class GrammarBase[Node <: CommonNode, Kind]
     def tokens: IndexedSeq[CommonToken[Kind]] = tokenList
     def errors: IndexedSeq[SourceMessage] = errorHandler.errors
 
-    def parse(source: CharStream): Unit = {
+    def parse(source: CharStream, filename: String) {
+        grammarFile = filename
         errorHandler = new ErrorHandler(tokenNames)
         val tokenSource =
             new TokenSourceWrapper[Kind](lexer(source, errorHandler), this)
@@ -59,7 +59,7 @@ abstract class GrammarBase[Node <: CommonNode, Kind]
     It is not part of the public API. */
 class ErrorHandler(val tokenNames: Map[Int, String]) {
     val errors = new ArrayBuffer[SourceMessage]()
-    var lastError: RecognitionException = null;
+    var lastError: RecognitionException = null
 
     def emitErrorMessage(message: String) {
         if (lastError.token ne null) {
@@ -71,8 +71,8 @@ class ErrorHandler(val tokenNames: Map[Int, String]) {
         } else {
             // Lexer error, we'll assume that the problem was
             // a single character.
-            val start = lastError.index;
-            val stop = start + 1;
+            val start = lastError.index
+            val stop = start + 1
             errors += new SourceMessage(message, SourceMessage.Error,
                                         start, stop,
                                         lastError.line,

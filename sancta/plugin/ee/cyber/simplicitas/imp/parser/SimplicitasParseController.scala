@@ -80,7 +80,7 @@ class SimplicitasParseController(language: Language,
   def parse(input: String, monitor: IProgressMonitor): Object = {
     val ctx = new ParseCtx() {
         def parse(g: GenericGrammar): Boolean = {
-            g.parseString(input)
+            g.parseString(input, path.toPortableString)
             for (tok <- g.tokens) {
                 tokens.put(tok.startIndex, tok)
             }
