@@ -31,7 +31,7 @@ class SimplPlugin extends SimplicitasPlugin {
     colorCache = collection.mutable.Map()
 
     colorDefs =
-            Map[Symbol, (String, String, Number)(
+            Map[Symbol, (String, String, Number)](
                 'keyword -> ("Keywords", "128,0,128", SWT.BOLD),
                 'operator -> ("Operators", "0,0,0", SWT.NORMAL),
                 'comment -> ("Comments", "128,128,0", SWT.ITALIC)) ++
