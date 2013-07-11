@@ -48,7 +48,7 @@ object SimplConfig {
 }
 
 class MyGrammar extends SimplGrammar {
-  var ctx: SimplCtx = null 
+  var ctx: SimplCtx = null
 }
 
 class SimplConfig extends APluginConfig() {
@@ -93,7 +93,7 @@ class SimplConfig extends APluginConfig() {
           id.parent match {
             case ref: Ref =>
               if (ref.ref ne null) ref.ref.name else null
-            case _ => 
+            case _ =>
               null
           }
         case _ => null
@@ -110,7 +110,7 @@ class SimplConfig extends APluginConfig() {
           }
         case _ => null
       }
-    
+
     override def propose(ctx: ProposalCtx) {
       val simplCtx = ctx.grammar.asInstanceOf[MyGrammar].ctx
 
@@ -127,8 +127,8 @@ class SimplConfig extends APluginConfig() {
     }
 
     // For some reasons, Map is not compatible with immutable.Map.
-    def addProposals(ctx: ProposalCtx, 
-                     symbols: Collection[(String, RuleDef)]) {
+    def addProposals(ctx: ProposalCtx,
+                     symbols: Iterable[(String, RuleDef)]) {
       for ((key, rule) <- symbols) {
         if ((ctx.prefix eq null) ||
               ctx.prefix == "" ||
@@ -139,7 +139,7 @@ class SimplConfig extends APluginConfig() {
     }
 
     override def getTokenColor(token: GenericToken): Symbol = {
-      val myToken = token.asInstanceOf[CommonToken[SimplKind.Kind]] 
+      val myToken = token.asInstanceOf[CommonToken[SimplKind.Kind]]
 
       myToken.kind match {
         case SimplKind.Str => 'strings
@@ -147,13 +147,13 @@ class SimplConfig extends APluginConfig() {
         case _ => null
       }
     }
-    
+
     override def singleLineCommentPrefix = "//"
 
     override def fences =
       Array(("(", ")"),
             ("{", "}"))
-    
+
     override def runGenerator(dir: String, file: String) {
       SimplMain.main(Array[String]("--dest", dir, dir + file))
     }

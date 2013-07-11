@@ -6,7 +6,7 @@ options (backtrack=true; memoize=true;)
     consists of header and list of rule definitions. */
 GrammarDef:
     header=PackageDef ';'
-    imports=Str*
+    imports=ImportFile*
     (opts=OptionList | scalaHeaders=ScalaHeader | lexerStates=LexerStates)*
     rules=RuleDef+;
 
@@ -50,11 +50,12 @@ option RuleDef {
 TerminalDef: 'hidden'? 'terminal' name=Id body=Code? stateOps=StateOp* ':'
     pattern=Pattern ';';
 
-option StateOp: EnterState | ExitState | CheckAll | CheckAny;
+option StateOp: EnterState | ExitState | CheckAll | CheckAny | CheckNone;
 EnterState: "enter-state" "(" IdList ")";
 ExitState: "exit-state" "(" IdList ")";
 CheckAll: "check-all" "(" IdList ")";
 CheckAny: "check-any" "(" IdList ")";
+CheckNone: "check-none" "(" IdList ")";
 
 IdList: item=Id ("," item=Id)*;
 
