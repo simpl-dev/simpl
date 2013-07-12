@@ -13,6 +13,7 @@ class SimplCtx(val grammar: SimplGrammar) {
     val options = Map[String, RuleDef]()
     val terminals = Map[String, RuleDef]()
     val fragments = Map[String, RuleDef]()
+    val lexerStates = Map[String, Id]()
 
     var errors = new ArrayBuffer[SourceMessage]()
 
@@ -22,7 +23,8 @@ class SimplCtx(val grammar: SimplGrammar) {
 
     def makeSymbolTable(tree: GrammarDef) {
         tree.imports foreach resolveImport
-        tree.rules foreach makeSymbolTable
+        tree.lexerStates foreach addToSymbolTable
+        tree.rules foreach addToSymbolTable
     }
 
     private def resolveImport(importNode: ImportFile) {
@@ -47,12 +49,18 @@ class SimplCtx(val grammar: SimplGrammar) {
             null
     }
 
-    def makeSymbolTable(r: RuleDef) {
+    def addToSymbolTable(r: RuleDef) {
         r match {
             case nd: NonTerminalDef => nonTerms += (nd.name.text -> nd)
             case o: OptionDef => options += (o.name.text -> o)
             case t: TerminalDef => terminals += (t.name.text -> t)
             case f: FragmentDef => fragments += (f.name.text -> f)
+        }
+    }
+
+    def addToSymbolTable(ls: LexerStates) {
+        for (id <- ls.idList.item) {
+            lexerStates += (id.text -> id)
         }
     }
 

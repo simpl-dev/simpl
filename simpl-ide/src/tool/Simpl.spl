@@ -50,7 +50,9 @@ option RuleDef {
 TerminalDef: 'hidden'? 'terminal' name=Id body=Code? stateOps=StateOp* ':'
     pattern=Pattern ';';
 
-option StateOp: EnterState | ExitState | CheckAll | CheckAny | CheckNone;
+option StateOp {
+        def idList: IdList
+    }: EnterState | ExitState | CheckAll | CheckAny | CheckNone;
 EnterState: "enter-state" "(" IdList ")";
 ExitState: "exit-state" "(" IdList ")";
 CheckAll: "check-all" "(" IdList ")";
@@ -61,7 +63,7 @@ IdList: item=Id ("," item=Id)*;
 
 /** Base class for references, not part of the actual grammar. */
 option Ref {
-    var ref: RuleDef = null
+        var ref: RuleDef = null
     }: RuleRef | FragmentRef;
 
 /** Points at things that can be referenced from rules:
@@ -110,7 +112,8 @@ TerminalDot: '.';
 
 fragment Letter: 'a'..'z' | 'A'..'Z' | '_';
 /** Identifiers can contain Latin characters, numbers and underscore. */
-terminal Id: Letter (Letter | '0'..'9')*;
+// Identifiers can refer to lexer states.
+terminal Id {var ref: Id = null}: Letter (Letter | '0'..'9')*;
 fragment SingleQuotedStr: '\'' (~('\''|'\\') | '\\' .)* '\'';
 fragment DoubleQuotedStr: '"' (~('"'|'\\') | '\\' .)* '"';
 /** Simpl supports both single- and double quoted strings. */

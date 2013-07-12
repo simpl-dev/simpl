@@ -31,9 +31,11 @@ class SimplPostProcess(val ctx: SimplCtx) {
                 if ((ref.ref ne null) &&
                         ref.parent.isInstanceOf[MatchToken] &&
                         (ref.parent.parent.asInstanceOf[Match].name eq null))
-                    NamingService.validateASTAttribute(uncapitalize(ref.id.text)) match {
-                        case Some(errorMessage) => addSimpleError(errorMessage, ref.id)
-                        case _ =>
+                    NamingService.validateASTAttribute(
+                        uncapitalize(ref.id.text)) match {
+                            case Some(errorMessage) =>
+                                addSimpleError(errorMessage, ref.id)
+                            case _ =>
                     }
             case ref: FragmentRef =>
                 if (ctx.fragments.contains(ref.id.text)) {
@@ -42,6 +44,14 @@ class SimplPostProcess(val ctx: SimplCtx) {
                     ref.ref = ctx.terminals(ref.id.text)
                 } else {
                     addError("Undefined fragment or terminal", ref.id)
+                }
+            case sop: StateOp =>
+                for (ls <- sop.idList.item) {
+                    if (ctx.lexerStates.contains(ls.text)) {
+                        ls.ref = ctx.lexerStates(ls.text)
+                    } else {
+                        addError("Undefined lexer state", ls)
+                    }
                 }
             case tDef: TerminalDef => validate(tDef, "Terminal", true)
             case fDef: FragmentDef => validate(fDef, "Fragment", true)
@@ -53,16 +63,19 @@ class SimplPostProcess(val ctx: SimplCtx) {
                     case _ =>
                 }
                 if ((m.token ne null) && (m.token.alt ne null))
-                    addSimpleError("The following pattern cannot be given a name", m.name)
+                    addSimpleError("The following pattern cannot be given a name",
+                        m.name)
             case _ => ()
         }
     }
 
-    private def validate(rDef: RuleDef, typeName: String, isTerminal: Boolean) =
-        NamingService.validateRuleName(rDef.name.text, typeName, isTerminal) match {
-            case Some(errorMsg) => addSimpleError(errorMsg, rDef.name)
-            case _ =>
-        }
+    private def validate(rDef: RuleDef, typeName: String,
+                         isTerminal: Boolean) =
+        NamingService.validateRuleName(rDef.name.text, typeName,
+            isTerminal) match {
+                case Some(errorMsg) => addSimpleError(errorMsg, rDef.name)
+                case _ =>
+            }
 
     private def addError(errorPrefix: String, id: Id) =
         addSimpleError(errorPrefix + ": \"" + id.text + "\"", id)

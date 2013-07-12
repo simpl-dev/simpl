@@ -90,11 +90,15 @@ class SimplConfig extends APluginConfig() {
     override def referenceTarget(node: CommonNode): CommonNode =
         node match {
             case id: Id =>
-                id.parent match {
-                    case ref: Ref =>
-                        if (ref.ref ne null) ref.ref.name else null
-                    case _ =>
-                        null
+                if (id.ref ne null) {
+                    id.ref
+                } else {
+                    id.parent match {
+                        case ref: Ref =>
+                            if (ref.ref ne null) ref.ref.name else null
+                        case _ =>
+                            null
+                    }
                 }
             case _ => null
         }
