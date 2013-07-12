@@ -80,7 +80,16 @@ class SimplicitasParseController(language: Language,
   def parse(input: String, monitor: IProgressMonitor): Object = {
     val ctx = new ParseCtx() {
         def parse(g: GenericGrammar): Boolean = {
-            g.parseString(input, path.toPortableString)
+            val filePath =
+                if (project eq null)
+                    path.toPortableString
+                else {
+                    val file = project.getRawProject.getFile(
+                        path.toPortableString)
+                    file.getRawLocation.toPortableString
+                }
+
+            g.parseString(input, filePath)
             for (tok <- g.tokens) {
                 tokens.put(tok.startIndex, tok)
             }
