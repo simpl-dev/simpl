@@ -77,11 +77,11 @@
     <target name="require-scala">
         <antcall target="require">
             <param name="group" value="org/scala-lang"/>
-            <param name="artifact" value="scala-library/2.9.2"/>
+            <param name="artifact" value="scala-library/2.9.3"/>
         </antcall>
         <antcall target="require">
             <param name="group" value="org/scala-lang"/>
-            <param name="artifact" value="scala-compiler/2.9.2"/>
+            <param name="artifact" value="scala-compiler/2.9.3"/>
         </antcall>
         <loadfile srcfile="${target}/deps" property="scala-path"/>
         <taskdef resource="scala/tools/ant/antlib.xml"
