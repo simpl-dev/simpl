@@ -14,6 +14,6 @@ examples -- example projects using Simpl
                    containing arithmetic expressions, user-defined
                    functions, nested scopes etc.
     spamdetector -- implements simple language for expressing
-	                spam detection rules.
+                    spam detection rules.
 doc -- Simpl documentation sources
 update-site -- projects for creating Eclipse update site
