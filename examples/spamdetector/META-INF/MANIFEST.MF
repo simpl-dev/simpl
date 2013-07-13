@@ -14,7 +14,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.imp.preferences,
  simplicitas-plugin,
  simplicitas-tool,
- org.scala-ide.scala.library;bundle-version="2.8.0"
+ org.scala-ide.scala.library;bundle-version="2.9.3"
 Bundle-Activator: ee.cyber.simplicitas.spamdetector.SDPlugin
 Eclipse-LazyStart: true
 Eclipse-RegisterBuddy: simplicitas-plugin,simplicitas-tool
