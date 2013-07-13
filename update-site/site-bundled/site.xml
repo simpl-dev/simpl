@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature url="features/simplicitas_feature_1.3.0.jar" id="simplicitas_feature" version="1.3.0">
+   <feature url="features/simplicitas_feature_1.4.0.jar" id="simplicitas_feature" version="1.4.0">
       <category name="simplicitas"/>
    </feature>
-   <feature url="features/simplicitas_prerequisites_1.3.0.jar" id="simplicitas_prerequisites" version="1.3.0">
+   <feature url="features/simplicitas_prerequisites_1.4.0.jar" id="simplicitas_prerequisites" version="1.4.0">
       <category name="simplicitas_prerequisites"/>
    </feature>
    <category-def name="simplicitas" label="Simplicitas">
